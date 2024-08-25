@@ -63,16 +63,15 @@
     } t_paquete;
 
     typedef struct{
-        uint8_t ax;
-        uint8_t bx;
-        uint8_t cx;
-        uint8_t dx;
-        uint32_t eax;
-        uint32_t ebx;
-        uint32_t ecx;
-        uint32_t edx;
-        uint32_t si;
-        uint32_t di;
+        uint32_t pc;
+        uint32_t ax;
+        uint32_t bx;
+        uint32_t cx;
+        uint32_t dx;
+        uint32_t ex;
+        uint32_t fx;
+        uint32_t gx;
+        uint32_t hx;
     } t_registros;
 
     typedef struct{
