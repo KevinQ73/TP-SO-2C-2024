@@ -12,6 +12,7 @@
 
     typedef enum{
         // INSTRUCCIONES DE CPU
+        MENSAJE,
         SET,
         READ_MEM,
         WRITE_MEM,
@@ -77,7 +78,7 @@
     typedef struct{
         uint32_t pid;
         t_list* tid;
-        t_list* mutex_asociados
+        t_list* mutex_asociados;
         int program_counter;
         estado_proceso estado;
         t_registros registros_cpu;
