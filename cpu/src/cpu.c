@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
 
     cpu_config = iniciar_config("./files/cpu.config");
 
-    cpu_registro = levantar_datos();
+    cpu_registro = levantar_datos(cpu_config);
     log_debug(cpu_log, "LEVANTÉ DATOS");
     // --------------------- Conexión como cliente de MEMORIA ----------------------
 
@@ -27,17 +27,4 @@ int main(int argc, char* argv[]) {
     log_debug(cpu_log, "TERMINANDO CPU");
     //terminar_modulo(fd_kernel_dispatch, cpu_log, cpu_config);
     //terminar_modulo(fd_kernel_interrupt, cpu_log, cpu_config);
-}
-
-t_cpu levantar_datos(){
-
-    t_cpu datos_config;
-
-    datos_config.ip_memoria = config_get_string_value(cpu_config, "IP_MEMORIA");
-    datos_config.puerto_memoria = config_get_string_value(cpu_config, "PUERTO_MEMORIA");
-    datos_config.puerto_cpu_dispatch = config_get_string_value(cpu_config,"PUERTO_ESCUCHA_DISPATCH");
-    datos_config.puerto_cpu_interrupt = config_get_string_value(cpu_config,"PUERTO_ESCUCHA_INTERRUPT");
-    datos_config.log_level = config_get_string_value(cpu_config, "LOG_LEVEL");
-    
-    return datos_config;
 }

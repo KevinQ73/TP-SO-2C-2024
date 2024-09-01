@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
 
     kernel_config = iniciar_config("./files/kernel.config");
 
-    kernel_registro = levantar_datos();
+    kernel_registro = levantar_datos(kernel_config);
 
     // --------------------- Conexión como cliente de CPU ----------------------
 
@@ -29,20 +29,4 @@ int main(int argc, char* argv[]) {
     //terminar_modulo(conexion_cpu_interrupt, kernel_log, kernel_config)
     //terminar_modulo(conexion_cpu_dispatch, kernel_log, kernel_config)
     //terminar_modulo(conexion_memoria, kernel_log, kernel_config);
-}
-
-t_kernel levantar_datos(){
-
-    t_kernel datos_config;
-
-    datos_config.ip_memoria = config_get_string_value(kernel_config, "IP_MEMORIA");
-    datos_config.puerto_memoria = config_get_string_value(kernel_config, "PUERTO_MEMORIA");
-    datos_config.ip_cpu = config_get_string_value(kernel_config, "IP_CPU");
-    datos_config.puerto_cpu_dispatch = config_get_string_value(kernel_config,"PUERTO_CPU_DISPATCH");
-    datos_config.puerto_cpu_interrupt = config_get_string_value(kernel_config,"PUERTO_CPU_INTERRUPT");
-    datos_config.algoritmo_planificacion = config_get_string_value(kernel_config, "ALGORITMO_PLANIFICACION");
-    datos_config.quantum = config_get_int_value(kernel_config, "QUANTUM");
-    datos_config.log_level = config_get_string_value(kernel_config, "LOG_LEVEL");
-    
-    return datos_config;
 }
