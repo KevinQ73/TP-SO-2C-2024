@@ -7,6 +7,21 @@ void crear_buffer(t_paquete* paquete){
 	paquete->buffer->stream = NULL;
 }
 
+void* serializar_paquete(t_paquete* paquete, int bytes){
+
+	void* magic = malloc(bytes);
+	int desplazamiento = 0;
+
+	memcpy(magic + desplazamiento, &(paquete->codigo_operacion), sizeof(int));
+	desplazamiento+= sizeof(int);
+	memcpy(magic + desplazamiento, &(paquete->buffer->size), sizeof(int));
+	desplazamiento+= sizeof(int);
+	memcpy(magic + desplazamiento, paquete->buffer->stream, paquete->buffer->size);
+	desplazamiento+= paquete->buffer->size;
+
+	return magic;
+}
+
 void enviar_mensaje(char* mensaje, int socket_cliente){
 
     t_paquete* paquete = malloc(sizeof(t_paquete));
@@ -27,23 +42,25 @@ void enviar_mensaje(char* mensaje, int socket_cliente){
 	eliminar_paquete(paquete);
 }
 
+void* recibir_buffer(int* size, int socket_cliente){
+    
+	void* buffer;
+	int err;
+
+	err = recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
+	printf("\n %d", err);
+	buffer = malloc(*size);
+	recv(socket_cliente, buffer, *size, MSG_WAITALL);
+
+	return buffer;
+}
+
 void recibir_mensaje(int socket_cliente, t_log* logger_servidor){
 
 	int size;
 	char* buffer = recibir_buffer(&size, socket_cliente);
 	log_info(logger_servidor, "Me llego el mensaje %s", buffer);
 	free(buffer);
-}
-
-void* recibir_buffer(int* size, int socket_cliente){
-    
-	void * buffer;
-
-	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
-	buffer = malloc(*size);
-	recv(socket_cliente, buffer, *size, MSG_WAITALL);
-
-	return buffer;
 }
 
 int recibir_operacion(int socket_cliente){
@@ -113,19 +130,4 @@ void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio){
 	memcpy(paquete->buffer->stream + paquete->buffer->size + sizeof(int), valor, tamanio);
 
 	paquete->buffer->size += tamanio + sizeof(int);
-}
-
-void* serializar_paquete(t_paquete* paquete, int bytes){
-
-	void* magic = malloc(bytes);
-	int desplazamiento = 0;
-
-	memcpy(magic + desplazamiento, &(paquete->codigo_operacion), sizeof(int));
-	desplazamiento+= sizeof(int);
-	memcpy(magic + desplazamiento, &(paquete->buffer->size), sizeof(int));
-	desplazamiento+= sizeof(int);
-	memcpy(magic + desplazamiento, paquete->buffer->stream, paquete->buffer->size);
-	desplazamiento+= paquete->buffer->size;
-
-	return magic;
 }

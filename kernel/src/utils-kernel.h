@@ -7,6 +7,7 @@
     #include <utils/cliente.h>
     #include <utils/files.h>
     #include <utils/servidor.h>
+    #include <utils/serializacion.h>
     #include <commons/collections/list.h>
     #include <commons/collections/queue.h>
     #include <commons/string.h>

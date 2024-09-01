@@ -9,8 +9,8 @@
 
     int conexion_cpu;
     int conexion_memoria;
-    int conexion_cpu_interrupt;
-    int conexion_cpu_dispatch;
+    int fd_conexion_dispatch;
+    int fd_conexion_interrupt;
 
 	char* ip_cpu;
 	char* ip_memoria;

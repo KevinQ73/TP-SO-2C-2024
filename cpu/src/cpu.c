@@ -17,14 +17,14 @@ int main(int argc, char* argv[]) {
 
     // --------------------- Conexión como servidor de KERNEL ----------------------
 
-    fd_server_dispatch = iniciar_servidor(cpu_registro.puerto_cpu_dispatch);
-    fd_server_interrupt = iniciar_servidor(cpu_registro.puerto_cpu_interrupt);
+    //fd_escucha_dispatch = iniciar_servidor(cpu_registro.puerto_cpu_dispatch);
+    fd_escucha_interrupt = iniciar_servidor(cpu_registro.puerto_cpu_interrupt);
     log_debug(cpu_log,"SOCKET LISTEN LISTO PARA RECIBIR CLIENTES");
 
-    fd_kernel_dispatch = esperar_cliente(fd_server_dispatch);
-    fd_kernel_interrupt = esperar_cliente(fd_server_interrupt);
+    //fd_conexion_dispatch = esperar_cliente(fd_escucha_dispatch);
+    fd_conexion_interrupt = esperar_cliente(fd_escucha_interrupt);
 
     log_debug(cpu_log, "TERMINANDO CPU");
-    //terminar_modulo(fd_kernel_dispatch, cpu_log, cpu_config);
-    //terminar_modulo(fd_kernel_interrupt, cpu_log, cpu_config);
+    //terminar_modulo(fd_conexion_dispatch, cpu_log, cpu_config);
+    //terminar_modulo(fd_conexion_interrupt, cpu_log, cpu_config);
 }

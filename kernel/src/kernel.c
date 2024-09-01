@@ -12,11 +12,11 @@ int main(int argc, char* argv[]) {
 
     // --------------------- Conexión como cliente de CPU ----------------------
 
-    conexion_cpu_dispatch = crear_conexion(kernel_registro.ip_cpu, kernel_registro.puerto_cpu_dispatch);
-    log_debug(kernel_log, "ME CONECTÉ A CPU DISPATCH");
-
-    conexion_cpu_interrupt = crear_conexion(kernel_registro.ip_cpu, kernel_registro.puerto_cpu_interrupt);
+    fd_conexion_interrupt = crear_conexion(kernel_registro.ip_cpu, kernel_registro.puerto_cpu_interrupt);
     log_debug(kernel_log, "ME CONECTÉ A CPU INTERRUPT");
+
+    //fd_conexion_dispatch = crear_conexion(kernel_registro.ip_cpu, kernel_registro.puerto_cpu_dispatch);
+    //log_debug(kernel_log, "ME CONECTÉ A CPU DISPATCH");
 
     // --------------------- Conexión como cliente de MEMORIA ----------------------
 

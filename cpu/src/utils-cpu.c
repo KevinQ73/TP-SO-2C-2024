@@ -9,6 +9,6 @@ t_cpu levantar_datos(t_config* config){
     datos_config.puerto_cpu_dispatch = config_get_string_value(config,"PUERTO_ESCUCHA_DISPATCH");
     datos_config.puerto_cpu_interrupt = config_get_string_value(config,"PUERTO_ESCUCHA_INTERRUPT");
     datos_config.log_level = config_get_string_value(config, "LOG_LEVEL");
-    
+
     return datos_config;
 }

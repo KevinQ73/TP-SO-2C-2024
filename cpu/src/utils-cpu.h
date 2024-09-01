@@ -4,10 +4,10 @@
     #include <pthread.h>
     #include <stdlib.h>
     #include <stdio.h>
+    #include <utils/serializacion.h>
     #include <utils/cliente.h>
     #include <utils/files.h>
     #include <utils/servidor.h>
-    #include <utils/serializacion.h>
     #include <commons/string.h>
 
     typedef struct{
