@@ -1,12 +1,13 @@
 #ifndef FILES_H_
 #define FILES_H_
 
+    #include <stdlib.h>
+    #include <string.h>
     #include <commons/string.h>
     #include <commons/log.h>
     #include <commons/config.h>
 	#include <commons/error.h>
     #include <commons/bitarray.h>
-    #include <stdlib.h>
 
     /**
     * @fn    iniciar_logger

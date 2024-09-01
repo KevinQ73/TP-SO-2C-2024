@@ -43,10 +43,10 @@ int esperar_cliente(int socket_servidor)
 	recv(socket_cliente, &handshake, sizeof(uint32_t), MSG_WAITALL);
 
 	if(handshake == 1){
-		send(socket_cliente, &resultOk, sizeof(uint32_t), NULL);
+		send(socket_cliente, &resultOk, sizeof(uint32_t), 0);
 	}
 	else{
-		send(socket_cliente, &resultError, sizeof(uint32_t), NULL);
+		send(socket_cliente, &resultError, sizeof(uint32_t), 0);
 	}
 
 	return socket_cliente;

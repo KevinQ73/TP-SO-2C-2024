@@ -5,6 +5,7 @@
     #include <stdint.h>
     #include <stdlib.h>
     #include <string.h>
+    #include <unistd.h>
     #include <semaphore.h>
     #include <commons/collections/list.h>
     #include <commons/log.h>

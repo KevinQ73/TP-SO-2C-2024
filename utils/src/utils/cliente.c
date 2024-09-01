@@ -25,7 +25,7 @@ int crear_conexion(char *ip, char* puerto)
 
 	connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
 
-	send(socket_cliente, &handshake, sizeof(uint32_t), NULL);
+	send(socket_cliente, &handshake, sizeof(uint32_t), 0);
 
 	recv(socket_cliente, &result, sizeof(uint32_t), MSG_WAITALL);
 
