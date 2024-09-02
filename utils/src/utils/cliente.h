@@ -24,6 +24,6 @@
     * @param puerto      Puerto por el cual se conecta al servidor.
     * @return            Retorna un nuevo socket con el cual se realizaran las conexiones cliente-servidor.
     **/
-    int crear_conexion(char* ip, char* puerto);
+    int crear_conexion(t_log* logger, char* ip, char* puerto);
 
 #endif /* CONEXION_H_ */

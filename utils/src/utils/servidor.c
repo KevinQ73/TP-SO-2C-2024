@@ -1,53 +1,56 @@
 #include <utils/servidor.h>
 
-int iniciar_servidor(char* puerto)
-{
-	int socket_servidor = 0;
-	struct addrinfo hints, *servinfo;
+int iniciar_servidor(t_log* logger, const char* name, char* puerto) {
+    int socket_servidor;
+    struct addrinfo hints, *servinfo;
 
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
+    // Inicializando hints
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
 
-	getaddrinfo(NULL, puerto, &hints, &servinfo);
+    // Recibe los addrinfo
+    getaddrinfo(NULL, puerto, &hints, &servinfo);
 
-	// Creamos el socket de escucha del servidor
-	socket_servidor = socket(servinfo -> ai_family,
-							 servinfo -> ai_socktype,						
-							 servinfo -> ai_protocol);
+    bool conecto = false;
 
-	// Asociamos el socket a un puerto
-	if (bind(socket_servidor, servinfo->ai_addr, servinfo-> ai_addrlen) != 0){
-            perror("FALLO DEL BIND");
-            exit(1);
+    // Itera por cada addrinfo devuelto
+    for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
+        socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+        if (socket_servidor == -1) // fallo de crear socket
+            continue;
+
+        if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
+            // Si entra aca fallo el bind
+            close(socket_servidor);
+            continue;
+        }
+        // Ni bien conecta uno nos vamos del for
+        conecto = true;
+        break;
     }
 
-	// Escuchamos las conexiones entrantes
-	listen(socket_servidor, SOMAXCONN);
-	freeaddrinfo(servinfo);
+    if(!conecto) {
+        free(servinfo);
+        return 0;
+    }
 
-	return socket_servidor;
+    listen(socket_servidor, SOMAXCONN); // Escuchando (hasta SOMAXCONN conexiones simultaneas)
+
+    // Aviso al logger
+    log_info(logger, "Escuchando en: %s (%s)\n", puerto, name);
+
+    freeaddrinfo(servinfo); //free
+
+    return socket_servidor;
 }
 
-int esperar_cliente(int socket_servidor)
-{
+int esperar_cliente(t_log* logger, const char* name, int socket_servidor) {
+
 	// Aceptamos un nuevo cliente
-	int socket_cliente = 0;
-	uint32_t handshake;
-	uint32_t resultOk = 0;
-	uint32_t resultError = -1;
-
-	socket_cliente = accept(socket_servidor, NULL, NULL);
-
-	recv(socket_cliente, &handshake, sizeof(uint32_t), MSG_WAITALL);
-
-	if(handshake == 1){
-		send(socket_cliente, &resultOk, sizeof(uint32_t), 0);
-	}
-	else{
-		send(socket_cliente, &resultError, sizeof(uint32_t), 0);
-	}
+	int socket_cliente = accept(socket_servidor, NULL, NULL);
+	log_info(logger, "Se conecto: %s", name);
 
 	return socket_cliente;
 }

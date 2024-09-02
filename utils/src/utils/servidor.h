@@ -19,7 +19,7 @@
     * @param puerto Ruta al puerto escucha del cliente
     * @return       Retorna el socket creado para poder realizar la conexión.
     */
-    int iniciar_servidor(char* puerto);
+    int iniciar_servidor(t_log* logger, const char* name, char* puerto);
 
     /**
     * @fn    esperar_cliente
@@ -29,7 +29,7 @@
     * @return                Retorna el socket con el cual tanto el servidor como
     *                        el cliente podrán conectarse.
     */
-    int esperar_cliente(int socket_servidor);
+    int esperar_cliente(t_log* logger, const char* name, int socket_servidor);
 
     /**
     * @fn    terminar_modulo

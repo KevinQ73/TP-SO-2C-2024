@@ -1,34 +1,35 @@
 #include <utils/cliente.h>
 
-int crear_conexion(char *ip, char* puerto)
-{
-	struct addrinfo hints;
-	struct addrinfo *server_info;
+int crear_conexion(t_log* logger, char* ip, char* puerto){
+    struct addrinfo hints, *servinfo;
 
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	
-	getaddrinfo(ip, puerto, &hints, &server_info);
+    // Init de hints
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
 
-	// Ahora vamos a crear el socket.
-	int socket_cliente = 0;
+    // Recibe addrinfo
+    getaddrinfo(ip, puerto, &hints, &servinfo);
 
-	socket_cliente = socket(server_info -> ai_family,
-							server_info -> ai_socktype,
-							server_info -> ai_protocol);
-	
-	// Ahora que tenemos el socket, vamos a conectarlo
-	uint32_t handshake = 1;
-	uint32_t result;
+    // Crea un socket con la informacion recibida (del primero, suficiente)
+    int socket_cliente = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
 
-	connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen);
+    // Fallo en crear el socket
+    if(socket_cliente == -1) {
+        log_error(logger, "Error creando el socket para %s:%s", ip, puerto);
+        return 0;
+    }
 
-	send(socket_cliente, &handshake, sizeof(uint32_t), 0);
+    // Error conectando
+    if(connect(socket_cliente, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+        log_error(logger, "Error al conectar (a %s)\n", "a");
+        freeaddrinfo(servinfo);
+        return 0;
+    } else
+        log_info(logger, "Cliente conectado en %s:%s (a %s)\n", ip, puerto, "a");
 
-	recv(socket_cliente, &result, sizeof(uint32_t), MSG_WAITALL);
+    freeaddrinfo(servinfo); //free
 
-	freeaddrinfo(server_info);
-
-	return socket_cliente;
+    return socket_cliente;
 }
