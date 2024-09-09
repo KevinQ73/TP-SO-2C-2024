@@ -12,8 +12,10 @@
     #include <sys/socket.h>
 
     typedef enum{
-        // INSTRUCCIONES DE CPU
         MENSAJE,
+    } cod_inst;
+
+    typedef enum{
         SET,
         READ_MEM,
         WRITE_MEM,
@@ -21,7 +23,9 @@
         SUB,
         JNZ,
         LOG,
-        // SYSCALLS
+    } inst_cpu;
+
+    typedef enum{
         DUMP_MEMORY,
         IO,
         PROCESS_CREATE,
@@ -33,7 +37,7 @@
         MUTEX_UNLOCK,
         THREAD_EXIT,
         PROCESS_EXIT,
-    } cod_inst;
+    } inst_syscalls;
 
     typedef enum{
         NEW_STATE = 200,
@@ -55,7 +59,8 @@
     } orden_prioridad;
 
     typedef struct{
-        int size;
+        uint32_t size;
+        uint32_t offset;
         void* stream;
     } t_buffer;
 
@@ -65,24 +70,11 @@
     } t_paquete;
 
     typedef struct{
-        uint32_t pc;
-        uint32_t ax;
-        uint32_t bx;
-        uint32_t cx;
-        uint32_t dx;
-        uint32_t ex;
-        uint32_t fx;
-        uint32_t gx;
-        uint32_t hx;
-    } t_registros;
-
-    typedef struct{
         uint32_t pid;
-        t_list* tid;
+        t_list* tids;
         t_list* mutex_asociados;
         int program_counter;
         estado_proceso estado;
-        t_registros registros_cpu;
     } t_pcb;
 
     typedef struct{
@@ -90,13 +82,102 @@
         orden_prioridad prioridad;
     } t_tid;
 
+    typedef struct {
+        uint8_t valor;
+        uint8_t tamanio;
+    } t_registro;
+
+    /*-------------------TADs de Buffer para serializar más fácil-------------*/
+
     /**
-    * @fn    crear_buffer
-    * @brief Arma una instancia t_buffer que almacena un stream void* y su tamaño.
+    * @fn    buffer_create
+    * @brief Crea un buffer vacío de tamaño size y offset 0
     * 
-    * @param paquete          Recibe un puntero a una instancia de t_paquete* que contendrá el buffer.
+    * @param size          Recibe un uint32_t size que indica el tamaño requerido para el buffer
     */
-    void crear_buffer(t_paquete* paquete);
+    t_buffer* buffer_create(uint32_t size);
+
+    /**
+    * @fn    buffer_destroy
+    * @brief Libera la memoria asociada al buffer
+    * 
+    * @param buffer          Recibe un buffer para ser liberado
+    */
+    void buffer_destroy(t_buffer* buffer);
+
+    /**
+    * @fn    buffer_add
+    * @brief Agrega un stream al buffer en la posición actual y avanza el offset
+    * 
+    * @param buffer          Buffer a utilizar
+    * @param data            Dirección de memoria del dato a agregar al buffer
+    * @param size            Tamaño necesario del dato a agregar al buffer
+    */
+    void buffer_add(t_buffer* buffer, void* data, uint32_t size);
+
+    /**
+    * @fn    buffer_read
+    * @brief Guarda size bytes del principio del buffer en la dirección data y avanza el offset
+    * 
+    * @param buffer          Buffer a utilizar
+    * @param data            Dirección de memoria donde guardar lo leído del buffer
+    * @param size            Tamaño a leer del buffer
+    */
+    void buffer_read(t_buffer* buffer, void* data, uint32_t size);
+
+    /**
+    * @fn    buffer_add_uint32
+    * @brief Agrega un uint32_t al buffer
+    * 
+    * @param buffer          Buffer a utilizar
+    * @param data            Número a añadir en el buffer
+    */
+    void buffer_add_uint32(t_buffer* buffer, uint32_t data);
+
+    /**
+    * @fn    buffer_read_uint32
+    * @brief Lee un uint32_t del buffer y avanza el offset
+    * 
+    * @param buffer          Buffer a utilizar
+    */
+    uint32_t buffer_read_uint32(t_buffer* buffer);
+
+    /**
+    * @fn    buffer_add_string
+    * @brief Agrega string al buffer con un uint32_t adelante indicando su longitud
+    * 
+    * @param buffer          Buffer a utilizar
+    * @param length          Largo del string a agregar
+    * @param data            String a agregar en el buffer
+    */
+    void buffer_add_string(t_buffer* buffer, uint32_t length, char* string);
+
+    /**
+    * @fn    buffer_read_string
+    * @brief Lee un string y su longitud del buffer y avanza el offset
+    * 
+    * @param buffer          Buffer a utilizar
+    * @param data            Dirección de memoria donde almacenar el largo del string
+    */
+    char* buffer_read_string(t_buffer* buffer, uint32_t* length);
+
+    void buffer_add_tlist(t_buffer* buffer, void* data, t_list* list);
+
+    void buffer_add_tids(t_buffer* buffer, t_tid* tid, t_list* list);
+
+    void buffer_add_mutex(t_buffer* buffer, sem_t* mutex, t_list* list);
+
+    t_list* buffer_read_tlist(t_buffer* buffer, void* data, t_list* list, uint32_t* length_lista, uint32_t size_data);
+
+    t_list* buffer_read_tids(t_buffer* buffer);
+
+    t_list* buffer_read_mutex(t_buffer* buffer);
+
+    void* serializar_pcb(t_pcb* data);
+
+    t_pcb* deserializar_pcb(t_buffer* buffer);
+
+    /*-------------------------------------------------------------------------*/
 
     /**
     * @fn    enviar_mensaje
@@ -183,6 +264,8 @@
     */
     void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 
+    void agregar_a_paquete_pcb(t_paquete* paquete_a_enviar, t_pcb* pcb);
+
     /**
     * @fn    serializar_paquete
     * @brief Serializa en un stream el paquete a enviar al servidor.
@@ -191,5 +274,9 @@
     * @param bytes            Tamaño en bytes que tendrá el stream a enviar.
     */
     void* serializar_paquete(t_paquete* paquete, int bytes);
+
+    void enviar_pcb(t_pcb* pcb_a_enviar, estado_proceso estado_pcb, cod_inst codigo_instruccion, int socket_destino);
+    
+    t_pcb* recibir_pcb();
 
 #endif /* SERIALIZACION_H_ */

@@ -9,10 +9,10 @@
 
     int fd_escucha_dispatch;
     int fd_escucha_interrupt;
-
     int conexion_memoria;
-    
     int fd_conexion_dispatch;
     int fd_conexion_interrupt;
+
+    t_dictionary* registros_cpu;
 
 #endif /* CPU_H_ */

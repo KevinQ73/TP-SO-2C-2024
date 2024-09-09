@@ -28,6 +28,14 @@ int main(int argc, char* argv[]) {
     fd_conexion_dispatch = esperar_cliente(cpu_log, "KERNEL-DISPATCH", fd_escucha_dispatch);
     fd_conexion_interrupt = esperar_cliente(cpu_log, "KERNEL-INTERRUPT", fd_escucha_interrupt);
 
+    // ------------------------ INICIAR CPU -------------------------
+
+    registros_cpu = inicializar_registros();
+
+    iniciar_cpu();
+
+    // ------------------------ FINALIZACIÓN CPU -------------------------
+
     log_debug(cpu_log, "TERMINANDO CPU");
     //terminar_modulo(fd_conexion_dispatch, cpu_log, cpu_config);
     //terminar_modulo(fd_conexion_interrupt, cpu_log, cpu_config);
