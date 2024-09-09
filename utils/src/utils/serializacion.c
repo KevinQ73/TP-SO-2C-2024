@@ -1,5 +1,17 @@
 #include <utils/serializacion.h>
 
+char* nombres_registros[9] = {
+        "PC",
+        "AX",
+        "BX",
+        "CX",
+        "DC",
+        "EX",
+        "FX",
+        "GX",
+        "HX",
+    };
+
 /*-------------------TADs de Buffer para serializar más fácil-------------*/
 
 t_buffer* buffer_create(uint32_t size){

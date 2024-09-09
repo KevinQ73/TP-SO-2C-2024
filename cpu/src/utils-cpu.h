@@ -18,18 +18,6 @@
         char* log_level;
     } t_cpu;
 
-    char* array_registros[9] = {
-        "PC",
-        "AX",
-        "BX",
-        "CX",
-        "DC",
-        "EX",
-        "FX",
-        "GX",
-        "HX",
-    };
-
     t_cpu levantar_datos(t_config* config);
 
     t_registro* make_registers();

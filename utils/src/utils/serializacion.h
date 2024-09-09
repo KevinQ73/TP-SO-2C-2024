@@ -58,6 +58,8 @@
         PRORIDAD_7,
     } orden_prioridad;
 
+    extern char* nombres_registros[9];
+
     typedef struct{
         uint32_t size;
         uint32_t offset;
