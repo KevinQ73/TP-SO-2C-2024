@@ -13,6 +13,8 @@
 
     typedef enum{
         MENSAJE,
+        PAQUETE,
+        PID_TID,
     } cod_inst;
 
     typedef enum{
@@ -75,14 +77,14 @@
         uint32_t pid;
         t_list* tids;
         t_list* mutex_asociados;
-        int program_counter;
+        uint32_t program_counter;
         estado_proceso estado;
     } t_pcb;
 
     typedef struct{
         uint32_t tid;
         orden_prioridad prioridad;
-    } t_tid;
+    } t_tcb;
 
     typedef struct {
         uint8_t valor;
@@ -106,6 +108,8 @@
     * @param buffer          Recibe un buffer para ser liberado
     */
     void buffer_destroy(t_buffer* buffer);
+
+    uint32_t buffer_size(t_buffer* buffer);
 
     /**
     * @fn    buffer_add
@@ -134,7 +138,7 @@
     * @param buffer          Buffer a utilizar
     * @param data            Número a añadir en el buffer
     */
-    void buffer_add_uint32(t_buffer* buffer, uint32_t data);
+    void buffer_add_uint32(t_buffer* buffer, uint32_t* data, t_log* log);
 
     /**
     * @fn    buffer_read_uint32
@@ -152,7 +156,7 @@
     * @param length          Largo del string a agregar
     * @param data            String a agregar en el buffer
     */
-    void buffer_add_string(t_buffer* buffer, uint32_t length, char* string);
+    void buffer_add_string(t_buffer* buffer, uint32_t length, char* string, t_log* log);
 
     /**
     * @fn    buffer_read_string
@@ -163,19 +167,23 @@
     */
     char* buffer_read_string(t_buffer* buffer, uint32_t* length);
 
-    void buffer_add_tlist(t_buffer* buffer, void* data, t_list* list);
+    void buffer_add_tlist(t_buffer* buffer, void* data, t_list* list, t_log* log);
 
-    void buffer_add_tids(t_buffer* buffer, t_tid* tid, t_list* list);
+    void buffer_add_tcbs(t_buffer* buffer, t_tcb* tcb, t_list* list, t_log* log);
 
-    void buffer_add_mutex(t_buffer* buffer, sem_t* mutex, t_list* list);
+    void buffer_add_mutex(t_buffer* buffer, sem_t* mutex, t_list* list, t_log* log);
+
+    void buffer_add_tids(t_buffer* buffer, uint32_t* tid, t_list* list, t_log* log);
 
     t_list* buffer_read_tlist(t_buffer* buffer, void* data, t_list* list, uint32_t* length_lista, uint32_t size_data);
 
-    t_list* buffer_read_tids(t_buffer* buffer);
+    t_list* buffer_read_tcbs(t_buffer* buffer);
 
     t_list* buffer_read_mutex(t_buffer* buffer);
 
-    void* serializar_pcb(t_pcb* data);
+    t_list* buffer_read_tids(t_buffer* buffer);
+
+    void* serializar_pcb(t_pcb* data, t_log* log);
 
     t_pcb* deserializar_pcb(t_buffer* buffer);
 
@@ -191,24 +199,14 @@
     void enviar_mensaje(char* mensaje, int socket_cliente);
 
     /**
-    * @fn    recibir_mensaje
-    * @brief Recibe el mensaje en forma de stream desde el cliente.
-    * 
-    * @param socket_cliente   Socket del cliente que envió el mensaje.
-    * @param logger_servidor  Instancia de logger del módulo correspondiente para poder informar
-    *                         el resultado del mensaje.
-    */
-    void recibir_mensaje(int socket_cliente, t_log* logger_servidor);
-
-    /**
     * @fn    recibir_buffer
     * @brief Obtiene el buffer enviado desde el cliente.
     * 
-    * @param size             Tamaño en bytes del buffer
+    * @param buffer             Tamaño en bytes del buffer
     * @param socket_cliente   Socket del cliente que envió el paquete con el buffer dentro.
     * @return                 Stream de tipo void* con los datos del buffer.
     */
-    void* recibir_buffer(int* size, int socket_cliente);
+    t_buffer* recibir_buffer(int socket_cliente);
     
     /**
     * @fn    recibir_operacion
@@ -266,7 +264,7 @@
     */
     void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 
-    void agregar_a_paquete_pcb(t_paquete* paquete_a_enviar, t_pcb* pcb);
+    void agregar_a_paquete_pcb(t_paquete* paquete_a_enviar, t_pcb* pcb, t_log* log);
 
     /**
     * @fn    serializar_paquete
@@ -277,8 +275,8 @@
     */
     void* serializar_paquete(t_paquete* paquete, int bytes);
 
-    void enviar_pcb(t_pcb* pcb_a_enviar, estado_proceso estado_pcb, cod_inst codigo_instruccion, int socket_destino);
+    void enviar_pcb(t_pcb* pcb_a_enviar, estado_proceso estado_pcb, cod_inst codigo_instruccion, int socket_destino, t_log* log);
     
-    t_pcb* recibir_pcb();
+    t_pcb* recibir_pcb(int socket_cliente);
 
 #endif /* SERIALIZACION_H_ */

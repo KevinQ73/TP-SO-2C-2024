@@ -27,13 +27,14 @@ void buffer_destroy(t_buffer* buffer){
 	free(buffer);
 }
 
-void buffer_add(t_buffer* buffer, void* data, uint32_t size){
+uint32_t buffer_size(t_buffer* buffer){
+	return buffer->size;
+}
 
-    if (buffer->offset + size > buffer->size) {
-        // Redimensionamos el buffer en caso de ser necesario
-        buffer->size = buffer->offset + size;  // Incrementamos el tamaño del buffer
-        buffer->stream = realloc(buffer->stream, buffer->size);  // Redimensionamos el stream
-    }
+void buffer_add(t_buffer* buffer, void* data, uint32_t size){
+    // Redimensionamos el buffer en caso de ser necesario
+    buffer->size = buffer->offset + size;  // Incrementamos el tamaño del buffer
+    buffer->stream = realloc(buffer->stream, buffer->size);  // Redimensionamos el stream
     
     // Copiamos los datos en la posición actual del buffer
     memcpy(buffer->stream + buffer->offset, data, size);
@@ -43,15 +44,15 @@ void buffer_add(t_buffer* buffer, void* data, uint32_t size){
 }
 
 void buffer_read(t_buffer* buffer, void* data, uint32_t size){
-	
 	// Copiamos size datos en data desde el buffer
-	memcpy(data, buffer->stream, size);
+	memcpy(data, buffer->stream + buffer->offset, size);
 	// Avanzamos el offset
 	buffer->offset = size;
 }
 
-void buffer_add_uint32(t_buffer* buffer, uint32_t data){
-	buffer_add(buffer, &data, sizeof(uint32_t));
+void buffer_add_uint32(t_buffer* buffer, uint32_t* data, t_log* log){
+	log_debug(log, "DATA: %d", *data);
+	buffer_add(buffer, data, sizeof(uint32_t));
 }
 
 uint32_t buffer_read_uint32(t_buffer* buffer){
@@ -61,9 +62,10 @@ uint32_t buffer_read_uint32(t_buffer* buffer){
 	return data;
 }
 
-void buffer_add_string(t_buffer* buffer, uint32_t length, char* string){
+void buffer_add_string(t_buffer* buffer, uint32_t length, char* string, t_log* log){
+	uint32_t length_string = length;
 	// Indico el largo del string
-	buffer_add_uint32(buffer, length);
+	buffer_add_uint32(buffer, &length_string, log);
 
 	//Agrego el string en el buffer
 	buffer_add(buffer, string, length);
@@ -85,10 +87,10 @@ char* buffer_read_string(t_buffer* buffer, uint32_t* length){
 	return string;
 }
 
-void buffer_add_tlist(t_buffer* buffer, void* data, t_list* list){
+void buffer_add_tlist(t_buffer* buffer, void* data, t_list* list, t_log* log){
 	// Añadimos al buffer el tamaño total de la lista
 	uint32_t size_lista = list_size(list);
-	buffer_add_uint32(buffer, size_lista);
+	buffer_add_uint32(buffer, &size_lista, log);
 
 	// Iteramos la lista, añadiendo uno por uno todos los elementos de la misma
 	for (int i = 0; i < size_lista; i++)
@@ -98,12 +100,16 @@ void buffer_add_tlist(t_buffer* buffer, void* data, t_list* list){
 	}
 }
 
-void buffer_add_tids(t_buffer* buffer, t_tid* tid, t_list* list){
-	buffer_add_tlist(buffer, tid, list);
+void buffer_add_tcbs(t_buffer* buffer, t_tcb* tcb, t_list* list, t_log* log){
+	buffer_add_tlist(buffer, tcb, list, log);
 }
 
-void buffer_add_mutex(t_buffer* buffer, sem_t* mutex, t_list* list){
-	buffer_add_tlist(buffer, mutex, list);
+void buffer_add_mutex(t_buffer* buffer, sem_t* mutex, t_list* list, t_log* log){
+	buffer_add_tlist(buffer, mutex, list, log);
+}
+
+void buffer_add_tids(t_buffer* buffer, uint32_t* tid, t_list* list, t_log* log){
+	buffer_add_tlist(buffer, tid, list, log);
 }
 
 t_list* buffer_read_tlist(t_buffer* buffer, void* data, t_list* list, uint32_t* length_lista, uint32_t size_data){
@@ -120,17 +126,17 @@ t_list* buffer_read_tlist(t_buffer* buffer, void* data, t_list* list, uint32_t* 
 	return list;
 }
 
-t_list* buffer_read_tids(t_buffer* buffer){
+t_list* buffer_read_tcbs(t_buffer* buffer){
 	// Creamos variables auxiliares para usarlos como direcciones de memoria
 	uint32_t largo_lista = 0;
-	t_tid* tid = malloc(sizeof(t_tid));
-	t_list* lista_tids = list_create();
+	t_tcb* tcb = malloc(sizeof(t_tcb));
+	t_list* lista_tcbs = list_create();
 
-	//Leemos del buffer la lista de tids
-	lista_tids = buffer_read_tlist(buffer, tid, lista_tids, &largo_lista, sizeof(t_tid));
+	//Leemos del buffer la lista de tcbs
+	lista_tcbs = buffer_read_tlist(buffer, tcb, lista_tcbs, &largo_lista, sizeof(t_tcb));
 
 	//Devolvemos la lista
-	return lista_tids;
+	return lista_tcbs;
 }
 
 t_list* buffer_read_mutex(t_buffer* buffer){
@@ -146,20 +152,32 @@ t_list* buffer_read_mutex(t_buffer* buffer){
 	return lista_mutex;
 }
 
-void* serializar_pcb(t_pcb* data){ // Nota para el autor: Probar si es necesario agregar t_buffer* buffer como parámetro
+t_list* buffer_read_tids(t_buffer* buffer){
+	uint32_t largo_lista = 0;
+	uint32_t tid = 0;
+	t_list* lista_tids = list_create();
+
+	//Leemos del buffer la lista de tcbs
+	lista_tids = buffer_read_tlist(buffer, &tid, lista_tids, &largo_lista, sizeof(uint32_t));
+
+	//Devolvemos la lista
+	return lista_tids;
+}
+
+void* serializar_pcb(t_pcb* data, t_log* log){ // Nota para el autor: Probar si es necesario agregar t_buffer* buffer como parámetro
 	// Creamos el buffer que vamos a utilizar
-	t_buffer* buffer = buffer_create(sizeof(t_pcb));
+	t_buffer* buffer = buffer_create(sizeof(t_buffer));
 	
 	// Creamos variables auxiliares para usarlos como direcciones de memoria
-	t_tid* tid = malloc(sizeof(t_tid));
+	uint32_t tid = 0;
 	sem_t* mutex = malloc(sizeof(sem_t));
 
 	// Añadimos uno por uno los elementos que componen el PCB
-	buffer_add_uint32(buffer, data->pid);						// PID
-	buffer_add_tids(buffer, tid, data->tids);					// Lista de TIDs
-	buffer_add_mutex(buffer, mutex, data->mutex_asociados);		// Lista de mutex
-	buffer_add_uint32(buffer, data->program_counter);			// Program Counter
-	buffer_add_uint32(buffer, data->estado);					// Estado del PCB
+	buffer_add_uint32(buffer, &data->pid, log);						// PID
+	buffer_add_tids(buffer, &tid, data->tids, log);					// Lista de TIDs
+	buffer_add_mutex(buffer, mutex, data->mutex_asociados, log);		// Lista de mutex
+	buffer_add_uint32(buffer, &data->program_counter, log);			// Program Counter
+	buffer_add_uint32(buffer, &data->estado, log);					// Estado del PCB
 
 	return buffer;
 }
@@ -185,7 +203,7 @@ t_paquete* crear_paquete(cod_inst instruccion){
 
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 	paquete->codigo_operacion = instruccion;
-	paquete->buffer = buffer_create(sizeof(t_buffer));
+	paquete->buffer = malloc(sizeof(t_buffer));
 	return paquete;
 }
 
@@ -225,25 +243,17 @@ void enviar_mensaje(char* mensaje, int socket_cliente){
 	eliminar_paquete(paquete);
 }
 
-void* recibir_buffer(int* size, int socket_cliente){
-    
-	void* buffer;
+t_buffer* recibir_buffer(int socket_cliente){
+
+	t_buffer* buffer = buffer_create(sizeof(t_buffer));
 	int err;
 
-	err = recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
+	err = recv(socket_cliente, &(buffer->size), sizeof(uint32_t), MSG_WAITALL);
 	printf("\n %d", err);
-	buffer = malloc(*size);
-	recv(socket_cliente, buffer, *size, MSG_WAITALL);
+	buffer->stream = malloc(buffer->size);
+	recv(socket_cliente, buffer->stream, buffer->size, 0);
 
 	return buffer;
-}
-
-void recibir_mensaje(int socket_cliente, t_log* logger_servidor){
-
-	int size;
-	char* buffer = recibir_buffer(&size, socket_cliente);
-	log_info(logger_servidor, "Me llego el mensaje %s", buffer);
-	free(buffer);
 }
 
 int recibir_operacion(int socket_cliente){
@@ -269,15 +279,13 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente){
 }
 
 t_list* recibir_paquete(int socket_cliente){
-
-	int size;
 	int desplazamiento = 0;
-	void * buffer;
+	t_buffer* buffer;
 	t_list* valores = list_create();
 	int tamanio;
 
-	buffer = recibir_buffer(&size, socket_cliente);
-	while(desplazamiento < size)
+	buffer = recibir_buffer(socket_cliente);
+	while(desplazamiento < buffer->size)
 	{
 		memcpy(&tamanio, buffer + desplazamiento, sizeof(int));
 		desplazamiento+=sizeof(int);
@@ -307,30 +315,28 @@ void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio){
 	paquete->buffer->size += tamanio + sizeof(int);
 }
 
-void agregar_a_paquete_pcb(t_paquete* paquete_a_enviar, t_pcb* pcb){
+void agregar_a_paquete_pcb(t_paquete* paquete_a_enviar, t_pcb* pcb, t_log* log){
 
     void* pcb_a_enviar;
-    pcb_a_enviar = serializar_pcb(pcb);
+    pcb_a_enviar = serializar_pcb(pcb, log);
 
     agregar_a_paquete(paquete_a_enviar, pcb_a_enviar, sizeof(pcb_a_enviar));
 }
 
-void enviar_pcb(t_pcb* pcb_a_enviar, estado_proceso estado_pcb, cod_inst codigo_instruccion, int socket_destino){
+void enviar_pcb(t_pcb* pcb_a_enviar, estado_proceso estado_pcb, cod_inst codigo_instruccion, int socket_destino, t_log* log){
 	pcb_a_enviar->estado = estado_pcb;
 
 	t_paquete* paquete_pcb = crear_paquete(codigo_instruccion);
 
-    agregar_a_paquete_pcb(paquete_pcb, pcb_a_enviar);
+    agregar_a_paquete_pcb(paquete_pcb, pcb_a_enviar, log);
     enviar_paquete(paquete_pcb, socket_destino);
 
     eliminar_paquete(paquete_pcb);
 }
 
 t_pcb* recibir_pcb(int socket_cliente){
-	int size;
-	void* buffer;
-	
-	buffer = recibir_buffer(&size, socket_cliente);
+	t_buffer* buffer = malloc(sizeof(t_buffer));
+	buffer = recibir_buffer(socket_cliente);
 
 	t_pcb* pcb = malloc(sizeof(t_pcb));
 

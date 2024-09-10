@@ -24,8 +24,8 @@
 
     t_dictionary* inicializar_registros();
 
-    void iniciar_cpu();
-
-    void fetch();
+    void recibir_paquete_kernel(int socket_kernel, t_log* kernel_log);
+    
+    void fetch(t_pcb* pcb_recibido);
 
 #endif /* UTILS_CPU_H_ */

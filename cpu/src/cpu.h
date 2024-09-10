@@ -14,5 +14,8 @@
     int fd_conexion_interrupt;
 
     t_dictionary* registros_cpu;
+    t_pcb* pcb_recibido;
+    
+    void iniciar_cpu();
 
 #endif /* CPU_H_ */

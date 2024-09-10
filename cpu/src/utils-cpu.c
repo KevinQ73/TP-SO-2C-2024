@@ -23,35 +23,34 @@ t_registro* make_registers(){
 t_dictionary* inicializar_registros(){
     t_dictionary* registros = dictionary_create();
     for (int i = 0; i < 9; i++) {
-        dictionary_put(registros, array_registros[i], (void*)make_registers);
+        dictionary_put(registros, nombres_registros[i], (void*)make_registers);
     }
     return registros;
 }
 
-void iniciar_cpu(){
-    /* 
-        Inicio proceso de ejecución de un proceso y un hilo mandado a la CPU
+void recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
+    uint32_t pid = 0;
+    uint32_t tid = 0;
 
-        1) Recibo PCB con PID y TIDs asociados al proceso que quiere ejecutar
-        2) FETCH -> DECODE -> EXECUTE -> CHECK INTERRUPT
+    int op = recibir_operacion(socket_kernel);
 
-    */
+    if (op == PID_TID)
+    {
+        log_debug(cpu_log, "SE RECIBIÓ UNA PETICIÓN DE KERNEL POR DISPATCH");
+    } else {
+        log_warning(cpu_log, "ERROR EN EL PAQUETE ENVIADO POR KERNEL");
+        abort();
+    }
 
-    t_pcb* pcb_recibido = recibir_pcb();
-
-    fetch(pcb_recibido);
+    t_buffer* buffer;
+    buffer = recibir_buffer(socket_kernel);
     
-    /*
-    decode(); IN CONSTRUCTION
-    */
-    /*
-    execute(); IN CONSTRUCTION
-    */
-    /*
-    check_interrupt(); IN CONSTRUCTION
-    */
+    pid = buffer_read_uint32(buffer);
+    tid = buffer_read_uint32(buffer);
+
+    log_debug(cpu_log, "EL PID ES: %d Y EL TID ES: %d", pid, tid);
 }
 
 void fetch(t_pcb* pcb_recibido){
-
+    
 }

@@ -42,3 +42,26 @@ int main(int argc, char* argv[]) {
 
     return EXIT_SUCCESS;
 }
+
+void iniciar_cpu(){
+
+    recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
+
+    /* 
+        Inicio proceso de ejecución de un proceso y un hilo mandado a la CPU
+
+        1) Recibo PCB con PID y TIDs asociados al proceso que quiere ejecutar
+        2) FETCH -> DECODE -> EXECUTE -> CHECK INTERRUPT
+
+    */
+
+    /*
+    decode(); IN CONSTRUCTION
+    */
+    /*
+    execute(); IN CONSTRUCTION
+    */
+    /*
+    check_interrupt(); IN CONSTRUCTION
+    */
+}
