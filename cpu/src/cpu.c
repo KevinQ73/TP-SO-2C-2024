@@ -45,7 +45,13 @@ int main(int argc, char* argv[]) {
 
 void iniciar_cpu(){
 
-    recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
+    // Prueba 1) Recibir paquete con PID-TID y deserializar **RECIBIDO SATISFACTORIAMENTE**
+
+    //recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
+
+    //char* mensaje_recibido = recibir_mensaje(fd_conexion_dispatch, cpu_log);
+
+    //log_debug(cpu_log, "%s", mensaje_recibido);
 
     /* 
         Inicio proceso de ejecución de un proceso y un hilo mandado a la CPU

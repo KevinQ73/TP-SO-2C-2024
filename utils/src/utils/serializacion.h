@@ -11,6 +11,8 @@
     #include <commons/log.h>
     #include <sys/socket.h>
 
+    /*-------------------------------- TADS ---------------------------------*/
+
     typedef enum{
         MENSAJE,
         PAQUETE,
@@ -60,8 +62,6 @@
         PRORIDAD_7,
     } orden_prioridad;
 
-    extern char* nombres_registros[9];
-
     typedef struct{
         uint32_t size;
         uint32_t offset;
@@ -91,13 +91,23 @@
         uint8_t tamanio;
     } t_registro;
 
-    /*-------------------TADs de Buffer para serializar más fácil-------------*/
+    typedef struct{
+        uint32_t pid;
+        uint32_t tid;
+    } t_pid_tid;
+
+    extern char* nombres_registros[9];
+
+    /*-----------------------------------------------------------------------*/
+
+    /*--------------------------- TADs de Buffer ----------------------------*/
 
     /**
     * @fn    buffer_create
     * @brief Crea un buffer vacío de tamaño size y offset 0
     * 
     * @param size          Recibe un uint32_t size que indica el tamaño requerido para el buffer
+    * @return              Una instancia t_buffer* de tamaño size
     */
     t_buffer* buffer_create(uint32_t size);
 
@@ -109,13 +119,20 @@
     */
     void buffer_destroy(t_buffer* buffer);
 
+    /**
+    * @fn    buffer_size
+    * @brief Indica el tamaño que tiene el payload del buffer
+    * 
+    * @param buffer          Recibe una instancia t_buffer*
+    * @return                Un entero uint32_t que indica el tamaño del payload
+    */
     uint32_t buffer_size(t_buffer* buffer);
 
     /**
     * @fn    buffer_add
     * @brief Agrega un stream al buffer en la posición actual y avanza el offset
     * 
-    * @param buffer          Buffer a utilizar
+    * @param buffer          Instancia t_buffer* a utilizar
     * @param data            Dirección de memoria del dato a agregar al buffer
     * @param size            Tamaño necesario del dato a agregar al buffer
     */
@@ -125,7 +142,7 @@
     * @fn    buffer_read
     * @brief Guarda size bytes del principio del buffer en la dirección data y avanza el offset
     * 
-    * @param buffer          Buffer a utilizar
+    * @param buffer          Instancia t_buffer* a utilizar
     * @param data            Dirección de memoria donde guardar lo leído del buffer
     * @param size            Tamaño a leer del buffer
     */
@@ -135,87 +152,72 @@
     * @fn    buffer_add_uint32
     * @brief Agrega un uint32_t al buffer
     * 
-    * @param buffer          Buffer a utilizar
+    * @param buffer          Instancia t_buffer* a utilizar
     * @param data            Número a añadir en el buffer
+    * @param log             **PARA DEBUGGEAR** Una instancia t_log* del módulo que utilice la función
     */
     void buffer_add_uint32(t_buffer* buffer, uint32_t* data, t_log* log);
-
-    /**
-    * @fn    buffer_read_uint32
-    * @brief Lee un uint32_t del buffer y avanza el offset
-    * 
-    * @param buffer          Buffer a utilizar
-    */
-    uint32_t buffer_read_uint32(t_buffer* buffer);
 
     /**
     * @fn    buffer_add_string
     * @brief Agrega string al buffer con un uint32_t adelante indicando su longitud
     * 
-    * @param buffer          Buffer a utilizar
+    * @param buffer          Instancia t_buffer* a utilizar
     * @param length          Largo del string a agregar
     * @param data            String a agregar en el buffer
+    * @param log             **PARA DEBUGGEAR** Una instancia t_log* del módulo que utilice la función
     */
     void buffer_add_string(t_buffer* buffer, uint32_t length, char* string, t_log* log);
+
+    /**
+    * @fn    buffer_read_uint32
+    * @brief Lee un uint32_t del buffer y avanza el offset
+    * 
+    * @param buffer          Instancia t_buffer* a utilizar
+    * @return                Un entero uint32_t leído del buffer.
+    */
+    uint32_t buffer_read_uint32(t_buffer* buffer);
 
     /**
     * @fn    buffer_read_string
     * @brief Lee un string y su longitud del buffer y avanza el offset
     * 
     * @param buffer          Buffer a utilizar
-    * @param data            Dirección de memoria donde almacenar el largo del string
+    * @param length          Dirección de memoria donde almacenar el largo del string
     */
     char* buffer_read_string(t_buffer* buffer, uint32_t* length);
 
-    void buffer_add_tlist(t_buffer* buffer, void* data, t_list* list, t_log* log);
-
-    void buffer_add_tcbs(t_buffer* buffer, t_tcb* tcb, t_list* list, t_log* log);
-
-    void buffer_add_mutex(t_buffer* buffer, sem_t* mutex, t_list* list, t_log* log);
-
-    void buffer_add_tids(t_buffer* buffer, uint32_t* tid, t_list* list, t_log* log);
-
-    t_list* buffer_read_tlist(t_buffer* buffer, void* data, t_list* list, uint32_t* length_lista, uint32_t size_data);
-
-    t_list* buffer_read_tcbs(t_buffer* buffer);
-
-    t_list* buffer_read_mutex(t_buffer* buffer);
-
-    t_list* buffer_read_tids(t_buffer* buffer);
-
-    void* serializar_pcb(t_pcb* data, t_log* log);
-
-    t_pcb* deserializar_pcb(t_buffer* buffer);
-
-    /*-------------------------------------------------------------------------*/
-
-    /**
-    * @fn    enviar_mensaje
-    * @brief Envía un mensaje desde el cliente al servidor
-    * 
-    * @param mensaje          Mensaje a ser enviado.
-    * @param socket_cliente   Socket del cliente para realizar la conexión.
-    */
-    void enviar_mensaje(char* mensaje, int socket_cliente);
-
-    /**
-    * @fn    recibir_buffer
+        /**
+    * @fn    buffer_recieve
     * @brief Obtiene el buffer enviado desde el cliente.
     * 
     * @param buffer             Tamaño en bytes del buffer
     * @param socket_cliente   Socket del cliente que envió el paquete con el buffer dentro.
     * @return                 Stream de tipo void* con los datos del buffer.
     */
-    t_buffer* recibir_buffer(int socket_cliente);
+    t_buffer* buffer_recieve(int socket_cliente);
+
+    /*
+    void buffer_add_tlist(t_buffer* buffer, t_list* list, t_log* log);
+
+    void buffer_add_tcbs(t_buffer* buffer, t_list* list, t_log* log);
+
+    void buffer_add_mutex(t_buffer* buffer, t_list* list, t_log* log);
+
+    void buffer_add_tids(t_buffer* buffer, t_list* list, t_log* log);
     
-    /**
-    * @fn    recibir_operacion
-    * @brief Recibe el socket del cliente y obtiene el código de operación.
-    * 
-    * @param socket_cliente   Socket del cual obtiene el código de operación.
-    * @return                 Un Integer con el código de operación.
+    t_list* buffer_read_tlist(t_buffer* buffer, t_list* list);
+
+    t_list* buffer_read_tcbs(t_buffer* buffer);
+
+    t_list* buffer_read_mutex(t_buffer* buffer);
+
+    t_list* buffer_read_tids(t_buffer* buffer);
     */
-    int recibir_operacion(int socket_cliente);
+
+    /*-------------------------------------------------------------------------*/
+
+    /*--------------------------- TADs de Paquete ---------------------------*/
 
     /**
     * @fn    crear_paquete
@@ -226,6 +228,26 @@
     * @return                 Un puntero a una instancia t_paquete.
     */
     t_paquete* crear_paquete(cod_inst instruccion);
+
+    /**
+    * @fn    agregar_a_paquete
+    * @brief Agrega un bloque stream más al paquete.
+    * 
+    * @param paquete          Puntero a una instancia t_paquete que agregará el stream nuevo.
+    * @param valor            Stream a ser agregado en el paquete.
+    * @param tamanio          Tamaño total del stream a enviar. Ejemplo: &tamanio_stream donde tamanio_stream 
+    *                         se declara previamente como Integer.
+    */
+    void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
+
+    /**
+    * @fn    serializar_paquete
+    * @brief Serializa en un stream el paquete a enviar al servidor.
+    * 
+    * @param paquete          Una instancia t_paquete a ser enviado.
+    * @param bytes            Tamaño en bytes que tendrá el stream a enviar.
+    */
+    void* serializar_paquete(t_paquete* paquete, int bytes);
 
     /**
     * @fn    enviar_paquete
@@ -253,30 +275,46 @@
     */
     void eliminar_paquete(t_paquete* paquete);
 
-    /**
-    * @fn    agregar_a_paquete
-    * @brief Agrega un bloque stream más al paquete.
-    * 
-    * @param paquete          Puntero a una instancia t_paquete que agregará el stream nuevo.
-    * @param valor            Stream a ser agregado en el paquete.
-    * @param tamanio          Tamaño total del stream a enviar. Ejemplo: &tamanio_stream donde tamanio_stream 
-    *                         se declara previamente como Integer.
-    */
-    void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
-
+    /*
     void agregar_a_paquete_pcb(t_paquete* paquete_a_enviar, t_pcb* pcb, t_log* log);
+    */
+
+    /*-----------------------------------------------------------------------*/
+
+    /*-------------- Funciones de envio de datos entre módulos --------------*/
 
     /**
-    * @fn    serializar_paquete
-    * @brief Serializa en un stream el paquete a enviar al servidor.
+    * @fn    recibir_operacion
+    * @brief Recibe el socket del cliente y obtiene el código de operación.
     * 
-    * @param paquete          Una instancia t_paquete a ser enviado.
-    * @param bytes            Tamaño en bytes que tendrá el stream a enviar.
+    * @param socket_cliente   Socket del cual obtiene el código de operación.
+    * @return                 Un Integer con el código de operación.
     */
-    void* serializar_paquete(t_paquete* paquete, int bytes);
+    int recibir_operacion(int socket_cliente);
+
+    /**
+    * @fn    enviar_mensaje
+    * @brief Envía un mensaje desde el cliente al servidor
+    * 
+    * @param mensaje          Mensaje a ser enviado.
+    * @param socket_cliente   Socket del cliente para realizar la conexión.
+    */
+    void enviar_mensaje(char* mensaje, int socket_server, t_log* log);
+
+    char* recibir_mensaje(int socket_cliente, t_log* log);
+
+    void enviar_pid_tid(uint32_t* pid, uint32_t* tid, int socket_servidor, t_log* log);
+
+    t_pid_tid recibir_pid_tid(int socket_cliente, t_log* log);
+
+    /*
+    void* serializar_pcb(t_pcb* data, t_log* log);
+
+    t_pcb* deserializar_pcb(t_buffer* buffer);
 
     void enviar_pcb(t_pcb* pcb_a_enviar, estado_proceso estado_pcb, cod_inst codigo_instruccion, int socket_destino, t_log* log);
     
     t_pcb* recibir_pcb(int socket_cliente);
+    */
 
 #endif /* SERIALIZACION_H_ */

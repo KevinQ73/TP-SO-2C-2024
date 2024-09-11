@@ -29,26 +29,9 @@ t_dictionary* inicializar_registros(){
 }
 
 void recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
-    uint32_t pid = 0;
-    uint32_t tid = 0;
 
-    int op = recibir_operacion(socket_kernel);
-
-    if (op == PID_TID)
-    {
-        log_debug(cpu_log, "SE RECIBIÓ UNA PETICIÓN DE KERNEL POR DISPATCH");
-    } else {
-        log_warning(cpu_log, "ERROR EN EL PAQUETE ENVIADO POR KERNEL");
-        abort();
-    }
-
-    t_buffer* buffer;
-    buffer = recibir_buffer(socket_kernel);
+    t_pid_tid pid_tid = recibir_pid_tid(socket_kernel, cpu_log);
     
-    pid = buffer_read_uint32(buffer);
-    tid = buffer_read_uint32(buffer);
-
-    log_debug(cpu_log, "EL PID ES: %d Y EL TID ES: %d", pid, tid);
 }
 
 void fetch(t_pcb* pcb_recibido){
