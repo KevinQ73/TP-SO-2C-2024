@@ -17,6 +17,7 @@
         MENSAJE,
         PAQUETE,
         PID_TID,
+        CREAR_PROCESO,
     } cod_inst;
 
     typedef enum{
