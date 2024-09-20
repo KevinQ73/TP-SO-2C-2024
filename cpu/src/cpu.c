@@ -32,7 +32,15 @@ int main(int argc, char* argv[]) {
 
     registros_cpu = inicializar_registros();
 
-    iniciar_cpu();
+    pthread_create(&hilo_kernel_dispatch, NULL, (void *)atender_puerto_dispatch, NULL);
+    pthread_detach(hilo_kernel_dispatch);
+
+    // Atender los mensajes de Kernel - Interrupt
+    pthread_create(&hilo_kernel_interrupt, NULL, (void *)atender_puerto_interrupt, NULL);
+    pthread_join(hilo_kernel_interrupt, NULL);
+
+
+    //iniciar_cpu();
 
     // ------------------------ FINALIZACIÓN CPU -------------------------
 
@@ -43,31 +51,33 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
 }
 
-void iniciar_cpu(){
+void atender_puerto_dispatch(){
+    while (flag_dispatch)
+    {
+        int op = recibir_operacion(fd_conexion_dispatch);
+        switch (op)
+        {
+        case PID_TID:
+            pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
+            log_debug(cpu_log, "PID RECIBIDO: %d, TID RECIBIDO: %d", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            ejecutar_proceso(pid_tid_recibido);
+            break;
+        
+        case DESCONEXION:
+            log_error(cpu_log, "Desconexion de Kernel - Dispatch");
+            flag_dispatch = false;
+            break;
+        default:
+            log_warning(cpu_log, "Operacion desconocida de Kernel - Dispatch");
+            break;
+        }
+    }
+}
 
-    // Prueba 1) Recibir paquete con PID-TID y deserializar **RECIBIDO SATISFACTORIAMENTE**
+void atender_puerto_interrupt(){
 
-    //recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
+}
 
-    //char* mensaje_recibido = recibir_mensaje(fd_conexion_dispatch, cpu_log);
+void ejecutar_proceso(t_pid_tid pid_tid_recibido){
 
-    //log_debug(cpu_log, "%s", mensaje_recibido);
-
-    /* 
-        Inicio proceso de ejecución de un proceso y un hilo mandado a la CPU
-
-        1) Recibo PCB con PID y TIDs asociados al proceso que quiere ejecutar
-        2) FETCH -> DECODE -> EXECUTE -> CHECK INTERRUPT
-
-    */
-
-    /*
-    decode(); IN CONSTRUCTION
-    */
-    /*
-    execute(); IN CONSTRUCTION
-    */
-    /*
-    check_interrupt(); IN CONSTRUCTION
-    */
 }

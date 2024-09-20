@@ -358,16 +358,6 @@ t_pid_tid recibir_pid_tid(int socket_cliente, t_log* log){
 	uint32_t pid = 0;
     uint32_t tid = 0;
 
-	int op = recibir_operacion(socket_cliente);
-
-	if (op == PID_TID)
-    {
-        log_debug(log, "SE RECIBIÓ UNA PETICIÓN DE KERNEL POR DISPATCH");
-    } else {
-        log_warning(log, "ERROR EN EL PAQUETE ENVIADO POR KERNEL");
-        abort();
-    }
-
 	t_buffer* buffer;
     buffer = buffer_recieve(socket_cliente);
 

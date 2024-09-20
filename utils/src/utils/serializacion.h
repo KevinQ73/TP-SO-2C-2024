@@ -17,6 +17,7 @@
         MENSAJE,
         PAQUETE,
         PID_TID,
+        DESCONEXION,
         CREAR_PROCESO,
     } cod_inst;
 
@@ -87,16 +88,16 @@
         orden_prioridad prioridad;
     } t_tcb;
 
-    typedef struct {
-        uint8_t valor;
-        uint8_t tamanio;
-    } t_registro;
-
     typedef struct{
         uint32_t pid;
         uint32_t tid;
     } t_pid_tid;
 
+    typedef struct {
+        uint8_t valor;
+        uint8_t tamanio;
+    } t_registro;
+    
     extern char* nombres_registros[9];
 
     /*-----------------------------------------------------------------------*/

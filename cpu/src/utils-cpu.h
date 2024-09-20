@@ -24,7 +24,7 @@
 
     t_dictionary* inicializar_registros();
 
-    void recibir_paquete_kernel(int socket_kernel, t_log* kernel_log);
+    t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* kernel_log);
     
     void fetch(t_pcb* pcb_recibido);
 

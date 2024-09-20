@@ -28,10 +28,11 @@ t_dictionary* inicializar_registros(){
     return registros;
 }
 
-void recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
+t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
 
     t_pid_tid pid_tid = recibir_pid_tid(socket_kernel, cpu_log);
     
+    return pid_tid;
 }
 
 void fetch(t_pcb* pcb_recibido){
