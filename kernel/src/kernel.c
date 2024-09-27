@@ -11,13 +11,9 @@ int main(int argc, char* argv[]) {
     kernel_registro = levantar_datos(kernel_config);
 
     // ----------------------- FUNCIONES DE INICIO ------------------------
-    void inicializar_colas(){
-        cola_new = queue_create();
-        cola_ready = queue_create();
-        cola_blocked = queue_create();
-        cola_exit = queue_create();
-    
-    }
+
+    inicializar_colas();
+
     // --------------------- Conexión como cliente de CPU ----------------------
 
     fd_conexion_dispatch = crear_conexion(kernel_log, kernel_registro.ip_cpu, kernel_registro.puerto_cpu_dispatch);
@@ -31,25 +27,39 @@ int main(int argc, char* argv[]) {
     conexion_memoria = crear_conexion(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
     log_debug(kernel_log, "ME CONECTÉ A MEMORIA");
 
+    // --------------------- Finalizacion del modulo----------------------
     
+    //eliminar_paquete(paquete_proceso);
+    //eliminar_paquete(paquete_fin_proceso);
+
+    log_debug(kernel_log, "TERMINANDO KERNEL");
+    eliminar_logger(kernel_log);
+
+    //LIBERAR COLAS Y ELEMENTOS QUE CONTIENE
+}
+
     // ------------------------- FUNCIONES DE PCB -------------------------
 
     t_pcb* create_pcb(){
         t_pcb* pcb = malloc(sizeof(t_pcb));
         
-        pcb->pid = siguiente_pid();
+        pcb->pid = 0;
         pcb->tids = list_create();
-        PCN->mutex_asociados = list_create();
+        pcb->mutex_asociados = list_create();
         pcb->program_counter = 0;
         pcb->estado = NEW_STATE;
-        
-
+    
         return pcb;
     }
     
-    
-    
     // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
+
+    void inicializar_colas(){
+        cola_new = queue_create();
+        cola_ready = queue_create();
+        cola_blocked = queue_create();
+        cola_exit = queue_create();
+    }
 
     void* inicializar_pcb_en_espera(){
         t_pcb* pcb;
@@ -68,13 +78,12 @@ int main(int argc, char* argv[]) {
             char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
 
             
-            if(respuesta_memoria == "ESPACIO_ASIGNADO"){
+            if(strcmp(respuesta_memoria, "ESPACIO_ASIGNADO")){
 
-                list_add(pcb->pid,/*FALTA TID DEL HILO ASOCIADO AL PROCESO*/);
+                //list_add(pcb->pid,); FALTA TID DEL HILO ASOCIADO AL PROCESO
                 poner_en_ready(pcb);
                 
-
-            }else if(respuesta_memoria == "ESPACIO_NO_ASIGNADO"){
+            }else if(strcmp(respuesta_memoria, "ESPACIO_NO_ASIGNADO")){
                 pcb= queue_pop(cola_new);
                 poner_en_new(pcb);
             }
@@ -109,14 +118,14 @@ int main(int argc, char* argv[]) {
         t_pcb* pcb;
         pcb = queue_pop(cola_new);
         pcb->estado = READY_STATE;
-        queue_push(cola_ready);
+        queue_push(cola_ready, pcb);
     }
 
     // --------------------- Creacion de procesos ----------------------
-    void* peticion_crear_proceso(void){
+    void* peticion_crear_proceso(char* path){
         t_pcb* pcb = create_pcb();
         poner_en_new(pcb);
-        log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: %s",estado_proceso->NEW_STATE, pcb->pid);
+        log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
         t_paquete* paquete_proceso = crear_paquete(CREAR_PROCESO);
 
         agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
@@ -129,20 +138,15 @@ int main(int argc, char* argv[]) {
         //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
         char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
 
-        
         if(respuesta_memoria == "ESPACIO_ASIGNADO"){
 
-            list_add(pcb->pid,/*FALTA TID DEL HILO ASOCIADO AL PROCESO*/);
+            //list_add(pcb->pid,); FALTA TID DEL HILO ASOCIADO AL PROCESO
             poner_en_ready(pcb);
-            
 
         }else if(respuesta_memoria == "ESPACIO_NO_ASIGNADO"){
             pcb= queue_pop(cola_new);
             poner_en_new(pcb);
         }
-
-
-
     }
 
 
@@ -182,15 +186,3 @@ int main(int argc, char* argv[]) {
     }
 
     // --------------------- Finalizacion de hilo ----------------------
-
-
-    // --------------------- Finalizacion del modulo----------------------
-    eliminar_paquete(paquete_proceso);
-    eliminar_paquete(paquete_fin_proceso);
-
-    log_debug(kernel_log, "TERMINANDO KERNEL");
-    eliminar_logger(kernel_log);
-
-    /*LIBERAR COLAS Y ELEMENTOS QUE CONTIENE*/
-    
-}

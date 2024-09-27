@@ -25,7 +25,8 @@
     t_queue* cola_blocked;
     t_queue* cola_exit;
 
-
+    pthread_t hiloNew;
+    pthread_t hiloPlanifCortoPlazo;
     // ----------------------- FUNCIONES DE INICIO ------------------------
     /**
     * @fn    levantar_datos
@@ -34,21 +35,18 @@
     * @return        Retorna una instancia de registro t_kernel
     */
     
-
-  
-
     void inicializar_colas();
 
     // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
 
-   void iniciar_planificacion();
-   void* planificador_corto_plazo();
+    void iniciar_planificacion();
+    void* planificador_corto_plazo();
 
-   void poner_en_new(t_pcb* pcb);
+    void poner_en_new(t_pcb* pcb);
 
     void poner_en_ready();
 
 
     // --------------------- Creacion de procesos ----------------------
-    void* peticion_crear_proceso(char* path)
+    void* peticion_crear_proceso(char* path);
 #endif /* KERNEL_H_ */

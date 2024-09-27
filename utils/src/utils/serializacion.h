@@ -94,6 +94,11 @@
         uint32_t tid;
     } t_pid_tid;
 
+    typedef struct{
+        uint32_t pid;
+        t_tcb* tcb_asociado;
+    } t_hilo_planificacion;
+
     typedef struct {
         uint8_t valor;
         uint8_t tamanio;
