@@ -50,6 +50,37 @@ int main(int argc, char* argv[]) {
     
     
     // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
+
+    void* inicializar_pcb_en_espera(){
+        t_pcb* pcb;
+        
+        if(queue_size(cola_new) != 0){
+            pcb= queue_pop(cola_new);
+            t_paquete* paquete_proceso = crear_paquete(CREAR_PROCESO);
+
+            agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
+
+            //ENVIA EL PEDIDO A MEMORIA PARA INICIALIZAR EL PROCESO
+            enviar_paquete(paquete_proceso, conexion_memoria);
+            log_debug(kernel_log, "SE ENVIO PAQUETE");
+
+            //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+            char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
+
+            
+            if(respuesta_memoria == "ESPACIO_ASIGNADO"){
+
+                list_add(pcb->pid,/*FALTA TID DEL HILO ASOCIADO AL PROCESO*/);
+                poner_en_ready(pcb);
+                
+
+            }else if(respuesta_memoria == "ESPACIO_NO_ASIGNADO"){
+                pcb= queue_pop(cola_new);
+                poner_en_new(pcb);
+            }
+        }
+        
+    }
     void* planificador_corto_plazo(){
     
     }
@@ -71,11 +102,6 @@ int main(int argc, char* argv[]) {
     void poner_en_new(t_pcb* pcb){
 
         queue_push(cola_new,(void*)pcb);
-
-
-
-        
-    
     }
 
     void poner_en_ready(){
@@ -96,6 +122,7 @@ int main(int argc, char* argv[]) {
         agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
 
         //ENVIA EL PEDIDO A MEMORIA PARA INICIALIZAR EL PROCESO
+
         enviar_paquete(paquete_proceso, conexion_memoria);
         log_debug(kernel_log, "SE ENVIO PAQUETE");
 
@@ -121,14 +148,45 @@ int main(int argc, char* argv[]) {
 
     // --------------------- Finalizacion de procesos ----------------------
 
-    void* peticion_finalizar_proceso(){
+    void* peticion_finalizar_proceso( t_pcb* pcb){
 
+        t_paquete* paquete_fin_proceso = crear_paquete(FINALIZAR_PROCESO);
+        agregar_a_paquete(paquete_fin_proceso, &pcb->pid, sizeof(uint32_t));
+
+        //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
+        enviar_paquete(paquete_fin_proceso, conexion_memoria);
+        log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE PROCESO");
+
+        //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+        char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
+
+        if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
+
+            free(pcb);
+            
+            inicializar_pcb_en_espera();
+
+        }else if(respuesta_memoria == "FINALIZACION_RECHAZADA"){
+            pcb= queue_pop(cola_new);
+            poner_en_new(pcb);
+        }
+        
+        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
     }
 
+
+    // --------------------- Creacion de hilo----------------------
+
+    void* peticion_crear_hilo(void){
+        
+    }
+
+    // --------------------- Finalizacion de hilo ----------------------
 
 
     // --------------------- Finalizacion del modulo----------------------
     eliminar_paquete(paquete_proceso);
+    eliminar_paquete(paquete_fin_proceso);
 
     log_debug(kernel_log, "TERMINANDO KERNEL");
     eliminar_logger(kernel_log);

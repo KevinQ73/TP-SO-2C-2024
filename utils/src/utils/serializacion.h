@@ -19,6 +19,7 @@
         PID_TID,
         DESCONEXION,
         CREAR_PROCESO,
+        FINALIZAR_PROCESO,
     } cod_inst;
 
     typedef enum{
