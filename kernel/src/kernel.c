@@ -13,6 +13,7 @@ int main(int argc, char* argv[]) {
     // ----------------------- FUNCIONES DE INICIO ------------------------
 
     inicializar_colas();
+    t_list* proceso_creados = list_create();
 
     // --------------------- Conexión como cliente de CPU ----------------------
 
@@ -34,11 +35,16 @@ int main(int argc, char* argv[]) {
 
     log_debug(kernel_log, "TERMINANDO KERNEL");
     eliminar_logger(kernel_log);
-
+    eliminar_listas();
     //LIBERAR COLAS Y ELEMENTOS QUE CONTIENE
 }
 
-    // ------------------------- FUNCIONES DE PCB -------------------------
+// ------------------------- CREAR LISTAS -------------------------
+
+
+   
+
+// ------------------------- FUNCIONES DE PCB -------------------------
 
     t_pcb* create_pcb(){
         t_pcb* pcb = malloc(sizeof(t_pcb));
@@ -56,7 +62,9 @@ int main(int argc, char* argv[]) {
 
     void inicializar_colas(){
         cola_new = queue_create();
+        cola_new_procesos queue_create();
         cola_ready = queue_create();
+        cola_ready_procesos = queue_create();
         cola_blocked = queue_create();
         cola_exit = queue_create();
     }
@@ -113,7 +121,15 @@ int main(int argc, char* argv[]) {
         queue_push(cola_new,(void*)pcb);
     }
 
+    void poner_en_new_procesos(t_pcb* pcb){
+
+        queue_push(cola_new_procesos,(void*)pcb);
+    }
+
     void poner_en_ready(){
+        
+    }
+    void poner_en_ready_procesos(){
         int size_cola_new = queue_size(cola_new);
         t_pcb* pcb;
         pcb = queue_pop(cola_new);
@@ -124,14 +140,20 @@ int main(int argc, char* argv[]) {
     // --------------------- Creacion de procesos ----------------------
     void* peticion_crear_proceso(char* path){
         t_pcb* pcb = create_pcb();
-        poner_en_new(pcb);
+        poner_en_new_procesos(pcb);
         log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
+        
+        peticion_iniciar_proceso(pcb);
+        
+    }
+
+
+    void* peticion_iniciar_proceso(t_pcb* pcb){
         t_paquete* paquete_proceso = crear_paquete(CREAR_PROCESO);
 
         agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
 
         //ENVIA EL PEDIDO A MEMORIA PARA INICIALIZAR EL PROCESO
-
         enviar_paquete(paquete_proceso, conexion_memoria);
         log_debug(kernel_log, "SE ENVIO PAQUETE");
 
@@ -139,15 +161,23 @@ int main(int argc, char* argv[]) {
         char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
 
         if(respuesta_memoria == "ESPACIO_ASIGNADO"){
+            t_hilo_planificacion* primer_hilo_asociado = {
+                pcb->pid,
+                {0,0}
+            };
 
-            //list_add(pcb->pid,); FALTA TID DEL HILO ASOCIADO AL PROCESO
-            poner_en_ready(pcb);
+            list_add(pcb->tids,primer_hilo_asociado);
+        
+            poner_en_ready_procesos(pcb);
 
         }else if(respuesta_memoria == "ESPACIO_NO_ASIGNADO"){
-            pcb= queue_pop(cola_new);
-            poner_en_new(pcb);
+            pcb= queue_pop(cola_new_procesos);
+            poner_en_new_procesos(pcb);
         }
+    
+
     }
+        
 
 
     // --------------------- Finalizacion de procesos ----------------------
@@ -167,7 +197,8 @@ int main(int argc, char* argv[]) {
         if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
 
             free(pcb);
-            
+            //FALTA LIBERAR HILOS DE ESE PCB??
+            log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
             inicializar_pcb_en_espera();
 
         }else if(respuesta_memoria == "FINALIZACION_RECHAZADA"){
@@ -175,7 +206,7 @@ int main(int argc, char* argv[]) {
             poner_en_new(pcb);
         }
         
-        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
+        
     }
 
 

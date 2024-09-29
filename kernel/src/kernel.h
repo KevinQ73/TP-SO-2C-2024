@@ -21,7 +21,9 @@
     char* puerto_cpu_interrupt;
 
     t_queue* cola_new;
+    t_queue* cola_new_procesos;
     t_queue* cola_ready;
+    t_queue* cola_ready_procesos;
     t_queue* cola_blocked;
     t_queue* cola_exit;
 
