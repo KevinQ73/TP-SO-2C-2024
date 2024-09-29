@@ -2,7 +2,7 @@
 
 /*----------------------------- Miscelaneo ------------------------------*/
 
-char* nombres_registros[9] = {
+char* nombres_registros[11] = {
         "PC",
         "AX",
         "BX",
@@ -12,6 +12,8 @@ char* nombres_registros[9] = {
         "FX",
         "GX",
         "HX",
+		"BASE",
+		"LIMITE"
     };
 
 /*-----------------------------------------------------------------------*/
@@ -321,9 +323,9 @@ char* recibir_mensaje(int socket_cliente, t_log* log){
 
 	if (op == MENSAJE)
     {
-        log_debug(log, "SE RECIBIÓ UN MENSAJE DE KERNEL POR DISPATCH");
+        log_debug(log, "SE RECIBIÓ UN MENSAJE");
     } else {
-        log_warning(log, "ERROR EN EL MENSAJE ENVIADO POR KERNEL");
+        log_warning(log, "ERROR EN EL MENSAJE ENVIADO");
         abort();
     }
 
@@ -372,6 +374,147 @@ t_pid_tid recibir_pid_tid(int socket_cliente, t_log* log){
 
 	buffer_destroy(buffer);
 	return pid_tid;
+}
+
+cod_inst obtener_codigo_instruccion(char* operacion){
+
+    // SET
+    if (strcmp(operacion, "SET") == 0){
+        return SET;
+    }
+
+    // READ_MEM
+    else if (strcmp(operacion, "READ_MEM") == 0){
+        return READ_MEM;
+    }
+
+    // WRITE_MEM
+    else if (strcmp(operacion, "WRITE_MEM") == 0){
+        return WRITE_MEM;
+    }
+
+    // SUM
+    else if (strcmp(operacion, "SUM") == 0){
+        return SUM;
+    }
+
+    // SUB
+    else if (strcmp(operacion, "SUB") == 0){
+        return SUB;
+    }
+
+    // JNZ
+    else if (strcmp(operacion, "JNZ") == 0){
+        return JNZ;
+    }
+
+    // LOG
+    else if (strcmp(operacion, "LOG") == 0){
+        return LOG;
+    }
+
+    // DUMP_MEMORY
+    else if (strcmp(operacion, "DUMP_MEMORY") == 0){
+        return DUMP_MEMORY;
+    }
+
+    // IO
+    else if (strcmp(operacion, "IO") == 0){
+        return IO;
+    }
+
+    // PROCESS_CREATE
+    else if (strcmp(operacion, "PROCESS_CREATE") == 0){
+        return PROCESS_CREATE;
+    }
+
+    // THREAD_CREATE
+    else if (strcmp(operacion, "THREAD_CREATE") == 0){
+        return THREAD_CREATE;
+    }
+
+    // THREAD_JOIN
+    else if (strcmp(operacion, "THREAD_JOIN") == 0){
+        return THREAD_JOIN;
+    }
+
+    // THREAD_CANCEL
+    else if (strcmp(operacion, "THREAD_CANCEL") == 0){
+        return THREAD_CANCEL;
+    }
+
+    // MUTEX_CREATE
+    else if (strcmp(operacion, "MUTEX_CREATE") == 0){
+        return MUTEX_CREATE;
+    }
+
+    // MUTEX_LOCK
+    else if (strcmp(operacion, "MUTEX_LOCK") == 0){
+        return MUTEX_LOCK;
+    }
+
+	//MUTEX_UNLOCK
+    else if (strcmp(operacion, "MUTEX_UNLOCK") == 0){
+        return MUTEX_UNLOCK;
+    }
+
+    // THREAD_EXIT
+    else if (strcmp(operacion, "THREAD_EXIT") == 0){
+        return THREAD_EXIT;
+    }
+
+	// PROCESS_EXIT
+	else if (strcmp(operacion, "PROCESS_EXIT") == 0){
+        return PROCESS_EXIT;
+    }
+	/*
+	// EXIT
+    else if (strcmp(operacion, "EXIT") == 0){
+        return EXIT;
+    }
+
+	// LADO CONSOLA
+
+	// EJECUTAR_SCRIPT
+    else if (strcmp(operacion, "EJECUTAR_SCRIPT") == 0){
+        return EJECUTAR_SCRIPT;
+    }
+
+	// INICIAR_PROCESO
+    else if (strcmp(operacion, "INICIAR_PROCESO") == 0){
+        return INICIAR_PROCESO;
+    }
+
+	// FINALIZAR_PROCESO
+    else if (strcmp(operacion, "FINALIZAR_PROCESO") == 0){
+        return FINALIZAR_PROCESO;
+    }
+
+	// DETENER_PLANIFICACION
+    else if (strcmp(operacion, "DETENER_PLANIFICACION") == 0){
+        return DETENER_PLANIFICACION;
+    }
+
+	// INICIAR_PLANIFICACION
+    else if (strcmp(operacion, "INICIAR_PLANIFICACION") == 0){
+        return INICIAR_PLANIFICACION;
+    }
+
+	// MULTIPROGRAMACION
+    else if (strcmp(operacion, "MULTIPROGRAMACION") == 0){
+        return MULTIPROGRAMACION;
+    }
+
+	// PROCESO_ESTADO
+    else if (strcmp(operacion, "PROCESO_ESTADO") == 0){
+        return PROCESO_ESTADO;
+    }
+
+    // El código no es válido
+    else {
+       return ERROR_CODE;
+    }
+	*/
 }
 
 /*

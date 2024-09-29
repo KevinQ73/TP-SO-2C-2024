@@ -20,6 +20,8 @@
         DESCONEXION,
         CREAR_PROCESO,
         FINALIZAR_PROCESO,
+        PETICION_INSTRUCCION,
+        CONTEXTO_EJECUCION,
     } cod_inst;
 
     typedef enum{
@@ -33,7 +35,7 @@
     } inst_cpu;
 
     typedef enum{
-        DUMP_MEMORY,
+        DUMP_MEMORY = 7,
         IO,
         PROCESS_CREATE,
         THREAD_CREATE,
@@ -53,9 +55,7 @@
         BLOCKED_STATE,
         EXIT_STATE,
     } estado_proceso;
-    
 
-    
     typedef enum{
         PRIORIDAD_MAXIMA,
         PRIORIDAD_1,
@@ -100,13 +100,8 @@
         uint32_t pid;
         t_tcb* tcb_asociado;
     } t_hilo_planificacion;
-
-    typedef struct {
-        uint8_t valor;
-        uint8_t tamanio;
-    } t_registro;
     
-    extern char* nombres_registros[9];
+    extern char* nombres_registros[11];
 
     /*-----------------------------------------------------------------------*/
 
@@ -317,6 +312,8 @@
 
     t_pid_tid recibir_pid_tid(int socket_cliente, t_log* log);
 
+    cod_inst obtener_codigo_instruccion(char* operacion);
+    
     /*
     void* serializar_pcb(t_pcb* data, t_log* log);
 
@@ -326,5 +323,6 @@
     
     t_pcb* recibir_pcb(int socket_cliente);
     */
+
 
 #endif /* SERIALIZACION_H_ */

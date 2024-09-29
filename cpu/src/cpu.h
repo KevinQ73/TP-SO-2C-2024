@@ -20,11 +20,18 @@
     pthread_t* hilo_kernel_interrupt;
 
     bool flag_dispatch = true;
+    bool interrupt_is_called = false;
+
+    /*--------------------- Atender conexiones a la CPU ---------------------*/
 
     void atender_puerto_dispatch();
 
     void atender_puerto_interrupt();
 
-    void ejecutar_proceso(t_pid_tid pid_tid_recibido);
+    /*-----------------------------------------------------------------------*/
+
+    /*-------------------------- Ciclo de ejecución -------------------------*/
+    
+    void ejecutar_hilo(t_pid_tid pid_tid_recibido);
 
 #endif /* CPU_H_ */

@@ -5,7 +5,7 @@ int main(int argc, char* argv[]) {
     //---------------------------- Iniciar archivos ----------------------------
 
     cpu_log = iniciar_logger("./files/cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
-
+    
     cpu_config = iniciar_config("./files/cpu.config");
 
     cpu_registro = levantar_datos(cpu_config);
@@ -51,6 +51,9 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
 }
 
+    /*--------------------- Atender conexiones a la CPU ---------------------*/
+
+
 void atender_puerto_dispatch(){
     while (flag_dispatch)
     {
@@ -60,7 +63,7 @@ void atender_puerto_dispatch(){
         case PID_TID:
             pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
             log_debug(cpu_log, "PID RECIBIDO: %d, TID RECIBIDO: %d", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            ejecutar_proceso(pid_tid_recibido);
+            ejecutar_hilo(pid_tid_recibido);
             break;
         
         case DESCONEXION:
@@ -78,6 +81,25 @@ void atender_puerto_interrupt(){
 
 }
 
-void ejecutar_proceso(t_pid_tid pid_tid_recibido){
+    /*-----------------------------------------------------------------------*/
+    /*-------------------------- Ciclo de ejecución -------------------------*/
 
+void ejecutar_hilo(t_pid_tid pid_tid_recibido){
+    t_dictionary* contexto_ejecucion = solicitar_contexto_ejecucion(pid_tid_recibido, conexion_memoria, cpu_log);
+
+    actualizar_registros_cpu(registros_cpu, contexto_ejecucion, cpu_log);
+
+    do
+    {
+        int pc = dictionary_get(registros_cpu, "PC");
+        char* instruccion = fetch(pid_tid_recibido, &pc, conexion_memoria, cpu_log);
+
+        char** instruccion_parseada = decode(instruccion);
+
+        execute(registros_cpu, instruccion_parseada, cpu_log);
+
+        string_array_destroy(instruccion_parseada);
+        free(instruccion);
+
+    } while (!interrupt_is_called);
 }
