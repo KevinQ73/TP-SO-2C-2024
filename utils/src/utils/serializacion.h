@@ -54,6 +54,8 @@
         EXIT_STATE,
     } estado_proceso;
     
+
+    
     typedef enum{
         PRIORIDAD_MAXIMA,
         PRIORIDAD_1,

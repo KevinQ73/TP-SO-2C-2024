@@ -138,17 +138,17 @@ int main(int argc, char* argv[]) {
     }
 
     // --------------------- Creacion de procesos ----------------------
-    void* peticion_crear_proceso(char* path){
+    void* peticion_crear_proceso(char* path, int tam_proceso, orden_prioridad prioridad_proceso  ){
         t_pcb* pcb = create_pcb();
         poner_en_new_procesos(pcb);
         log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
         
-        peticion_iniciar_proceso(pcb);
+        peticion_iniciar_proceso(pcb, path, tam_proceso, prioridad_proceso);
         
     }
 
 
-    void* peticion_iniciar_proceso(t_pcb* pcb){
+    void* peticion_iniciar_proceso(t_pcb* pcb, char* path, int tam_proceso, orden_prioridad prioridad_proceso){
         t_paquete* paquete_proceso = crear_paquete(CREAR_PROCESO);
 
         agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
@@ -217,3 +217,28 @@ int main(int argc, char* argv[]) {
     }
 
     // --------------------- Finalizacion de hilo ----------------------
+
+    // --------------------- Syscalls a atender  ----------------------
+
+  
+
+    void* syscalls_a_atender(char* syscall){
+
+
+        /*TODO: ESPERAR PAQUETE QUE ME MANDA CPU PARA LEER LA INSTRUCCION CON LOS PARAMETROS */
+        switch (syscall)
+        {
+        case PROCESS_CREATE:
+            peticion_crear_proceso(path,tam_proceso,prioridad_proceso);
+            break;
+
+        case PROCESS_EXIT:
+            peticion_finalizar_proceso();
+            break;
+        
+        default:
+            break;
+        }
+    }
+
+    
