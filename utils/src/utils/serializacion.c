@@ -467,6 +467,10 @@ cod_inst obtener_codigo_instruccion(char* operacion){
 	else if (strcmp(operacion, "PROCESS_EXIT") == 0){
         return PROCESS_EXIT;
     }
+	// El código no es válido
+    else {
+       return ERROR_CODE;
+    }
 	/*
 	// EXIT
     else if (strcmp(operacion, "EXIT") == 0){
@@ -508,11 +512,6 @@ cod_inst obtener_codigo_instruccion(char* operacion){
 	// PROCESO_ESTADO
     else if (strcmp(operacion, "PROCESO_ESTADO") == 0){
         return PROCESO_ESTADO;
-    }
-
-    // El código no es válido
-    else {
-       return ERROR_CODE;
     }
 	*/
 }

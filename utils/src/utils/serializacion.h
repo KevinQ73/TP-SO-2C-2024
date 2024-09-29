@@ -46,6 +46,7 @@
         MUTEX_UNLOCK,
         THREAD_EXIT,
         PROCESS_EXIT,
+        ERROR_CODE,
     } inst_syscalls;
 
     typedef enum{
