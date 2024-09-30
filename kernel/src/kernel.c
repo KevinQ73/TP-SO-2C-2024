@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     }
 
     // --------------------- Creacion de procesos ----------------------
-    void* peticion_crear_proceso(char* path, int tam_proceso, orden_prioridad prioridad_proceso  ){
+    void* peticion_crear_proceso(char* path, int tam_proceso, int prioridad_proceso  ){
         t_pcb* pcb = create_pcb();
         poner_en_new_procesos(pcb);
         log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
@@ -224,7 +224,7 @@ int main(int argc, char* argv[]) {
 
     void* syscalls_a_atender(char* syscall){
 
-
+        
         /*TODO: ESPERAR PAQUETE QUE ME MANDA CPU PARA LEER LA INSTRUCCION CON LOS PARAMETROS */
         switch (syscall)
         {
