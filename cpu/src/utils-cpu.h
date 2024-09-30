@@ -70,9 +70,13 @@
 
     void execute_dump_memory();
 
+    void execute_io();
+
     void execute_process_create();
 
     void execute_thread_create();
+
+    void execute_thread_join();
 
     void execute_thread_cancel();
 

@@ -32,12 +32,12 @@ int main(int argc, char* argv[]) {
 
     registros_cpu = inicializar_registros();
 
-    pthread_create(&hilo_kernel_dispatch, NULL, (void *)atender_puerto_dispatch, NULL);
-    pthread_detach(hilo_kernel_dispatch);
+    pthread_create(hilo_kernel_dispatch, NULL, (void *)atender_puerto_dispatch, NULL);
+    pthread_detach(*hilo_kernel_dispatch);
 
     // Atender los mensajes de Kernel - Interrupt
-    pthread_create(&hilo_kernel_interrupt, NULL, (void *)atender_puerto_interrupt, NULL);
-    pthread_join(hilo_kernel_interrupt, NULL);
+    pthread_create(hilo_kernel_interrupt, NULL, (void *)atender_puerto_interrupt, NULL);
+    pthread_join(*hilo_kernel_interrupt, NULL);
 
 
     //iniciar_cpu();
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 
 
 void atender_puerto_dispatch(){
-    while (flag_dispatch)
+    while (flag_disconect)
     {
         int op = recibir_operacion(fd_conexion_dispatch);
         switch (op)
@@ -68,7 +68,7 @@ void atender_puerto_dispatch(){
         
         case DESCONEXION:
             log_error(cpu_log, "Desconexion de Kernel - Dispatch");
-            flag_dispatch = false;
+            flag_disconect = false;
             break;
         default:
             log_warning(cpu_log, "Operacion desconocida de Kernel - Dispatch");
@@ -78,9 +78,53 @@ void atender_puerto_dispatch(){
 }
 
 void atender_puerto_interrupt(){
+    while (flag_disconect)
+    {
+        int op = recibir_operacion(fd_conexion_interrupt);
+        switch (op)
+        {
+        case INTERRUPCION_QUANTUM:
+            if (check_tid_interrupt(fd_conexion_interrupt)){
+                interrupt_results(&(pid_tid_recibido.tid), "INTERRUPCIÓN POR QUANTUM");
+            }
+            break;
+        
+        case INTERRUPCION_USUARIO:
+            if (check_tid_interrupt(fd_conexion_interrupt)){
+                interrupt_results(&(pid_tid_recibido.tid), "INTERRUPCIÓN POR USUARIO");
+            }
+            break;
 
+        default:
+            log_debug(cpu_log, "ERROR EN ATENDER_PUERTO_INTERRUPT");
+            break;
+        }
+    }
 }
 
+bool check_tid_interrupt(int fd_kernel){
+    t_buffer* buffer = buffer_recieve(fd_kernel);
+    uint32_t tid_recibido = buffer_read_uint32(buffer);
+
+    return tid_recibido == pid_tid_recibido.tid;
+}
+
+void interrupt_results(uint32_t* tid, char* motivo){
+    uint32_t length = strlen(motivo) + 1;
+    t_paquete* paquete = crear_paquete(ENVIO_TID);
+    t_buffer* buffer = buffer_create(
+        sizeof(uint32_t) + length
+    );
+
+    buffer_add_uint32(buffer, tid, cpu_log);
+    log_debug(cpu_log, "TID A ENVIAR: %d", *tid);
+    buffer_add_string(buffer, length, motivo, cpu_log);
+    log_debug(cpu_log, "AVISO A ENVIAR: %s", motivo);
+
+    paquete->buffer = buffer;
+    enviar_paquete(paquete, fd_conexion_interrupt);
+    eliminar_paquete(paquete);
+}
     /*-----------------------------------------------------------------------*/
     /*-------------------------- Ciclo de ejecución -------------------------*/
 
@@ -91,7 +135,7 @@ void ejecutar_hilo(t_pid_tid pid_tid_recibido){
 
     do
     {
-        int pc = dictionary_get(registros_cpu, "PC");
+        uint32_t pc = dictionary_get(registros_cpu, "PC");
         char* instruccion = fetch(pid_tid_recibido, &pc, conexion_memoria, cpu_log);
 
         char** instruccion_parseada = decode(instruccion);

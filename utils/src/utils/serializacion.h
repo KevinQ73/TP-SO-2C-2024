@@ -22,6 +22,9 @@
         FINALIZAR_PROCESO,
         PETICION_INSTRUCCION,
         CONTEXTO_EJECUCION,
+        INTERRUPCION_QUANTUM,
+        INTERRUPCION_USUARIO,
+        ENVIO_TID,
     } cod_inst;
 
     typedef enum{
@@ -32,10 +35,7 @@
         SUB,
         JNZ,
         LOG,
-    } inst_cpu;
-
-    typedef enum{
-        DUMP_MEMORY = 7,
+        DUMP_MEMORY,
         IO,
         PROCESS_CREATE,
         THREAD_CREATE,
@@ -47,7 +47,7 @@
         THREAD_EXIT,
         PROCESS_EXIT,
         ERROR_CODE,
-    } inst_syscalls;
+    } inst_cpu;
 
     typedef enum{
         NEW_STATE = 200,

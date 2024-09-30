@@ -19,7 +19,7 @@
     pthread_t* hilo_kernel_dispatch;
     pthread_t* hilo_kernel_interrupt;
 
-    bool flag_dispatch = true;
+    bool flag_disconect = true;
     bool interrupt_is_called = false;
 
     /*--------------------- Atender conexiones a la CPU ---------------------*/
@@ -27,6 +27,10 @@
     void atender_puerto_dispatch();
 
     void atender_puerto_interrupt();
+
+    bool check_tid_interrupt(int fd_kernel);
+
+    void interrupt_results(uint32_t* tid, char* motivo);
 
     /*-----------------------------------------------------------------------*/
 

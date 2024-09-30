@@ -116,7 +116,7 @@ char** decode(char* instruccion){
 }
 
 void execute(t_dictionary* registro_a_modificar, char** instruccion_parseada, t_log* log){
-    cod_inst op = obtener_codigo_instruccion(instruccion_parseada[0]);
+    inst_cpu op = obtener_codigo_instruccion(instruccion_parseada[0]);
 
     switch (op)
     {
@@ -152,12 +152,20 @@ void execute(t_dictionary* registro_a_modificar, char** instruccion_parseada, t_
         execute_dump_memory();
         break;
 
+    case IO:
+        execute_io();
+        break;
+
     case PROCESS_CREATE:
         execute_process_create();
         break;
 
-    case THREAD_JOIN:
+    case THREAD_CREATE:
         execute_thread_create();
+        break;
+
+    case THREAD_JOIN:
+        execute_thread_join();
         break;
 
     case THREAD_CANCEL:
@@ -223,11 +231,19 @@ void execute_dump_memory(){
     
 }
 
+void execute_io(){
+    
+}
+
 void execute_process_create(){
     
 }
 
 void execute_thread_create(){
+    
+}
+
+void execute_thread_join(){
     
 }
 
