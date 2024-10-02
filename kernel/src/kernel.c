@@ -57,6 +57,8 @@ int main(int argc, char* argv[]) {
     
         return pcb;
     }
+
+    
     
     // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
 
@@ -116,9 +118,9 @@ int main(int argc, char* argv[]) {
         pthread_detach(hiloPlanifCortoPlazo);
     }
 
-    void poner_en_new(t_pcb* pcb){
+    void poner_en_new(t_hilo_planificacion* hilo_del_proceso){
 
-        queue_push(cola_new,(void*)pcb);
+        queue_push(cola_new,(void*)hilo_del_proceso);
     }
 
     void poner_en_new_procesos(t_pcb* pcb){
@@ -126,29 +128,60 @@ int main(int argc, char* argv[]) {
         queue_push(cola_new_procesos,(void*)pcb);
     }
 
-    void poner_en_ready(){
-        
+    void poner_en_ready_segun_prioridad(){
+        int size_cola_new = queue_size(cola_new_procesos);
+        t_pcb* pcb;
+        t_hilo_planificacion hilo_del_proceso;
+        pcb = queue_pop(cola_new_procesos);
+        pcb->estado = READY_STATE;
+        poner_en_ready_procesos(pcb);
+        //PONGO EN READY EL PROCESO Y LO METO EN UNA LISTA DE PROCESOS ACTIVOS,TAMBIEN TENGO QUE PONER EN READY A TODOS LOS HILOS DE ESE PROCESO 
+        /*for (int i = 0; i < list_size(pcb->tids); i++) {
+            tid = list_get(pcb->tids,i);
+            
+            queue_push(cola_ready, hilo_del_proceso.tcb_asociado);//REVISAR CON KEVIN
+            pcb->tid[i]->estado = READY_STATE;
+        }*/
+
+
+
+
+
     }
     void poner_en_ready_procesos(){
         int size_cola_new = queue_size(cola_new);
         t_pcb* pcb;
-        pcb = queue_pop(cola_new);
+        pcb = queue_pop(cola_new_procesos);
         pcb->estado = READY_STATE;
-        queue_push(cola_ready, pcb);
+        queue_push(cola_ready_procesos, pcb);
     }
 
     // --------------------- Creacion de procesos ----------------------
+
+
+    
+
+    /*ESTOY ENTRE CREAR LISTAS O COLAS PARA PLANIFICAR LOS HILOS*/
+
     void* peticion_crear_proceso(char* path, int tam_proceso, int prioridad_proceso  ){
         t_pcb* pcb = create_pcb();
         poner_en_new_procesos(pcb);
         log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
-        
-        peticion_iniciar_proceso(pcb, path, tam_proceso, prioridad_proceso);
+
+        t_hilo_planificacion* primer_hilo_asociado = {
+                pcb->pid,
+                {0,prioridad_proceso},
+                NEW_STATE
+            };
+
+            list_add(pcb->tids,primer_hilo_asociado->tcb_asociado->tid);
+            poner_en_new(primer_hilo_asociado);
+        peticion_iniciar_proceso(pcb,primer_hilo_asociado);
         
     }
 
 
-    void* peticion_iniciar_proceso(t_pcb* pcb, char* path, int tam_proceso, orden_prioridad prioridad_proceso){
+    void* peticion_iniciar_proceso(t_pcb pcb, t_hilo_planificacion* primer_hilo_asociado){
         t_paquete* paquete_proceso = crear_paquete(CREAR_PROCESO);
 
         agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
@@ -161,14 +194,9 @@ int main(int argc, char* argv[]) {
         char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
 
         if(respuesta_memoria == "ESPACIO_ASIGNADO"){
-            t_hilo_planificacion* primer_hilo_asociado = {
-                pcb->pid,
-                {0,0}
-            };
-
-            list_add(pcb->tids,primer_hilo_asociado);
-        
+          
             poner_en_ready_procesos(pcb);
+            poner_en_ready_segun_prioridad(primer_hilo_asociado);
 
         }else if(respuesta_memoria == "ESPACIO_NO_ASIGNADO"){
             pcb= queue_pop(cola_new_procesos);
@@ -234,6 +262,30 @@ int main(int argc, char* argv[]) {
 
         case PROCESS_EXIT:
             peticion_finalizar_proceso();
+            break;
+
+        case THREAD_CREATE:
+            
+            break;
+
+        case THREAD_JOIN:
+            
+            break;
+
+        case THREAD_CANCEL:
+            
+            break;
+
+        case THREAD_EXIT:
+            
+            break;
+        
+        case MUTEX_UNLOCK:
+            
+            break;
+
+        case DUMP_MEMORY:
+            
             break;
         
         default:
