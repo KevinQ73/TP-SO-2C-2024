@@ -69,6 +69,8 @@ int main(int argc, char* argv[]) {
         cola_ready_procesos = queue_create();
         cola_blocked = queue_create();
         cola_exit = queue_create();
+
+        
     }
 
     void* inicializar_pcb_en_espera(){
@@ -101,11 +103,11 @@ int main(int argc, char* argv[]) {
         
     }
     void* planificador_corto_plazo(){
-    
+
     }
 
     void* planificador_largo_plazo(){
-
+        
     }
 
     void iniciar_planificacion(){
@@ -120,7 +122,7 @@ int main(int argc, char* argv[]) {
 
     void poner_en_new(t_hilo_planificacion* hilo_del_proceso){
 
-        queue_push(cola_new,(void*)hilo_del_proceso);
+        queue_push(cola_new,hilo_del_proceso);
     }
 
     void poner_en_new_procesos(t_pcb* pcb){
@@ -134,15 +136,10 @@ int main(int argc, char* argv[]) {
         t_hilo_planificacion hilo_del_proceso;
         pcb = queue_pop(cola_new_procesos);
         pcb->estado = READY_STATE;
-        poner_en_ready_procesos(pcb);
-        //PONGO EN READY EL PROCESO Y LO METO EN UNA LISTA DE PROCESOS ACTIVOS,TAMBIEN TENGO QUE PONER EN READY A TODOS LOS HILOS DE ESE PROCESO 
-        /*for (int i = 0; i < list_size(pcb->tids); i++) {
-            tid = list_get(pcb->tids,i);
-            
-            queue_push(cola_ready, hilo_del_proceso.tcb_asociado);//REVISAR CON KEVIN
-            pcb->tid[i]->estado = READY_STATE;
-        }*/
 
+        //MANDAR AL PCB A LA LISTA DE PROCESOS EN READY
+        poner_en_ready_procesos(pcb);
+        
 
 
 
@@ -164,6 +161,15 @@ int main(int argc, char* argv[]) {
     /*ESTOY ENTRE CREAR LISTAS O COLAS PARA PLANIFICAR LOS HILOS*/
 
     void* peticion_crear_proceso(char* path, int tam_proceso, int prioridad_proceso  ){
+        uint32_t largo_string = 0;
+        t_buffer* buffer;
+        buffer = buffer_recieve( fd_conexion_dispatch );
+        char* path = buffer_read_string(buffer, &largo_string);
+
+        int tam_proceso = buffer_read_uint32(buffer);
+
+        int prioridad_proceso = buffer_read_uint32(buffer);
+
         t_pcb* pcb = create_pcb();
         poner_en_new_procesos(pcb);
         log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
@@ -253,11 +259,11 @@ int main(int argc, char* argv[]) {
     void* syscalls_a_atender(char* syscall){
 
         
-        /*TODO: ESPERAR PAQUETE QUE ME MANDA CPU PARA LEER LA INSTRUCCION CON LOS PARAMETROS */
+        /*LEER LA OP QUE TIENE EL PAQUETE QUE ENVIA CPU (recibir_op)*/
         switch (syscall)
         {
         case PROCESS_CREATE:
-            peticion_crear_proceso(path,tam_proceso,prioridad_proceso);
+            peticion_crear_proceso();
             break;
 
         case PROCESS_EXIT:
