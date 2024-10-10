@@ -19,6 +19,7 @@
         PID_TID,
         DESCONEXION,
         CREAR_PROCESO,
+        CREAR_HILO,
         FINALIZAR_PROCESO,
         PETICION_INSTRUCCION,
         CONTEXTO_EJECUCION,
@@ -90,7 +91,7 @@
     typedef struct{
         uint32_t tid;
         orden_prioridad prioridad;
-        
+        char* archivo_asociado; 
     } t_tcb;
 
     typedef struct{

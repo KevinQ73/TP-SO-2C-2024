@@ -25,7 +25,16 @@
     t_queue* cola_ready;
     t_queue* cola_ready_procesos;
     t_queue* cola_blocked;
-    t_queue* cola_exit;
+    t_queue* cola_prioridad_maxima;
+    t_queue* cola_prioridad_1;
+    t_queue* cola_prioridad_2;
+    t_queue* cola_prioridad_3;
+    t_queue* cola_prioridad_4;
+    t_queue* cola_prioridad_5;
+    t_queue* cola_prioridad_6;
+    t_queue* cola_prioridad_7;
+
+
 
     pthread_t hiloNew;
     pthread_t hiloPlanifCortoPlazo;

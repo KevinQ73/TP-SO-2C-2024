@@ -58,6 +58,17 @@ int main(int argc, char* argv[]) {
         return pcb;
     }
 
+    t_tcb* create_tcb(){
+        t_tcb* tcb = malloc(sizeof(t_tcb));
+
+        tcb->tid;
+        tcb->prioridad;
+        tcb->archivo_asociado = " ";
+
+
+        return tcb;
+    }
+
     
     
     // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
@@ -69,6 +80,14 @@ int main(int argc, char* argv[]) {
         cola_ready_procesos = queue_create();
         cola_blocked = queue_create();
         cola_exit = queue_create();
+        cola_prioridad_maxima= queue_create();
+        cola_prioridad_1 = queue_create();
+        cola_prioridad_2 = queue_create();
+        cola_prioridad_3 = queue_create();
+        cola_prioridad_4 = queue_create();
+        cola_prioridad_5 = queue_create();
+        cola_prioridad_6 = queue_create();
+        cola_prioridad_7 = queue_create();
 
         
     }
@@ -103,6 +122,18 @@ int main(int argc, char* argv[]) {
         
     }
     void* planificador_corto_plazo(){
+            char* planificacion = kernel_registro.algoritmo_planificacion;
+
+
+        if(planificacion == "FIFO"){
+
+        }else if(planificacion == "PRIORIDADES"){
+
+        }else if(planificacion == "COLAS_MULTINIVEL"){
+
+        }else{
+            log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
+        }
 
     }
 
@@ -145,6 +176,7 @@ int main(int argc, char* argv[]) {
 
 
     }
+
     void poner_en_ready_procesos(){
         int size_cola_new = queue_size(cola_new);
         t_pcb* pcb;
@@ -158,9 +190,9 @@ int main(int argc, char* argv[]) {
 
     
 
-    /*ESTOY ENTRE CREAR LISTAS O COLAS PARA PLANIFICAR LOS HILOS*/
+    
 
-    void* peticion_crear_proceso(char* path, int tam_proceso, int prioridad_proceso  ){
+    void* peticion_crear_proceso(){
         uint32_t largo_string = 0;
         t_buffer* buffer;
         buffer = buffer_recieve( fd_conexion_dispatch );
@@ -181,7 +213,9 @@ int main(int argc, char* argv[]) {
             };
 
             list_add(pcb->tids,primer_hilo_asociado->tcb_asociado->tid);
+
             poner_en_new(primer_hilo_asociado);
+
         peticion_iniciar_proceso(pcb,primer_hilo_asociado);
         
     }
@@ -247,7 +281,59 @@ int main(int argc, char* argv[]) {
     // --------------------- Creacion de hilo----------------------
 
     void* peticion_crear_hilo(void){
+
+        uint32_t largo_string = 0;
+        t_buffer* buffer;
+        buffer = buffer_recieve( fd_conexion_dispatch );
+        char* path = buffer_read_string(buffer, &largo_string);
+
+        int prioridad_hilo = buffer_read_uint32(buffer);
+
+        t_paquete* paquete_proceso = crear_paquete(CREAR_HILO);
+
+        /*COMO LE MANDO A MEMORIA EL PATH A EJECUTAR*/
+        agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
+       
         
+
+        //ENVIA EL PEDIDO A MEMORIA PARA INICIALIZAR EL PROCESO
+        enviar_paquete(paquete_proceso, conexion_memoria);
+        log_debug(kernel_log, "SE ENVIO PAQUETE");
+        
+
+        t_tcb tcb= create_tcb();
+        //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+        char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
+
+        if(respuesta_memoria == "ESPACIO_ASIGNADO"){
+            /*TODO la funcion aplicar_tid*/
+            tcb.tid = aplicar_tid();
+            /*PONGO EN READY AL HILO SEGUN SU NIVEL DE PRIORIDAD */
+            if(prioridad_hilo == 0){
+            
+            }else if(prioridad_hilo == 1){
+                
+            }else if(prioridad_hilo == 2){
+            
+            }else if(prioridad_hilo == 3){
+            
+            }else if(prioridad_hilo == 4){
+            
+            }else if(prioridad_hilo == 5){
+            
+            }else if(prioridad_hilo == 6){
+            
+            }else if(prioridad_hilo == 7){
+            
+            }else{
+                log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
+            }
+
+        }else if(respuesta_memoria == "ESPACIO_NO_ASIGNADO"){
+            pcb= queue_pop(cola_new_procesos);
+            poner_en_new_procesos(pcb);
+        }
+    
     }
 
     // --------------------- Finalizacion de hilo ----------------------
@@ -271,7 +357,7 @@ int main(int argc, char* argv[]) {
             break;
 
         case THREAD_CREATE:
-            
+            peticion_crear_hilo();
             break;
 
         case THREAD_JOIN:
