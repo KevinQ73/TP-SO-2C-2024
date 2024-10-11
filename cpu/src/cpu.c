@@ -20,8 +20,8 @@ int main(int argc, char* argv[]) {
 
     // --------------------- Conexión como cliente de MEMORIA ----------------------
 
-    conexion_memoria = crear_conexion(cpu_log, cpu_registro.ip_memoria, cpu_registro.puerto_memoria);
-    log_debug(cpu_log, "ME CONECTÉ A MEMORIA");
+    //conexion_memoria = crear_conexion(cpu_log, cpu_registro.ip_memoria, cpu_registro.puerto_memoria);
+    //log_debug(cpu_log, "ME CONECTÉ A MEMORIA");
 
     // ------------------------ Esperar conexión de Kernel -------------------------
 
@@ -38,9 +38,6 @@ int main(int argc, char* argv[]) {
     // Atender los mensajes de Kernel - Interrupt
     pthread_create(hilo_kernel_interrupt, NULL, (void *)atender_puerto_interrupt, NULL);
     pthread_join(*hilo_kernel_interrupt, NULL);
-
-
-    //iniciar_cpu();
 
     // ------------------------ FINALIZACIÓN CPU -------------------------
 

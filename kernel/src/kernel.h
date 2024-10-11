@@ -20,6 +20,8 @@
 	char* puerto_cpu_dispatch;
     char* puerto_cpu_interrupt;
 
+    t_list* proceso_creados;
+
     t_queue* cola_new;
     t_queue* cola_new_procesos;
     t_queue* cola_ready;
@@ -54,13 +56,31 @@
     // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
 
     void iniciar_planificacion();
+
+    void* planificador_largo_plazo();
+
     void* planificador_corto_plazo();
 
-    void poner_en_new(t_pcb* pcb);
+    void eliminar_listas();
 
-    void poner_en_ready();
-
-
+    void* poner_en_ready_segun_prioridad(int prioridad_hilo, t_hilo_planificacion* hilo_del_proceso);
     // --------------------- Creacion de procesos ----------------------
-    void* peticion_crear_proceso(char* path);
+
+    void poner_en_ready_procesos();
+
+    void* inicializar_pcb_en_espera();
+
+    void* peticion_crear_proceso();
+
+    void* peticion_iniciar_proceso(t_pcb* pcb, t_hilo_planificacion* primer_hilo_asociado);
+
+    void* peticion_finalizar_proceso(t_pcb* pcb);
+
+    int aplicar_tid();
+
+    void* peticion_crear_hilo(void);
+
+    void* finalizar_hilo(int tid);
+
+    void* syscalls_a_atender();
 #endif /* KERNEL_H_ */

@@ -332,19 +332,4 @@
 
    /*-----------------------------------------------------------------------*/
 
-    /*-------------- Funcion de comparacion de pids --------------*/
-
-    bool compare_pid(uint32_t* pid_1,uint32_t* pid_2) {
-        if (pid_1== NULL || pid_2 == NULL) {
-            return false;  // Manejar el caso en que alguno de los punteros sea NULL
-        }   
-    
-        return (*pid_1 == *pid_2);  // Comparar los valores apuntados por a y b
-    
-    }
-
-   
-
-
-
 #endif /* SERIALIZACION_H_ */
