@@ -168,27 +168,27 @@ int main(int argc, char* argv[]) {
         
         /*PONGO EN READY AL HILO SEGUN SU NIVEL DE PRIORIDAD */
             if(prioridad_hilo == 0){
-                queue_push(cola_prioridad_maxima);
+                queue_push(cola_prioridad_maxima, hilo_del_proceso);
             }else if(prioridad_hilo == 1){
-                queue_push(cola_prioridad_1);
+                queue_push(cola_prioridad_1, hilo_del_proceso);
                 
             }else if(prioridad_hilo == 2){
-                queue_push(cola_prioridad_2);
+                queue_push(cola_prioridad_2, hilo_del_proceso);
                 
             }else if(prioridad_hilo == 3){
-                queue_push(cola_prioridad_3);
+                queue_push(cola_prioridad_3, hilo_del_proceso);
                 
             }else if(prioridad_hilo == 4){
-                queue_push(cola_prioridad_4);
+                queue_push(cola_prioridad_4, hilo_del_proceso);
                 
             }else if(prioridad_hilo == 5){
-                queue_push(cola_prioridad_5);
+                queue_push(cola_prioridad_5, hilo_del_proceso);
                 
             }else if(prioridad_hilo == 6){
-                queue_push(cola_prioridad_6);
+                queue_push(cola_prioridad_6,hilo_del_proceso);
                 
             }else if(prioridad_hilo == 7){
-                queue_push(cola_prioridad_7);
+                queue_push(cola_prioridad_7,hilo_del_proceso);
                 
             }else{
                 log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
@@ -350,14 +350,43 @@ int main(int argc, char* argv[]) {
 
     // --------------------- Finalizacion de hilo ----------------------
 
+    void* finalizar_hilo(int tid){
+        t_paquete* paquete_fin_hilo = crear_paquete(FINALIZAR_HILO);
+        agregar_a_paquete(paquete_fin_hilo, &tid sizeof(uint32_t));
+
+        //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
+        enviar_paquete(paquete_fin_proceso, conexion_memoria);
+        log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE PROCESO");
+
+        //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+        char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
+
+        if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
+            //TODO ver como buscar segun que planificacion sea
+            if(planificacion == "FIFO"){
+
+            }else if(planificacion == "PRIORIDADES"){
+
+            }else if(planificacion == "COLAS_MULTINIVEL"){
+
+            }
+            
+
+        }else if(respuesta_memoria == "FINALIZACION_RECHAZADA"){
+           
+        }
+    }
+
     // --------------------- Syscalls a atender  ----------------------
 
   
 
-    void* syscalls_a_atender(char* syscall){
+    void* syscalls_a_atender(){
 
+/*LEER LA OP QUE TIENE EL PAQUETE QUE ENVIA CPU (recibir_op)*/
+
+        int syscall = recibir_operacion(fd_conexion_interrupt);
         
-        /*LEER LA OP QUE TIENE EL PAQUETE QUE ENVIA CPU (recibir_op)*/
         switch (syscall)
         {
         case PROCESS_CREATE:
