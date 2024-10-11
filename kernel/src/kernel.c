@@ -127,7 +127,7 @@ void* inicializar_pcb_en_espera(){
     }
 }
 
-/*No se si es con * o sin en t_hilo_planificacion*/
+
 void* poner_en_ready_segun_prioridad(int prioridad_hilo, t_hilo_planificacion* hilo_del_proceso){ 
     /*PONGO EN READY AL HILO SEGUN SU NIVEL DE PRIORIDAD */
     if(prioridad_hilo == 0){
@@ -147,7 +147,7 @@ void* poner_en_ready_segun_prioridad(int prioridad_hilo, t_hilo_planificacion* h
     }else if(prioridad_hilo == 7){
         queue_push(cola_prioridad_7,hilo_del_proceso);
     }else{
-        log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
+        log_error(kernel_log,"NO SE RECONOCE LA prioridad");
     }
 }
 
@@ -257,17 +257,14 @@ void* peticion_crear_hilo(){
     char* path = buffer_read_string(buffer, &largo_string);
 
     int prioridad_hilo = buffer_read_uint32(buffer);
-
-    t_paquete* paquete_proceso = crear_paquete(CREAR_HILO);
-
-    /*COMO LE MANDO A MEMORIA EL PATH A EJECUTAR*/
-    t_pcb* pcb; // Auxiliar para que compile
-    agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
-       
-    //ENVIA EL PEDIDO A MEMORIA PARA INICIALIZAR EL PROCESO
-    enviar_paquete(paquete_proceso, conexion_memoria);
+    unit32_t lenght = strlen(path) + 1;
+    t_paquete* paquete= crear_paquete(CREAR_HILO);
+    t_buffer* buffer_envio = buffer_create(sizeof(uint32_t) + length);
+    buffer_add_string(buffer_envio,lenght,path,kernel_log);
+    paquete->buffer = buffer_envio;
+    enviar_paquete(paquete,fd_conexion_interrupt );
     log_debug(kernel_log, "SE ENVIO PAQUETE");
-        
+    eliminar_paquete(paquete);
     t_tcb* tcb = create_tcb();
     //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
     char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
