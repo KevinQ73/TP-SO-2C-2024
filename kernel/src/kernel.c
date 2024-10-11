@@ -80,6 +80,7 @@ int main(int argc, char* argv[]) {
         cola_ready_procesos = queue_create();
         cola_blocked = queue_create();
         cola_exit = queue_create();
+
         cola_prioridad_maxima= queue_create();
         cola_prioridad_1 = queue_create();
         cola_prioridad_2 = queue_create();
@@ -161,16 +162,38 @@ int main(int argc, char* argv[]) {
         queue_push(cola_new_procesos,(void*)pcb);
     }
 
-    void poner_en_ready_segun_prioridad(){
-        int size_cola_new = queue_size(cola_new_procesos);
-        t_pcb* pcb;
-        t_hilo_planificacion hilo_del_proceso;
-        pcb = queue_pop(cola_new_procesos);
-        pcb->estado = READY_STATE;
-
-        //MANDAR AL PCB A LA LISTA DE PROCESOS EN READY
-        poner_en_ready_procesos(pcb);
+/*No se si es con * o sin en t_hilo_planificacion*/
+    void* poner_en_ready_segun_prioridad(t_hilo_planificacion* hilo_del_proceso;){
+       
         
+        /*PONGO EN READY AL HILO SEGUN SU NIVEL DE PRIORIDAD */
+            if(prioridad_hilo == 0){
+                queue_push(cola_prioridad_maxima);
+            }else if(prioridad_hilo == 1){
+                queue_push(cola_prioridad_1);
+                
+            }else if(prioridad_hilo == 2){
+                queue_push(cola_prioridad_2);
+                
+            }else if(prioridad_hilo == 3){
+                queue_push(cola_prioridad_3);
+                
+            }else if(prioridad_hilo == 4){
+                queue_push(cola_prioridad_4);
+                
+            }else if(prioridad_hilo == 5){
+                queue_push(cola_prioridad_5);
+                
+            }else if(prioridad_hilo == 6){
+                queue_push(cola_prioridad_6);
+                
+            }else if(prioridad_hilo == 7){
+                queue_push(cola_prioridad_7);
+                
+            }else{
+                log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
+            }
+
 
 
 
@@ -181,8 +204,10 @@ int main(int argc, char* argv[]) {
         int size_cola_new = queue_size(cola_new);
         t_pcb* pcb;
         pcb = queue_pop(cola_new_procesos);
+        list_add(proceso_creados,pcb);
         pcb->estado = READY_STATE;
-        queue_push(cola_ready_procesos, pcb);
+        list_add(proceso_creados,pcb);
+        
     }
 
     // --------------------- Creacion de procesos ----------------------
@@ -206,15 +231,22 @@ int main(int argc, char* argv[]) {
         poner_en_new_procesos(pcb);
         log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
 
-        t_hilo_planificacion* primer_hilo_asociado = {
-                pcb->pid,
-                {0,prioridad_proceso},
-                NEW_STATE
-            };
+        t_tcb tcb= create_tcb();
 
-            list_add(pcb->tids,primer_hilo_asociado->tcb_asociado->tid);
+        tcb.tid= aplicar_tid();
+        tcb.prioridad= prioridad_proceso;
+        /*DONDE LO LIBERO EL TCB?*/
 
-            poner_en_new(primer_hilo_asociado);
+        t_hilo_planificacion primer_hilo_planificacion;
+
+        primer_hilo_planificacion.pid = pcb->pid;
+        primer_hilo_planificacion.tcb_asociado = tcb;
+        primer_hilo_planificacion.estado = NEW_STATE;
+
+    
+        list_add(pcb->tids,primer_hilo_asociado->tcb_asociado->tid);
+
+        poner_en_new(primer_hilo_asociado);
 
         peticion_iniciar_proceso(pcb,primer_hilo_asociado);
         
@@ -279,6 +311,9 @@ int main(int argc, char* argv[]) {
 
 
     // --------------------- Creacion de hilo----------------------
+    aplicar_tid(){
+        //TODO
+    }
 
     void* peticion_crear_hilo(void){
 
@@ -305,34 +340,11 @@ int main(int argc, char* argv[]) {
         //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
         char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
 
-        if(respuesta_memoria == "ESPACIO_ASIGNADO"){
-            /*TODO la funcion aplicar_tid*/
-            tcb.tid = aplicar_tid();
-            /*PONGO EN READY AL HILO SEGUN SU NIVEL DE PRIORIDAD */
-            if(prioridad_hilo == 0){
-            
-            }else if(prioridad_hilo == 1){
-                
-            }else if(prioridad_hilo == 2){
-            
-            }else if(prioridad_hilo == 3){
-            
-            }else if(prioridad_hilo == 4){
-            
-            }else if(prioridad_hilo == 5){
-            
-            }else if(prioridad_hilo == 6){
-            
-            }else if(prioridad_hilo == 7){
-            
-            }else{
-                log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
-            }
-
-        }else if(respuesta_memoria == "ESPACIO_NO_ASIGNADO"){
-            pcb= queue_pop(cola_new_procesos);
-            poner_en_new_procesos(pcb);
-        }
+        
+        /*TODO la funcion aplicar_tid*/
+        tcb.tid  = aplicar_tid();
+        poner_en_ready_segun_prioridad(tcb);
+        
     
     }
 
