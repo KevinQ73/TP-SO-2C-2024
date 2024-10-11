@@ -24,7 +24,10 @@
     t_queue* cola_new_procesos;
     t_queue* cola_ready;
     t_queue* cola_ready_procesos;
+    t_queue* cola_ready_fifo;
     t_queue* cola_blocked;
+    t_queue* cola_execute;
+    t_queue* cola_exit;
     t_queue* cola_prioridad_maxima;
     t_queue* cola_prioridad_1;
     t_queue* cola_prioridad_2;

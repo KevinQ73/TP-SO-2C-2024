@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
     inicializar_colas();
     t_list* proceso_creados = list_create();
-
+    t_list* hilos_en_espera = list_create();
     // --------------------- Conexión como cliente de CPU ----------------------
 
     fd_conexion_dispatch = crear_conexion(kernel_log, kernel_registro.ip_cpu, kernel_registro.puerto_cpu_dispatch);
@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
 
     log_debug(kernel_log, "TERMINANDO KERNEL");
     eliminar_logger(kernel_log);
+    //TODO
     eliminar_listas();
     //LIBERAR COLAS Y ELEMENTOS QUE CONTIENE
 }
@@ -79,58 +80,44 @@ int main(int argc, char* argv[]) {
         cola_ready = queue_create();
         cola_ready_procesos = queue_create();
         cola_blocked = queue_create();
+        cola_execute= queue_create();
         cola_exit = queue_create();
 
-        cola_prioridad_maxima= queue_create();
-        cola_prioridad_1 = queue_create();
-        cola_prioridad_2 = queue_create();
-        cola_prioridad_3 = queue_create();
-        cola_prioridad_4 = queue_create();
-        cola_prioridad_5 = queue_create();
-        cola_prioridad_6 = queue_create();
-        cola_prioridad_7 = queue_create();
+        
 
         
     }
 
-    void* inicializar_pcb_en_espera(){
-        t_pcb* pcb;
-        
-        if(queue_size(cola_new) != 0){
-            pcb= queue_pop(cola_new);
-            t_paquete* paquete_proceso = crear_paquete(CREAR_PROCESO);
-
-            agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
-
-            //ENVIA EL PEDIDO A MEMORIA PARA INICIALIZAR EL PROCESO
-            enviar_paquete(paquete_proceso, conexion_memoria);
-            log_debug(kernel_log, "SE ENVIO PAQUETE");
-
-            //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
-            char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
-
-            
-            if(strcmp(respuesta_memoria, "ESPACIO_ASIGNADO")){
-
-                //list_add(pcb->pid,); FALTA TID DEL HILO ASOCIADO AL PROCESO
-                poner_en_ready(pcb);
-                
-            }else if(strcmp(respuesta_memoria, "ESPACIO_NO_ASIGNADO")){
-                pcb= queue_pop(cola_new);
-                poner_en_new(pcb);
-            }
-        }
-        
-    }
+    
     void* planificador_corto_plazo(){
             char* planificacion = kernel_registro.algoritmo_planificacion;
 
 
         if(planificacion == "FIFO"){
 
+            cola_ready_fifo= queue_create();
+
         }else if(planificacion == "PRIORIDADES"){
 
+            cola_prioridad_maxima= queue_create();
+            cola_prioridad_1 = queue_create();
+            cola_prioridad_2 = queue_create();
+            cola_prioridad_3 = queue_create();
+            cola_prioridad_4 = queue_create();
+            cola_prioridad_5 = queue_create();
+            cola_prioridad_6 = queue_create();
+            cola_prioridad_7 = queue_create();
+
+
         }else if(planificacion == "COLAS_MULTINIVEL"){
+            cola_prioridad_maxima= queue_create();
+            cola_prioridad_1 = queue_create();
+            cola_prioridad_2 = queue_create();
+            cola_prioridad_3 = queue_create();
+            cola_prioridad_4 = queue_create();
+            cola_prioridad_5 = queue_create();
+            cola_prioridad_6 = queue_create();
+            cola_prioridad_7 = queue_create();
 
         }else{
             log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
@@ -162,11 +149,18 @@ int main(int argc, char* argv[]) {
         queue_push(cola_new_procesos,(void*)pcb);
     }
 
-/*No se si es con * o sin en t_hilo_planificacion*/
+/*TODO No se si es con * o sin en t_hilo_planificacion*/
     void* poner_en_ready_segun_prioridad(t_hilo_planificacion* hilo_del_proceso;){
        
         
         /*PONGO EN READY AL HILO SEGUN SU NIVEL DE PRIORIDAD */
+
+
+        if(planificacion == "FIFO"){
+            queue_pop(cola_new);
+            queue_push(cola_ready, hilo_del_proceso);
+
+        }else if(planificacion == "PRIORIDADES"){
             if(prioridad_hilo == 0){
                 queue_push(cola_prioridad_maxima, hilo_del_proceso);
             }else if(prioridad_hilo == 1){
@@ -190,31 +184,99 @@ int main(int argc, char* argv[]) {
             }else if(prioridad_hilo == 7){
                 queue_push(cola_prioridad_7,hilo_del_proceso);
                 
-            }else{
-                log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
+            }
+            
+
+
+        }else if(planificacion == "COLAS_MULTINIVEL"){
+
+            if(prioridad_hilo == 0){
+                queue_push(cola_prioridad_maxima, hilo_del_proceso);
+            }else if(prioridad_hilo == 1){
+                queue_push(cola_prioridad_1, hilo_del_proceso);
+                
+            }else if(prioridad_hilo == 2){
+                queue_push(cola_prioridad_2, hilo_del_proceso);
+                
+            }else if(prioridad_hilo == 3){
+                queue_push(cola_prioridad_3, hilo_del_proceso);
+                
+            }else if(prioridad_hilo == 4){
+                queue_push(cola_prioridad_4, hilo_del_proceso);
+                
+            }else if(prioridad_hilo == 5){
+                queue_push(cola_prioridad_5, hilo_del_proceso);
+                
+            }else if(prioridad_hilo == 6){
+                queue_push(cola_prioridad_6,hilo_del_proceso);
+                
+            }else if(prioridad_hilo == 7){
+                queue_push(cola_prioridad_7,hilo_del_proceso);
+                
             }
 
-
-
-
-
+        }
+        
     }
 
     void poner_en_ready_procesos(){
         int size_cola_new = queue_size(cola_new);
         t_pcb* pcb;
         pcb = queue_pop(cola_new_procesos);
-        list_add(proceso_creados,pcb);
+        
         pcb->estado = READY_STATE;
+
         list_add(proceso_creados,pcb);
         
     }
 
     // --------------------- Creacion de procesos ----------------------
+    t_hilo_planificacion* find_by_pid(t_list* hilos_en_espera, unit_32* pid) {
 
+        bool hilo_pid(void* ptr) {
+            t_hilo_planificacion* hilo = (t_hilo_planificacion*) ptr;
+            return compare_pid(hilo->pid, pid);
+        }
+        //TODO por que no encuetra la funcion ?
+        return list_find(hilos_en_espera,pid);
+    }
 
     
+    void* inicializar_pcb_en_espera(){
+        t_pcb* pcb;
+        
+            
+            if(queue_size(cola_new_procesos) != 0){
+                pcb= queue_pop(cola_new_procesos);
+                
+              
+                t_paquete* paquete_proceso = crear_paquete(CREAR_PROCESO);
 
+                agregar_a_paquete(paquete_proceso, &pcb->pid, sizeof(uint32_t));
+
+                //ENVIA EL PEDIDO A MEMORIA PARA INICIALIZAR EL PROCESO
+                enviar_paquete(paquete_proceso, conexion_memoria);
+                log_debug(kernel_log, "SE ENVIO PAQUETE");
+
+                //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+                char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
+
+                
+                if(strcmp(respuesta_memoria, "ESPACIO_ASIGNADO")){
+
+                    
+                   t_hilo_planificacion* hilo_encontrado = find_by_pid(hilos_en_espera,pcb->pid);
+                    bool removed = list_remove_element(hilos_en_espera, hilo_encontrado);
+                    poner_en_ready_procesos(pcb);
+                    poner_en_ready_segun_prioridad(hilo_encontrado);
+                    
+                }else if(strcmp(respuesta_memoria, "ESPACIO_NO_ASIGNADO")){
+                    pcb= queue_pop(cola_new);
+                    poner_en_new(pcb);
+                }
+            }
+            
+    }
     
 
     void* peticion_crear_proceso(){
@@ -232,21 +294,23 @@ int main(int argc, char* argv[]) {
         log_debug(kernel_log,"PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
 
         t_tcb tcb= create_tcb();
-
         tcb.tid= aplicar_tid();
         tcb.prioridad= prioridad_proceso;
-        /*DONDE LO LIBERO EL TCB?*/
+        /*TODO DONDE LO LIBERO EL TCB?*/
 
-        t_hilo_planificacion primer_hilo_planificacion;
+        /*TODO esta bien inicializado?*/
+        t_hilo_planificacion* primer_hilo_planificacion;
+        
 
-        primer_hilo_planificacion.pid = pcb->pid;
-        primer_hilo_planificacion.tcb_asociado = tcb;
-        primer_hilo_planificacion.estado = NEW_STATE;
+
+        primer_hilo_planificacion->pid = pcb->pid;
+        primer_hilo_planificacion->tcb_asociado = tcb;
+        primer_hilo_planificacion->estado = NEW_STATE;
 
     
         list_add(pcb->tids,primer_hilo_asociado->tcb_asociado->tid);
 
-        poner_en_new(primer_hilo_asociado);
+        
 
         peticion_iniciar_proceso(pcb,primer_hilo_asociado);
         
@@ -265,14 +329,17 @@ int main(int argc, char* argv[]) {
         //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
         char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
 
-        if(respuesta_memoria == "ESPACIO_ASIGNADO"){
+        
+
+        if(strcmp(respuesta_memoria, "ESPACIO_ASIGNADO")){
           
             poner_en_ready_procesos(pcb);
             poner_en_ready_segun_prioridad(primer_hilo_asociado);
 
-        }else if(respuesta_memoria == "ESPACIO_NO_ASIGNADO"){
+        }else if(strcmp(respuesta_memoria, "ESPACIO_NO_ASIGNADO")){
             pcb= queue_pop(cola_new_procesos);
             poner_en_new_procesos(pcb);
+            list_add(hilos_en_espera,primer_hilo_asociado);
         }
     
 
@@ -297,7 +364,7 @@ int main(int argc, char* argv[]) {
         if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
 
             free(pcb);
-            //FALTA LIBERAR HILOS DE ESE PCB??
+            //TODO FALTA LIBERAR HILOS DE ESE PCB??
             log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
             inicializar_pcb_en_espera();
 
