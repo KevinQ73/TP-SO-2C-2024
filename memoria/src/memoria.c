@@ -28,6 +28,7 @@ int main(int argc, char* argv[]) {
     log_debug(memoria_log, "Esperando KERNEL...");
     fd_conexion_kernel = esperar_cliente(memoria_log, "KERNEL", fd_conexiones);
 
+    //iniciar multihilos
     //FINALIZACION DEL MODULO
 
     log_debug(memoria_log, "TERMINANDO MEMORIA");
@@ -35,5 +36,27 @@ int main(int argc, char* argv[]) {
     //terminar_modulo(conexion_kernel, memoria_log, memoria_config);
     //terminar_modulo(conexion_filesystem, memoria_log, memoria_config);
 
+}
+void atender_kernel(){
+    // recibir paquete de kernel
+    t_paquete* paquete = recibir_paquete(fd_conexion_kernel);
+    int op = recibir_operacion(fd_conexion_kernel);
 
+    if(op == CREAR_PROCESO){
+        pthread_create(hiloCrearProceso,NULL,crear_proceso(),NULL);
+        pthread_detach(hiloCrearProceso);
+    }
+    else if(op == FINALIZAR_PROCESO){
+        pthread_create(hiloFinalizarProceso,NULL,finalizar_proceso(),NULL);
+        pthread_detach(hiloFinalizarProceso);
+    }  
+}
+// PETICION 1: recibo pid para inicializar el pcb
+// PETICION 2: recibo pid para crear el proceso
+void* crear_proceso(){
+    enviar_mensaje("ESPACIO_ASIGNADO", fd_conexion_kernel, memoria_log);
+}
+// PETICION 3: recibo pid para finalizar el proceso
+void* finalizar_proceso(){
+    enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
 }

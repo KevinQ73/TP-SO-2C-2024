@@ -11,5 +11,11 @@
     int conexion_filesystem;
     int fd_conexion_cpu;
     int fd_conexion_kernel;
+    
+    pthread_t hiloCrearProceso;
+    pthread_t hiloFinalizarProceso;
+    void atender_kernel();
+    void* crear_proceso();
+    void* finalizar_proceso();
 
 #endif /* MEMORIA_SRC_MEMORIA_H_ */
