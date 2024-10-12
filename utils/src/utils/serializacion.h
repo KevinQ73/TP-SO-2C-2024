@@ -27,6 +27,7 @@
         INTERRUPCION_QUANTUM,
         INTERRUPCION_USUARIO,
         ENVIO_TID,
+        EJECUTAR_HILO,
     } cod_inst;
 
     typedef enum{

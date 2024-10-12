@@ -18,15 +18,6 @@ t_kernel levantar_datos(t_config* config){
     return datos_config;
 }
 
-void iniciar_semaforos(){
-    pthread_mutex_init(&mutex_siguiente_id, NULL);
-    pthread_mutex_init(&mutex_cola_new, NULL);
-    pthread_mutex_init(&mutex_uso_fd_memoria, NULL);
-    pthread_mutex_init(&mutex_cola_ready, NULL);
-    pthread_mutex_init(&mutex_lista_procesos_ready, NULL);
-
-    sem_init(&contador_procesos_en_new, 0, 0);
-}
 
 /*----------------------- FUNCIONES CREATE DE STRUCTS -----------------------*/
 
@@ -68,59 +59,6 @@ t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_asociado, t_tcb* tcb_
 
 /*----------------------- FUNCIONES DE PLANIFICACIÓN ------------------------*/
 
-void poner_en_new(t_pcb* pcb){
-    pthread_mutex_lock(&mutex_cola_new);
-    queue_push(cola_new, pcb);
-    pthread_mutex_unlock(&mutex_cola_new);
-    sem_post(&contador_procesos_en_new);
-}
-
-/*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
-
-char* avisar_creacion_proceso_memoria(char* path, int size_process, int prioridad, t_log* kernel_log){
-    uint32_t largo_string = 0;
-    t_buffer* buffer;
-    int length = strlen(path) + 1;
-    t_paquete* paquete = crear_paquete(CREAR_PROCESO);
-    t_buffer* buffer = buffer_create(
-        length + sizeof(int) + sizeof(int)
-    );
-
-    buffer_add_string(buffer, length, path, kernel_log);
-    buffer_add_uint32(buffer, (uint32_t)size_process, kernel_log);
-    buffer_add_uint32(buffer, (uint32_t)prioridad, kernel_log);
-
-    paquete->buffer = buffer;
-
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
-    enviar_paquete(paquete, conexion_memoria);
-    char* response_memoria = recibir_mensaje(conexion_memoria, kernel_log);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
-
-    return response_memoria;
-}
-
-char* avisar_creacion_hilo_memoria(char* path, int prioridad, t_log* kernel_log){
-    uint32_t largo_string = 0;
-    t_buffer* buffer;
-    int length = strlen(path) + 1;
-    t_paquete* paquete = crear_paquete(CREAR_HILO);
-    t_buffer* buffer = buffer_create(
-        length + sizeof(int)
-    );
-
-    buffer_add_string(buffer, length, path, kernel_log);
-    buffer_add_uint32(buffer, (uint32_t)prioridad, kernel_log);
-
-    paquete->buffer = buffer;
-
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
-    enviar_paquete(paquete, conexion_memoria);
-    char* response_memoria = recibir_mensaje(conexion_memoria, kernel_log);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
-
-    return response_memoria;
-}
 
 /*------------------------------ MISCELANEO --------------------------------*/
 

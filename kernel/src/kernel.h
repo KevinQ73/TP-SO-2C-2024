@@ -14,7 +14,7 @@
     int proceso_ejecutando;
 
     t_pcb* primer_proceso;
-
+    
 	char* ip_cpu;
 	char* ip_memoria;
 
@@ -22,9 +22,21 @@
 	char* puerto_cpu_dispatch;
     char* puerto_cpu_interrupt;
 
-    t_list* proceso_creados;
+    t_list* procesos_creados;
     t_list* hilo_exec;
     t_list* hilos_block;
+
+    pthread_t hiloNew;
+    pthread_t hiloPlanifCortoPlazo;
+
+    pthread_mutex_t mutex_siguiente_id;
+    pthread_mutex_t mutex_cola_new;
+    pthread_mutex_t mutex_cola_ready;
+    pthread_mutex_t mutex_uso_fd_memoria;
+    pthread_mutex_t mutex_lista_procesos_ready;
+
+    sem_t contador_procesos_en_new;
+    sem_t aviso_exit_proceso;
 
     t_queue* cola_new;
     t_queue* cola_new_procesos;
@@ -43,15 +55,10 @@
     t_queue* cola_prioridad_6;
     t_queue* cola_prioridad_7;
 
-    pthread_t hiloNew;
-    pthread_t hiloPlanifCortoPlazo;
-
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 
-    void iniciar_primer_proceso();
+    void iniciar_primer_proceso(char* path, char* size);
     
-    void iniciar_colas();
-
     void iniciar_planificacion();
 
     // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
@@ -60,9 +67,13 @@
 
     void* planificador_corto_plazo();
 
+    void poner_en_new(t_pcb* pcb);
+
     void eliminar_listas();
 
     void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso);
+
+    t_pcb* obtener_pcb_from_hilo(t_hilo_planificacion* hilo);
     // --------------------- Creacion de procesos ----------------------
 
     void poner_en_ready_procesos();
@@ -81,21 +92,27 @@
 
     void* peticion_crear_hilo(void);
 
-    void* finalizar_hilo(t_tcb* tcb);
+    void* finalizar_hilo(t_hilo_planificacion* hilo);
 
     void* syscalls_a_atender();
 
     void* mover_a_block(void);
 
-    void syscall_thread_join();
+    void* syscall_thread_join();
 //-----------------------------FUNCIONES DE EJECUCUION---------------------------------------
     void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar);
     void* esperar_tid_cpu(void);
     void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar);
 
+    /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
+
+    char* avisar_creacion_proceso_memoria(char* path, int* size_process, int* prioridad, int socket_memoria, t_log* kernel_log);
+
+    char* avisar_creacion_hilo_memoria(char* path, int* prioridad, int socket_memoria, t_log* kernel_log);
+
 //---------------------------FUNCIONES DE FINALIZACION--------------------------------------
 
-    void t_hilo_planificacion_destroy(void* ptr);
+    void t_hilo_planificacion_destroy(t_hilo_planificacion* hilo);
     void pcb_destroy(t_pcb* pcb);
     void eliminar_listas();
     void eliminar_colas();
