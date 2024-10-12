@@ -13,6 +13,8 @@
     int fd_conexion_interrupt;
     int proceso_ejecutando;
 
+    t_pcb* primer_proceso;
+
 	char* ip_cpu;
 	char* ip_memoria;
 
@@ -22,6 +24,7 @@
 
     t_list* proceso_creados;
     t_list* hilo_exec;
+    t_list* hilos_block;
 
     t_queue* cola_new;
     t_queue* cola_new_procesos;
@@ -40,23 +43,18 @@
     t_queue* cola_prioridad_6;
     t_queue* cola_prioridad_7;
 
-
-
     pthread_t hiloNew;
     pthread_t hiloPlanifCortoPlazo;
-    // ----------------------- FUNCIONES DE INICIO ------------------------
-    /**
-    * @fn    levantar_datos
-    * @brief Levanta los datos desde el config a el registro propio del módulo.
-    * 
-    * @return        Retorna una instancia de registro t_kernel
-    */
-    
-    void inicializar_colas();
 
-    // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
+    /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
+
+    void iniciar_primer_proceso();
+    
+    void iniciar_colas();
 
     void iniciar_planificacion();
+
+    // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
 
     void* planificador_largo_plazo();
 
@@ -64,24 +62,42 @@
 
     void eliminar_listas();
 
-    void* poner_en_ready_segun_prioridad(int prioridad_hilo, t_hilo_planificacion* hilo_del_proceso);
+    void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso);
     // --------------------- Creacion de procesos ----------------------
 
     void poner_en_ready_procesos();
 
     void* inicializar_pcb_en_espera();
 
-    void* peticion_crear_proceso();
+    void reintentar_inicializar_pcb_en_espera(t_pcb* pcb);
+
+    void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante);
 
     void* peticion_iniciar_proceso(t_pcb* pcb, t_hilo_planificacion* primer_hilo_asociado);
 
     void* peticion_finalizar_proceso(t_pcb* pcb);
 
-    int aplicar_tid();
+    int aplicar_tid(t_pcb* pcb);
 
     void* peticion_crear_hilo(void);
 
     void* finalizar_hilo(t_tcb* tcb);
 
     void* syscalls_a_atender();
+
+    void* mover_a_block(void);
+
+    void syscall_thread_join();
+//-----------------------------FUNCIONES DE EJECUCUION---------------------------------------
+    void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar);
+    void* esperar_tid_cpu(void);
+    void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar);
+
+//---------------------------FUNCIONES DE FINALIZACION--------------------------------------
+
+    void t_hilo_planificacion_destroy(void* ptr);
+    void pcb_destroy(t_pcb* pcb);
+    void eliminar_listas();
+    void eliminar_colas();
+    
 #endif /* KERNEL_H_ */

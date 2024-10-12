@@ -83,10 +83,13 @@
 
     typedef struct{
         uint32_t pid;
+        uint32_t tidSig;
         t_list* tids;
         t_list* mutex_asociados;
         uint32_t program_counter;
         estado_proceso estado;
+        char* path_instrucciones_hilo_main;
+        int size_process;
     } t_pcb;
 
     typedef struct{
