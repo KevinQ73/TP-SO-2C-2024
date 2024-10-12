@@ -12,6 +12,7 @@
     #include <commons/collections/queue.h>
     #include <commons/string.h>
     #include <readline/readline.h>
+	#include "../../utils/src/utils/serializacion.h"
 
     typedef struct{
         char* puerto_escucha;

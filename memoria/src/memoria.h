@@ -12,6 +12,11 @@
     int fd_conexion_cpu;
     int fd_conexion_kernel;
     
+    pthread_t hiloMemoriaCpu;
+    void atender_cpu();
+    void enviar_contexto_solicitado(t_dictionary* registro_solicitado);
+    char* obtenerInstruccion(char* pathInstrucciones, uint32_t program_counter);
+
     pthread_t hiloCrearProceso;
     pthread_t hiloFinalizarProceso;
     void atender_kernel();
