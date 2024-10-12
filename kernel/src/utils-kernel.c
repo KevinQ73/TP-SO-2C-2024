@@ -34,9 +34,8 @@ t_tcb* create_tcb(){
     t_tcb* tcb = malloc(sizeof(t_tcb));
     char* archivo = string_new();
 
-    tcb->tid = 0; // Crear función incremental
-    tcb->prioridad = PRORIDAD_7;
-    tcb->archivo_asociado = archivo;
+    tcb->tid = aplicar_tid(); // Crear función incremental
+    tcb->prioridad = PRIORIDAD_MAXIMA;
 
     return tcb;
 }

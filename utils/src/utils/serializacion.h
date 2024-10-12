@@ -92,7 +92,6 @@
     typedef struct{
         uint32_t tid;
         orden_prioridad prioridad;
-        char* archivo_asociado; 
     } t_tcb;
 
     typedef struct{
@@ -104,6 +103,7 @@
         uint32_t pid;
         t_tcb* tcb_asociado;
         estado_proceso estado;
+        t_list* lista_hilos_block;
     } t_hilo_planificacion;
     
     extern char* nombres_registros[11];

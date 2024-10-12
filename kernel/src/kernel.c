@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
     inicializar_colas();
     proceso_creados = list_create();
-
+    hilo_exec = list_create();
     // --------------------- Conexión como cliente de CPU ----------------------
 
     fd_conexion_dispatch = crear_conexion(kernel_log, kernel_registro.ip_cpu, kernel_registro.puerto_cpu_dispatch);
@@ -42,6 +42,8 @@ int main(int argc, char* argv[]) {
     eliminar_listas();
     //LIBERAR COLAS Y ELEMENTOS QUE CONTIENE
 }
+
+
 
 // ------------------------- CREAR LISTAS -------------------------
 
@@ -123,6 +125,7 @@ void* inicializar_pcb_en_espera(){
         }else if(strcmp(respuesta_memoria, "ESPACIO_NO_ASIGNADO")){
             //Ver que hace
             log_debug(kernel_log, "ESPACIO_NO_ASIGNADO");
+            //Deberia ponerlo al final de la cola de new 
         }
     }
 }
@@ -130,7 +133,31 @@ void* inicializar_pcb_en_espera(){
 
 void* poner_en_ready_segun_prioridad(int prioridad_hilo, t_hilo_planificacion* hilo_del_proceso){ 
     /*PONGO EN READY AL HILO SEGUN SU NIVEL DE PRIORIDAD */
-    if(prioridad_hilo == 0){
+   if(strcmp(planificacion, "FIFO")){
+        queue_push(cola_prioridad_maxima, hilo_del_proceso);
+    }else if(strcmp(planificacion, "PRIORIDADES")){
+       if(prioridad_hilo == 0){
+        queue_push(cola_prioridad_maxima, hilo_del_proceso);
+        
+    }else if(prioridad_hilo == 1){
+        queue_push(cola_prioridad_1, hilo_del_proceso);
+    }else if(prioridad_hilo == 2){
+        queue_push(cola_prioridad_2, hilo_del_proceso);
+    }else if(prioridad_hilo == 3){
+        queue_push(cola_prioridad_3, hilo_del_proceso);
+    }else if(prioridad_hilo == 4){
+        queue_push(cola_prioridad_4, hilo_del_proceso);
+    }else if(prioridad_hilo == 5){
+        queue_push(cola_prioridad_5, hilo_del_proceso);
+    }else if(prioridad_hilo == 6){
+        queue_push(cola_prioridad_6,hilo_del_proceso);
+    }else if(prioridad_hilo == 7){
+        queue_push(cola_prioridad_7,hilo_del_proceso);
+    }else{
+        log_error(kernel_log,"NO SE RECONOCE LA prioridad");
+    }
+    }else if(strcmp(planificacion, "COLAS_MULTINIVEL")){
+       if(prioridad_hilo == 0){
         queue_push(cola_prioridad_maxima, hilo_del_proceso);
     }else if(prioridad_hilo == 1){
         queue_push(cola_prioridad_1, hilo_del_proceso);
@@ -149,6 +176,12 @@ void* poner_en_ready_segun_prioridad(int prioridad_hilo, t_hilo_planificacion* h
     }else{
         log_error(kernel_log,"NO SE RECONOCE LA prioridad");
     }
+    }else{
+        log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
+    }
+
+
+    
 }
 
 void poner_en_ready_procesos(){
@@ -178,8 +211,6 @@ void* peticion_crear_proceso(){
 
     t_tcb* tcb= create_tcb();
 
-    tcb->tid = aplicar_tid();
-    tcb->prioridad = prioridad_proceso;
     /*DONDE LO LIBERO EL TCB?*/
 
     t_hilo_planificacion* primer_hilo_planificacion;
@@ -253,54 +284,92 @@ int aplicar_tid(){
 void* peticion_crear_hilo(){
     uint32_t largo_string = 0;
     t_buffer* buffer;
-    buffer = buffer_recieve( fd_conexion_dispatch );
+    buffer = buffer_recieve(fd_conexion_dispatch);
+    
     char* path = buffer_read_string(buffer, &largo_string);
-
     int prioridad_hilo = buffer_read_uint32(buffer);
-    unit32_t lenght = strlen(path) + 1;
-    t_paquete* paquete= crear_paquete(CREAR_HILO);
-    t_buffer* buffer_envio = buffer_create(sizeof(uint32_t) + length);
-    buffer_add_string(buffer_envio,lenght,path,kernel_log);
+    
+    unit32_t length = strlen(path) + 1;
+
+    t_paquete* paquete = crear_paquete(CREAR_HILO);
+    t_buffer* buffer_envio = buffer_create(
+        length
+        );
+    buffer_add_string(buffer_envio, length, path, kernel_log);
+
     paquete->buffer = buffer_envio;
-    enviar_paquete(paquete,fd_conexion_interrupt );
+
+    enviar_paquete(paquete,conexion_memoria);
     log_debug(kernel_log, "SE ENVIO PAQUETE");
     eliminar_paquete(paquete);
+    
     t_tcb* tcb = create_tcb();
     //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
     char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
 
-    /*TODO la funcion aplicar_tid*/
-    tcb->tid = aplicar_tid();
-    poner_en_ready_segun_prioridad(tcb->prioridad, tcb);
+    if (strcmp(respuesta_memoria, "OK"))
+    {
+        poner_en_ready_segun_prioridad(tcb->prioridad, tcb);
+    } else {
+        log_debug(kernel_log, "Rompimos algo con peticion crear hilo");
+    }
 }
 
 // --------------------- Finalizacion de hilo ----------------------
 
-void* finalizar_hilo(int tid){
+void* finalizar_hilo(t_hilo_planificacion* hilo){
     t_paquete* paquete_fin_hilo = crear_paquete(FINALIZAR_HILO);
-    agregar_a_paquete(paquete_fin_hilo, &tid, sizeof(uint32_t));
 
+    t_buffer* buffer = buffer_create(
+        2* sizeof(uint32_t);
+    );
+    buffer_add_uint32(buffer, hilo->pid);
+    buffer_add_uint32(buffer, hilo->tcb_asociado->tid);
+
+    paquete_fin_hilo->buffer = buffer;
     //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
     enviar_paquete(paquete_fin_hilo, conexion_memoria);
-    log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE PROCESO");
+    log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE HILO PID: %d TID: %d", hilo->pid, hilo->tcb_asociado->tid);
 
+    eliminar_paquete(paquete_fin_hilo);
     //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
     char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
 
-    if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
-        //TODO ver como buscar segun que planificacion sea
-        /*
-        if(planificacion == "FIFO"){
-
-        }else if(planificacion == "PRIORIDADES"){
-
-        }else if(planificacion == "COLAS_MULTINIVEL"){
-
-        }
-
-        }else if(respuesta_memoria == "FINALIZACION_RECHAZADA"){
-        */ 
+    if (strcmp(respuesta_memoria, "OK"))
+    {
+        liberar_hilos_bloqueados(hilo);
+        free(hilo); //Hacer un hilo_destroy
+        free(respuesta_memoria);
+        buffer_destroy(buffer);
+    } else {
+        log_debug(kernel_log, "Rompimos algo con finalizar hilo");
     }
+}
+
+void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
+    for (int i = 0; i < list_size(hilo->lista_hilos_block); i++)
+    {
+        int get_thread_by_id(t_tcb* tcb){
+            return tcb->tid == hilo->tcb_asociado->tid;
+        }
+        t_hilo_planificacion* hilo_obtenido = (hilo->lista_hilos_block, void*get_thread_by_id);
+        poner_en_ready_segun_prioridad(hilo_obtenido->tcb_asociado->prioridad, hilo);
+    }
+}
+
+//-----------------------------THREAD_JOIN----------------------------------
+void* thread_join(){
+    uint32_t largo_string = 0;
+    t_buffer* buffer;
+    buffer = buffer_recieve(fd_conexion_dispatch);
+    uint32_t tid = buffer_read_uint32(buffer);
+    t_hilo_planificacion* hilo_a_bloquear = list_get(lista_exec,0);
+    list_add(hilo_a_bloquear->lista_hilos_block, tid);
+
+    hilo_a_bloquear->estado = BLOCKED_STATE;
+    //TODO: hacer mover_a_block(hilo_a_bloquear) se va a meter en una lista de bloqueados 
+    mover_a_block(hilo_a_bloquear);
+    buffer_destroy(buffer);
 }
 
 // --------------------- Syscalls a atender  ----------------------
@@ -326,7 +395,7 @@ void* syscalls_a_atender(){
         break;
 
     case THREAD_JOIN:
-            
+            thread_join();
         break;
 
     case THREAD_CANCEL:

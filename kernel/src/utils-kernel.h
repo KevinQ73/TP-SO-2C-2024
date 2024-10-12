@@ -30,8 +30,6 @@
 
     t_tcb* create_tcb();
 
-    void poner_en_ready();
-
     void poner_en_new(t_queue* cola_planificador, t_hilo_planificacion* hilo_del_proceso);
 
     void poner_en_new_procesos(t_queue* cola_planificador, t_pcb* pcb);

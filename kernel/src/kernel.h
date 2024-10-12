@@ -21,6 +21,7 @@
     char* puerto_cpu_interrupt;
 
     t_list* proceso_creados;
+    t_list* hilo_exec;
 
     t_queue* cola_new;
     t_queue* cola_new_procesos;
@@ -80,7 +81,7 @@
 
     void* peticion_crear_hilo(void);
 
-    void* finalizar_hilo(int tid);
+    void* finalizar_hilo(t_tcb* tcb);
 
     void* syscalls_a_atender();
 #endif /* KERNEL_H_ */
