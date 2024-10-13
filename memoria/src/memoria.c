@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
     fd_conexion_kernel = esperar_cliente(memoria_log, "KERNEL", fd_conexiones);
 
     //iniciar multihilos
+    atender_kernel();
     pthread_create(&hiloMemoriaCpu, NULL, (void *)atender_cpu, NULL);
     pthread_detach(hiloMemoriaCpu);
     //FINALIZACION DEL MODULO
