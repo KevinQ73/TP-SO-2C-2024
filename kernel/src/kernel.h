@@ -57,11 +57,17 @@
 
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 
+    void iniciar_semaforos();
+
+    void iniciar_colas();
+
     void iniciar_primer_proceso(char* path, char* size);
     
     void iniciar_planificacion();
 
-    // -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
+    /*------------------------ FUNCIONES DE PLANIFICACIÓN -----------------------*/
+
+    int aplicar_tid(t_pcb* pcb);
 
     void* planificador_largo_plazo();
 
@@ -69,40 +75,25 @@
 
     void poner_en_new(t_pcb* pcb);
 
-    void eliminar_listas();
-
-    void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso);
-
-    t_pcb* obtener_pcb_from_hilo(t_hilo_planificacion* hilo);
-    // --------------------- Creacion de procesos ----------------------
-
-    void poner_en_ready_procesos();
-
     void* inicializar_pcb_en_espera();
 
     void reintentar_inicializar_pcb_en_espera(t_pcb* pcb);
 
-    void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante);
+    void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso);
 
-    void* peticion_iniciar_proceso(t_pcb* pcb, t_hilo_planificacion* primer_hilo_asociado);
+    void poner_en_ready_procesos();
 
-    void* peticion_finalizar_proceso(t_pcb* pcb);
+    void* poner_en_block();
 
-    int aplicar_tid(t_pcb* pcb);
+    /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
-    void* peticion_crear_hilo(void);
-
-    void* finalizar_hilo(t_hilo_planificacion* hilo);
-
-    void* syscalls_a_atender();
-
-    void* mover_a_block(void);
-
-    void* syscall_thread_join();
-//-----------------------------FUNCIONES DE EJECUCUION---------------------------------------
     void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar);
-    void* esperar_tid_cpu(void);
+
+    void* esperar_tid_cpu();
+
     void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar);
+
+    void liberar_hilos_bloqueados(t_hilo_planificacion* hilo);
 
     /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
 
@@ -110,11 +101,34 @@
 
     char* avisar_creacion_hilo_memoria(char* path, int* prioridad, int socket_memoria, t_log* kernel_log);
 
-//---------------------------FUNCIONES DE FINALIZACION--------------------------------------
+    /*--------------------------------- SYSCALLS --------------------------------*/
+
+    void* syscalls_a_atender();
+
+    void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante);
+
+    void* syscall_process_exit(t_pcb* pcb);
+
+    void* syscall_thread_create();
+
+    void* syscall_thread_join();
+
+    void* syscall_thread_exit(t_hilo_planificacion* hilo);
+
+    /*--------------------------- FINALIZACIÓN DE TADS --------------------------*/
 
     void t_hilo_planificacion_destroy(t_hilo_planificacion* hilo);
+
     void pcb_destroy(t_pcb* pcb);
+
+    /*------------------------- FINALIZACIÓN DEL MODULO -------------------------*/
+
     void eliminar_listas();
+
     void eliminar_colas();
+
+    /*------------------------------- MISCELANEO --------------------------------*/
+
+    t_pcb* obtener_pcb_from_hilo(t_hilo_planificacion* hilo);
     
 #endif /* KERNEL_H_ */

@@ -26,8 +26,8 @@ int main(int argc, char* argv[]) {
     // --------------------- Inicio del modulo ----------------------
 
     iniciar_semaforos();
-    iniciar_primer_proceso(argv[1], argv[2]);
     iniciar_colas();
+    iniciar_primer_proceso(argv[1], argv[2]);
     iniciar_planificacion();
 
     procesos_creados = list_create();
@@ -113,7 +113,13 @@ void iniciar_planificacion(){
     pthread_detach(hiloPlanifCortoPlazo);
 }
 
-// -------------------- FUNCIONES DE PLANIFICACIÓN --------------------
+/*------------------------ FUNCIONES DE PLANIFICACIÓN -----------------------*/
+
+int aplicar_tid(t_pcb* pcb){
+    int valor = pcb->tidSig;
+    pcb->tidSig++;
+    return valor; //crea un tid en base al contador, aumenta dicho contador y devuelve el tid correspondiente
+}
 
 void* planificador_largo_plazo(){
     while (1)
@@ -248,134 +254,11 @@ void poner_en_ready_procesos(t_pcb* pcb){
     pthread_mutex_unlock(&mutex_lista_procesos_ready);
 }
 
-// --------------------- Creacion de procesos ----------------------
-
-void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante){
-    uint32_t largo_string = 0;
-    t_buffer* buffer;
-    buffer = buffer_recieve(fd_conexion_dispatch);
-
-    char* path = buffer_read_string(buffer, &largo_string);
-    uint32_t tam_proceso = buffer_read_uint32(buffer);
-    int prioridad_proceso = buffer_read_uint32(buffer);
-
-    log_info(kernel_log,"(%d:%d) - Solicitó syscall: PROCESS CREATE", pid_solicitante, tid_solicitante);
-
-    t_pcb* pcb = create_pcb(path, tam_proceso);
-    t_tcb* tcb_asociado = create_tcb(pcb, prioridad_proceso);
-
-    poner_en_new(pcb);
-    log_info(kernel_log,"## PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
-}   
-        
-// --------------------- Finalizacion de procesos ----------------------
-
-void* peticion_finalizar_proceso(t_pcb* pcb){
-
-    t_paquete* paquete_fin_proceso = crear_paquete(FINALIZAR_PROCESO);
-    agregar_a_paquete(paquete_fin_proceso, &pcb->pid, sizeof(uint32_t));
-
-    //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
-    enviar_paquete(paquete_fin_proceso, conexion_memoria);
-    log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE PROCESO");
-
-    //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
-    char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
-
-    if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
-        free(pcb);
-        
-        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
-        inicializar_pcb_en_espera();
-
-    }
-}
-
-// --------------------- Creacion de hilo----------------------
-int aplicar_tid(t_pcb* pcb){
-    int valor = pcb->tidSig;
-    pcb->tidSig++;
-    return valor; //crea un tid en base al contador, aumenta dicho contador y devuelve el tid correspondiente
-}
-
-void* peticion_crear_hilo(){
-    uint32_t largo_string = 0;
-    t_buffer* buffer;
-    buffer = buffer_recieve(fd_conexion_dispatch);
-    
-    char* path = buffer_read_string(buffer, &largo_string);
-    int prioridad_hilo = buffer_read_uint32(buffer);
-    
-    uint32_t length = strlen(path) + 1;
-
-    t_paquete* paquete = crear_paquete(CREAR_HILO);
-    t_buffer* buffer_envio = buffer_create(
-        length
-        );
-    buffer_add_string(buffer_envio, length, path, kernel_log);
-
-    paquete->buffer = buffer_envio;
-
-    enviar_paquete(paquete,conexion_memoria);
-    log_debug(kernel_log, "SE ENVIO PAQUETE");
-    eliminar_paquete(paquete);
-
-    t_hilo_planificacion* hilo = list_get(hilo_exec, 0);
-    t_pcb* pcb = obtener_pcb_from_hilo(hilo);
-
-    t_tcb* tcb = create_tcb(pcb, prioridad_hilo);
-    t_hilo_planificacion* hilo_ejecutando = list_get(hilo_exec,0);
-    t_hilo_planificacion* hilo_a_crear;
-    
-    hilo_a_crear->pid = hilo_ejecutando->pid;
-    hilo_a_crear->tcb_asociado = tcb;
-    hilo_a_crear->estado = NEW_STATE;
-    hilo_a_crear->lista_hilos_block = list_create();
-
-    //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
-    char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
-
-    if (strcmp(respuesta_memoria, "OK"))
-    {
-        poner_en_ready(hilo_a_crear);
-    } else {
-        log_debug(kernel_log, "Rompimos algo con peticion crear hilo");
-    }
-}
-
-t_pcb* obtener_pcb_from_hilo(t_hilo_planificacion* hilo){
-
-}
-
-// --------------------- Finalizacion de hilo ----------------------
-
-void* finalizar_hilo(t_hilo_planificacion* hilo){
-    t_paquete* paquete_fin_hilo = crear_paquete(FINALIZAR_HILO);
-
-    t_buffer* buffer = buffer_create(
-        2* sizeof(uint32_t)
-    );
-    buffer_add_uint32(buffer, hilo->pid, kernel_log);
-    buffer_add_uint32(buffer, hilo->tcb_asociado->tid, kernel_log);
-
-    paquete_fin_hilo->buffer = buffer;
-    //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
-    enviar_paquete(paquete_fin_hilo, conexion_memoria);
-    log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE HILO PID: %d TID: %d", hilo->pid, hilo->tcb_asociado->tid);
-
-    eliminar_paquete(paquete_fin_hilo);
-    //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
-    char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
-
-    if (strcmp(respuesta_memoria, "OK"))
-    {
-        liberar_hilos_bloqueados(hilo);
-        t_hilo_planificacion_destroy(hilo);
-        free(respuesta_memoria);
-        buffer_destroy(buffer);
-    } else {
-        log_debug(kernel_log, "Rompimos algo con finalizar hilo");
-    }
+void* poner_en_block(){
+    //WAIT
+    t_hilo_planificacion* hilo_a_bloquear = list_remove(hilo_exec, 0);
+    //SIGNAL
+    list_add(hilos_block,hilo_a_bloquear);
 }
 
 void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
@@ -389,118 +272,41 @@ void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
     }
 }
 
+/*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
-//-----------------------------FUNCION EJECUCION DE HILOS----------------------------------
-    void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
-        
-        //mover_hilo_a_exec(hilo_a_ejecutar);
+void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
+    //mover_hilo_a_exec(hilo_a_ejecutar);
+    t_paquete* paquete = crear_paquete(EJECUTAR_HILO);
 
-        t_paquete* paquete = crear_paquete(EJECUTAR_HILO);
+    t_buffer* buffer_envio = buffer_create(
+        2*(sizeof(uint32_t))
+        );
 
-        t_buffer* buffer_envio = buffer_create(
-            2*(sizeof(uint32_t))
-            );
+    buffer_add_uint32(buffer_envio, hilo_a_ejecutar->pid, kernel_log);
+    buffer_add_uint32(buffer_envio, hilo_a_ejecutar->tcb_asociado->tid, kernel_log);
 
-        buffer_add_uint32(buffer_envio, hilo_a_ejecutar->pid, kernel_log);
-        buffer_add_uint32(buffer_envio, hilo_a_ejecutar->tcb_asociado->tid, kernel_log);
+    paquete->buffer = buffer_envio;
 
-        paquete->buffer = buffer_envio;
+    enviar_paquete(paquete,fd_conexion_dispatch);
+    log_debug(kernel_log, "SE ENVIO PAQUETE");
+    eliminar_paquete(paquete);
 
-        enviar_paquete(paquete,fd_conexion_dispatch);
-        log_debug(kernel_log, "SE ENVIO PAQUETE");
-        eliminar_paquete(paquete);
-
-        //SEMAFORO QUE ESPERE HASTA QUE CPU DEVUELVA EL TID
-        esperar_tid_cpu();
-
-    }
-
-    void* esperar_tid_cpu(void){
-            //TODO
-    }
-
-    void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar){
-        /*
-        PETICION_INSTRUCCION,
-        CONTEXTO_EJECUCION,
-        INTERRUPCION_QUANTUM,
-        INTERRUPCION_USUARIO,
-        */
-        //TODO
-    }
-
-
-//-----------------------------THREAD_JOIN----------------------------------
-
-void* mover_a_block(){
-    //WAIT
-    t_hilo_planificacion* hilo_a_bloquear = list_remove(hilo_exec, 0);
-    //SIGNAL
-    list_add(hilos_block,hilo_a_bloquear);
-
+    //SEMAFORO QUE ESPERE HASTA QUE CPU DEVUELVA EL TID
+    esperar_tid_cpu();
 }
 
-void* syscall_thread_join(){
-    uint32_t largo_string = 0;
-    t_buffer* buffer;
-    buffer = buffer_recieve(fd_conexion_dispatch);
-    uint32_t tid = buffer_read_uint32(buffer);
-    t_hilo_planificacion* hilo_a_bloquear = list_get(hilo_exec,0);
-    list_add(hilo_a_bloquear->lista_hilos_block, tid);
-
-    hilo_a_bloquear->estado = BLOCKED_STATE;
-    
-    
-    mover_a_block();
-    buffer_destroy(buffer);
+void* esperar_tid_cpu(){
+    //TODO
 }
 
-// --------------------- Syscalls a atender  ----------------------
-
-void* syscalls_a_atender(){
-
-/*LEER LA OP QUE TIENE EL PAQUETE QUE ENVIA CPU (recibir_op)*/
-
-    int syscall = recibir_operacion(fd_conexion_interrupt);
-    t_pid_tid pid_tid_recibido = recibir_pid_tid(fd_conexion_interrupt, kernel_log);
-
-    switch (syscall)
-    {
-    case PROCESS_CREATE:
-        syscall_process_create(pid_tid_recibido.pid, pid_tid_recibido.tid);
-        break;
-
-    case PROCESS_EXIT:
-        //peticion_finalizar_proceso();
-        break;
-
-    case THREAD_CREATE:
-        peticion_crear_hilo();
-        break;
-
-    case THREAD_JOIN:
-        syscall_thread_join();
-        break;
-
-    case THREAD_CANCEL:
-            
-        break;
-
-    case THREAD_EXIT:
-            
-        break;
-        
-    case MUTEX_UNLOCK:
-            
-        break;
-
-    case DUMP_MEMORY:
-            
-        break;
-        
-    default:
-        break;
-    }
+void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar){
+    /*
+    PETICION_INSTRUCCION,
+    CONTEXTO_EJECUCION,
+    INTERRUPCION_QUANTUM,
+    INTERRUPCION_USUARIO,
+    */
+    //TODO
 }
 
 /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
@@ -546,7 +352,180 @@ char* avisar_creacion_hilo_memoria(char* path, int* prioridad, int socket_memori
     return response_memoria;
 }
 
-//---------------------------FUNCIONES DE FINALIZACION--------------------------------------
+/*--------------------------------- SYSCALLS --------------------------------*/
+
+void* syscalls_a_atender(){
+    int syscall = recibir_operacion(fd_conexion_interrupt);
+    t_pid_tid pid_tid_recibido = recibir_pid_tid(fd_conexion_interrupt, kernel_log);
+
+    switch (syscall)
+    {
+    case PROCESS_CREATE:
+        syscall_process_create(pid_tid_recibido.pid, pid_tid_recibido.tid);
+        break;
+
+    case PROCESS_EXIT:
+        //syscall_process_exit();
+        break;
+
+    case THREAD_CREATE:
+        syscall_thread_create();
+        break;
+
+    case THREAD_JOIN:
+        syscall_thread_join();
+        break;
+
+    case THREAD_CANCEL:
+            
+        break;
+
+    case THREAD_EXIT:
+            
+        break;
+        
+    case MUTEX_UNLOCK:
+            
+        break;
+
+    case DUMP_MEMORY:
+            
+        break;
+        
+    default:
+        break;
+    }
+}
+
+void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante){
+    uint32_t largo_string = 0;
+    t_buffer* buffer;
+    buffer = buffer_recieve(fd_conexion_dispatch);
+
+    char* path = buffer_read_string(buffer, &largo_string);
+    uint32_t tam_proceso = buffer_read_uint32(buffer);
+    int prioridad_proceso = buffer_read_uint32(buffer);
+
+    log_info(kernel_log,"(%d:%d) - Solicitó syscall: PROCESS CREATE", pid_solicitante, tid_solicitante);
+
+    t_pcb* pcb = create_pcb(path, tam_proceso);
+    t_tcb* tcb_asociado = create_tcb(pcb, prioridad_proceso);
+
+    poner_en_new(pcb);
+    log_info(kernel_log,"## PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
+}   
+
+void* syscall_process_exit(t_pcb* pcb){
+
+    t_paquete* paquete_fin_proceso = crear_paquete(FINALIZAR_PROCESO);
+    agregar_a_paquete(paquete_fin_proceso, &pcb->pid, sizeof(uint32_t));
+
+    //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
+    enviar_paquete(paquete_fin_proceso, conexion_memoria);
+    log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE PROCESO");
+
+    //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+    char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
+
+    if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
+        free(pcb);
+        
+        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
+        inicializar_pcb_en_espera();
+
+    }
+}
+
+void* syscall_thread_create(){
+    uint32_t largo_string = 0;
+    t_buffer* buffer;
+    buffer = buffer_recieve(fd_conexion_dispatch);
+    
+    char* path = buffer_read_string(buffer, &largo_string);
+    int prioridad_hilo = buffer_read_uint32(buffer);
+    
+    uint32_t length = strlen(path) + 1;
+
+    t_paquete* paquete = crear_paquete(CREAR_HILO);
+    t_buffer* buffer_envio = buffer_create(
+        length
+        );
+    buffer_add_string(buffer_envio, length, path, kernel_log);
+
+    paquete->buffer = buffer_envio;
+
+    enviar_paquete(paquete,conexion_memoria);
+    log_debug(kernel_log, "SE ENVIO PAQUETE");
+    eliminar_paquete(paquete);
+
+    t_hilo_planificacion* hilo = list_get(hilo_exec, 0);
+    t_pcb* pcb = obtener_pcb_from_hilo(hilo);
+
+    t_tcb* tcb = create_tcb(pcb, prioridad_hilo);
+    t_hilo_planificacion* hilo_ejecutando = list_get(hilo_exec,0);
+    t_hilo_planificacion* hilo_a_crear;
+    
+    hilo_a_crear->pid = hilo_ejecutando->pid;
+    hilo_a_crear->tcb_asociado = tcb;
+    hilo_a_crear->estado = NEW_STATE;
+    hilo_a_crear->lista_hilos_block = list_create();
+
+    //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+    char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
+
+    if (strcmp(respuesta_memoria, "OK"))
+    {
+        poner_en_ready(hilo_a_crear);
+    } else {
+        log_debug(kernel_log, "Rompimos algo con peticion crear hilo");
+    }
+}
+
+void* syscall_thread_join(){
+    uint32_t largo_string = 0;
+    t_buffer* buffer;
+    buffer = buffer_recieve(fd_conexion_dispatch);
+    uint32_t tid = buffer_read_uint32(buffer);
+    t_hilo_planificacion* hilo_a_bloquear = list_get(hilo_exec,0);
+    list_add(hilo_a_bloquear->lista_hilos_block, tid);
+
+    hilo_a_bloquear->estado = BLOCKED_STATE;
+    
+    
+    poner_en_block();
+    buffer_destroy(buffer);
+}
+
+void* syscall_thread_exit(t_hilo_planificacion* hilo){
+    t_paquete* paquete_fin_hilo = crear_paquete(FINALIZAR_HILO);
+
+    t_buffer* buffer = buffer_create(
+        2* sizeof(uint32_t)
+    );
+    buffer_add_uint32(buffer, hilo->pid, kernel_log);
+    buffer_add_uint32(buffer, hilo->tcb_asociado->tid, kernel_log);
+
+    paquete_fin_hilo->buffer = buffer;
+    //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
+    enviar_paquete(paquete_fin_hilo, conexion_memoria);
+    log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE HILO PID: %d TID: %d", hilo->pid, hilo->tcb_asociado->tid);
+
+    eliminar_paquete(paquete_fin_hilo);
+    //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+    char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
+
+    if (strcmp(respuesta_memoria, "OK"))
+    {
+        liberar_hilos_bloqueados(hilo);
+        t_hilo_planificacion_destroy(hilo);
+        free(respuesta_memoria);
+        buffer_destroy(buffer);
+    } else {
+        log_debug(kernel_log, "Rompimos algo con finalizar hilo");
+    }
+}
+
+/*--------------------------- FINALIZACIÓN DE TADS --------------------------*/
 
 void t_hilo_planificacion_destroy(t_hilo_planificacion* hilo) {
     free(hilo->tcb_asociado);
@@ -562,6 +541,8 @@ void pcb_destroy(t_pcb* pcb){
     free(pcb->program_counter);
     free(pcb);
 }
+
+/*------------------------- FINALIZACIÓN DEL MODULO -------------------------*/
 
 void eliminar_listas(){
     /*list_clean_and_destroy_elements(hilo_exec,hilo_destroy);
@@ -583,10 +564,13 @@ void eliminar_colas(){
     queue_destroy_and_destroy_elements(cola_prioridad_5,t_hilo_planificacion_destroy);
     queue_destroy_and_destroy_elements(cola_prioridad_6,t_hilo_planificacion_destroy);
     queue_destroy_and_destroy_elements(cola_prioridad_7,t_hilo_planificacion_destroy);
-
-
     queue_destroy_and_destroy_elements(cola_new_procesos,pcb_destroy);
     queue_destroy_and_destroy_elements(cola_ready_procesos,pcb_destroy);
+}
+
+/*------------------------------- MISCELANEO --------------------------------*/
+
+t_pcb* obtener_pcb_from_hilo(t_hilo_planificacion* hilo){
 
 }
     

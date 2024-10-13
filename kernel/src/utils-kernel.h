@@ -24,9 +24,11 @@
         char* log_level;
     } t_kernel;
 
+    /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
+
     t_kernel levantar_datos(t_config* config);
 
-    void iniciar_semaforos();
+    /*----------------------- FUNCIONES CREATE DE STRUCTS -----------------------*/
 
     t_pcb* create_pcb(char* path_instrucciones, int size_process);
 
@@ -34,7 +36,7 @@
 
     t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_asociado, t_tcb* tcb_asociado);
 
-    void poner_en_new_procesos(t_queue* cola_planificador, t_pcb* pcb);
+    /*------------------------------ MISCELANEO --------------------------------*/
 
     bool compare_pid(uint32_t* pid_1, uint32_t* pid_2);
 

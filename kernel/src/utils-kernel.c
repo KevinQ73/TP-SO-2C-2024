@@ -18,7 +18,6 @@ t_kernel levantar_datos(t_config* config){
     return datos_config;
 }
 
-
 /*----------------------- FUNCIONES CREATE DE STRUCTS -----------------------*/
 
 t_pcb* create_pcb(char* path_instrucciones, int size_process){
@@ -56,9 +55,6 @@ t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_asociado, t_tcb* tcb_
 
     return hilo;
 }
-
-/*----------------------- FUNCIONES DE PLANIFICACIÓN ------------------------*/
-
 
 /*------------------------------ MISCELANEO --------------------------------*/
 
