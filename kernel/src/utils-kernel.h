@@ -24,6 +24,11 @@
         char* log_level;
     } t_kernel;
 
+    typedef struct{
+        t_queue* cola;
+        int prioridad;
+    } t_cola_prioridades;
+
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 
     t_kernel levantar_datos(t_config* config);
@@ -35,6 +40,8 @@
     t_tcb* create_tcb(t_pcb* pcb, int prioridad);
 
     t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_asociado, t_tcb* tcb_asociado);
+
+    t_cola_prioridades* create_priority_queue(int prioridad);
 
     /*------------------------------ MISCELANEO --------------------------------*/
 

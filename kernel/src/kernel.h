@@ -12,9 +12,10 @@
     int fd_conexion_dispatch;
     int fd_conexion_interrupt;
     int proceso_ejecutando;
+    int prioridad_
 
     t_pcb* primer_proceso;
-    
+
 	char* ip_cpu;
 	char* ip_memoria;
 
@@ -25,6 +26,8 @@
     t_list* procesos_creados;
     t_list* hilo_exec;
     t_list* hilos_block;
+    t_list* lista_prioridades;
+    t_list* lista_colas_multinivel;
 
     pthread_t hiloNew;
     pthread_t hiloPlanifCortoPlazo;
@@ -34,26 +37,14 @@
     pthread_mutex_t mutex_cola_ready;
     pthread_mutex_t mutex_uso_fd_memoria;
     pthread_mutex_t mutex_lista_procesos_ready;
+    pthread_mutex_t mutex_colas_multinivel_existentes;
 
     sem_t contador_procesos_en_new;
     sem_t aviso_exit_proceso;
 
     t_queue* cola_new;
-    t_queue* cola_new_procesos;
-    t_queue* cola_ready;
-    t_queue* cola_ready_procesos;
     t_queue* cola_ready_fifo;
-    t_queue* cola_blocked;
-    t_queue* cola_execute;
     t_queue* cola_exit;
-    t_queue* cola_prioridad_maxima;
-    t_queue* cola_prioridad_1;
-    t_queue* cola_prioridad_2;
-    t_queue* cola_prioridad_3;
-    t_queue* cola_prioridad_4;
-    t_queue* cola_prioridad_5;
-    t_queue* cola_prioridad_6;
-    t_queue* cola_prioridad_7;
 
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 
@@ -71,19 +62,31 @@
 
     void* planificador_largo_plazo();
 
-    void* planificador_corto_plazo();
-
-    void poner_en_new(t_pcb* pcb);
-
     void* inicializar_pcb_en_espera();
 
     void reintentar_inicializar_pcb_en_espera(t_pcb* pcb);
+
+    void* planificador_corto_plazo();
+
+    t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion);
+
+    void poner_en_new(t_pcb* pcb);
 
     void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso);
 
     void poner_en_ready_procesos();
 
     void* poner_en_block();
+
+    void liberar_hilos_bloqueados(t_hilo_planificacion* hilo);
+
+    /*--------------------------- FUNCIONES DE COLAS ----------------------------*/
+
+    void queue_push_by_priority(t_hilo_planificacion* hilo_del_proceso);
+
+    t_cola_prioridades* queue_get_by_priority(t_list* lista_colas_prioridades, int prioridad);
+
+    bool queue_find_by_priority(t_list* lista_colas_prioridades, int prioridad);
 
     /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
@@ -92,8 +95,6 @@
     void* esperar_tid_cpu();
 
     void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar);
-
-    void liberar_hilos_bloqueados(t_hilo_planificacion* hilo);
 
     /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
 

@@ -33,6 +33,8 @@ int main(int argc, char* argv[]) {
     procesos_creados = list_create();
     hilo_exec = list_create();
     hilos_block = list_create();
+    lista_colas_multinivel = list_create();
+    lista_prioridades = list_create();
 
     // --------------------- Finalizacion del modulo----------------------
     
@@ -60,20 +62,8 @@ void iniciar_semaforos(){
 
 void iniciar_colas(){
     cola_new = queue_create();
-    cola_new_procesos = queue_create();
-    cola_ready = queue_create();
-    cola_ready_procesos = queue_create();
-    cola_blocked = queue_create();
+    cola_ready_fifo = queue_create();
     cola_exit = queue_create();
-
-    cola_prioridad_maxima = queue_create();
-    cola_prioridad_1 = queue_create();
-    cola_prioridad_2 = queue_create();
-    cola_prioridad_3 = queue_create();
-    cola_prioridad_4 = queue_create();
-    cola_prioridad_5 = queue_create();
-    cola_prioridad_6 = queue_create();
-    cola_prioridad_7 = queue_create();
 }
 
 void iniciar_primer_proceso(char* path, char* size){
@@ -97,6 +87,7 @@ void iniciar_primer_proceso(char* path, char* size){
             log_debug(kernel_log, "SE CREÓ EL PRIMER PROCESO CON PID: %d, Y PRIMER TID: %d", primer_proceso->pid, primer_hilo->tid);
         } else {
             log_error(kernel_log, "ERROR AL INICIAR PRIMER HILO");
+            abort();
         }
     } else {
         log_error(kernel_log, "ERROR AL INICIAR PRIMER PROCESO");
@@ -129,27 +120,6 @@ void* planificador_largo_plazo(){
     }
 }
 
-void* planificador_corto_plazo(){
-    char* planificacion = kernel_registro.algoritmo_planificacion;
-
-    if(strcmp(planificacion, "FIFO")){
-        log_debug(kernel_log, "FIFO");
-    }else if(strcmp(planificacion, "PRIORIDADES")){
-        log_debug(kernel_log, "PRIORIDADES");
-    }else if(strcmp(planificacion, "COLAS_MULTINIVEL")){
-        log_debug(kernel_log, "COLAS_MULTINIVEL");
-    }else{
-        log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
-    }
-}
-
-void poner_en_new(t_pcb* pcb){
-    pthread_mutex_lock(&mutex_cola_new);
-    queue_push(cola_new, pcb);
-    pthread_mutex_unlock(&mutex_cola_new);
-    sem_post(&contador_procesos_en_new);
-}
-
 void* inicializar_pcb_en_espera(){        
     if(queue_size(cola_new) != 0){
         pthread_mutex_lock(&mutex_cola_new);
@@ -157,8 +127,9 @@ void* inicializar_pcb_en_espera(){
         pthread_mutex_unlock(&mutex_cola_new);
 
         t_tcb* tcb_asociado = list_get(pcb->tids, 0);
+        int prioridad = tcb_asociado->prioridad;
 
-        char* respuesta_memoria = avisar_creacion_proceso_memoria(pcb->path_instrucciones_hilo_main, &(pcb->size_process), &(tcb_asociado->prioridad), conexion_memoria, kernel_log);
+        char* respuesta_memoria = avisar_creacion_proceso_memoria(pcb->path_instrucciones_hilo_main, &(pcb->size_process), &prioridad, conexion_memoria, kernel_log);
 
         if (strcmp(respuesta_memoria, "OK"))
         {
@@ -177,11 +148,12 @@ void* inicializar_pcb_en_espera(){
 
 void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
     t_tcb* tcb_asociado = list_get(pcb->tids, 0);
-    char* respuesta_memoria = avisar_creacion_proceso_memoria(pcb->path_instrucciones_hilo_main, &(pcb->size_process), &(tcb_asociado->prioridad), conexion_memoria, kernel_log);
+    int prioridad = tcb_asociado->prioridad;
+    char* respuesta_memoria = avisar_creacion_proceso_memoria(pcb->path_instrucciones_hilo_main, &(pcb->size_process), &prioridad, conexion_memoria, kernel_log);
 
         if (strcmp(respuesta_memoria, "OK"))
         {
-            char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(pcb->path_instrucciones_hilo_main, &(tcb_asociado->prioridad), conexion_memoria, kernel_log);
+            char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(pcb->path_instrucciones_hilo_main, &prioridad, conexion_memoria, kernel_log);
             t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_asociado);
 
             poner_en_ready(hilo);
@@ -191,58 +163,65 @@ void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
         }
 }
 
+void* planificador_corto_plazo(){
+    while (1)
+    {
+        char* planificacion = kernel_registro.algoritmo_planificacion;
+
+        hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
+
+        ejecutar_hilo(hilo_en_ejecucion);
+
+        manejar_respuesta_cpu(hilo_en_ejecucion);
+    }
+}
+
+t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
+    t_hilo_planificacion* hilo;
+
+    if (strcmp(planificacion, "FIFO"))
+    {
+        pthread_mutex_lock(&mutex_cola_ready);
+        hilo = (t_hilo_planificacion)queue_pop(cola_ready_fifo);
+        pthread_mutex_unlock(&mutex_cola_ready);
+
+    } else if (strcmp(planificacion, "PRIORIDADES"))
+    {
+        pthread_mutex_lock(&mutex_cola_ready);
+        hilo = thread_find_by_priority(lista_prioridades);
+        pthread_mutex_unlock(&mutex_cola_ready);
+
+    } else if (strcmp(planificacion, "COLAS_MULTINIVEL"))
+    {
+        pthread_mutex_lock(&mutex_cola_ready);
+        hilo = thread_find_by_multilevel_queues(lista_colas_multinivel);
+        pthread_mutex_unlock(&mutex_cola_ready);
+    }
+    return hilo;
+}
+
+void poner_en_new(t_pcb* pcb){
+    pthread_mutex_lock(&mutex_cola_new);
+    queue_push(cola_new, pcb);
+    pthread_mutex_unlock(&mutex_cola_new);
+    sem_post(&contador_procesos_en_new);
+}
+
 void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso){
     pthread_mutex_lock(&mutex_cola_ready);
     hilo_del_proceso->estado = READY_STATE;
     
     if(strcmp(kernel_registro.algoritmo_planificacion, "FIFO")){
-        queue_push(cola_prioridad_maxima, hilo_del_proceso);
+        queue_push(cola_ready_fifo, hilo_del_proceso);
 
     } else if(strcmp(kernel_registro.algoritmo_planificacion, "PRIORIDADES")){
-    
-        if(hilo_del_proceso->tcb_asociado->prioridad == 0){
-            queue_push(cola_prioridad_maxima, hilo_del_proceso);
-            
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 1){
-            queue_push(cola_prioridad_1, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 2){
-            queue_push(cola_prioridad_2, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 3){
-            queue_push(cola_prioridad_3, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 4){
-            queue_push(cola_prioridad_4, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 5){
-            queue_push(cola_prioridad_5, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 6){
-            queue_push(cola_prioridad_6,hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 7){
-            queue_push(cola_prioridad_7,hilo_del_proceso);
-        }else{
-            log_error(kernel_log,"NO SE RECONOCE LA prioridad");
-        }
+        list_add(lista_prioridades, hilo_del_proceso);
 
     }else if(strcmp(kernel_registro.algoritmo_planificacion, "COLAS_MULTINIVEL")){
-        if(hilo_del_proceso->tcb_asociado->prioridad  == 0){
-            queue_push(cola_prioridad_maxima, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 1){
-            queue_push(cola_prioridad_1, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 2){
-            queue_push(cola_prioridad_2, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 3){
-            queue_push(cola_prioridad_3, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 4){
-            queue_push(cola_prioridad_4, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 5){
-            queue_push(cola_prioridad_5, hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 6){
-            queue_push(cola_prioridad_6,hilo_del_proceso);
-        }else if(hilo_del_proceso->tcb_asociado->prioridad  == 7){
-            queue_push(cola_prioridad_7,hilo_del_proceso);
-        }else{
-            log_error(kernel_log,"NO SE RECONOCE LA prioridad");
-        }
+        queue_push_by_priority(hilo_del_proceso);
     }else{
         log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
+        abort();
     }
     pthread_mutex_unlock(&mutex_cola_ready);
 }
@@ -271,6 +250,43 @@ void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
         poner_en_ready(hilo);
     }
 }
+
+/*--------------------------- FUNCIONES DE COLAS ----------------------------*/
+
+void queue_push_by_priority(t_hilo_planificacion* hilo_del_proceso){
+    if (queue_find_by_priority(lista_colas_multinivel, hilo_del_proceso->tcb_asociado->prioridad))
+    {
+        t_cola_prioridades* cola_prioridad = queue_get_by_priority(lista_colas_multinivel, hilo_del_proceso->tcb_asociado->prioridad);
+        queue_push(cola_prioridad->cola, hilo_del_proceso);
+        log_info(kernel_log, "## Se agregó el hilo (%d:%d) a la cola de prioridad %d en estado READY", hilo_del_proceso->pid, hilo_del_proceso->tcb_asociado->tid, hilo_del_proceso->tcb_asociado->prioridad);
+    } else {
+        t_cola_prioridades* cola_prioridad_nueva = create_priority_queue(hilo_del_proceso->tcb_asociado->prioridad);
+        queue_push(cola_prioridad_nueva, hilo_del_proceso);
+        list_add(lista_colas_multinivel, cola_prioridad_nueva);
+        log_info(kernel_log, "## Se agregó el hilo (%d:%d) a la NUEVA cola de prioridad %d en estado READY", hilo_del_proceso->pid, hilo_del_proceso->tcb_asociado->tid, hilo_del_proceso->tcb_asociado->prioridad);
+    }
+}
+
+t_cola_prioridades* queue_get_by_priority(t_list* lista_colas_prioridades, int prioridad){
+    bool _queue_contains(void* ptr) {
+	    t_cola_prioridades* cola = (t_cola_prioridades*) ptr;
+	    return (prioridad == cola->prioridad);
+	}
+	return list_find(lista_colas_prioridades, _queue_contains);
+}
+
+bool queue_find_by_priority(t_list* lista_colas_prioridades, int prioridad){
+    bool _queue_contains(void* ptr) {
+	    t_cola_prioridades* cola = (t_cola_prioridades*) ptr;
+	    return (prioridad == cola->prioridad);
+	}
+	return list_any_satisfy(lista_colas_prioridades, _queue_contains);
+}
+
+t_hilo_planificacion* thread_find_by_multilevel_queues(t_list* lista_colas_multinivel){
+    
+}
+
 
 /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
@@ -553,19 +569,8 @@ void eliminar_listas(){
 void eliminar_colas(){
     
     queue_destroy_and_destroy_elements(cola_new,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_ready,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_blocked,t_hilo_planificacion_destroy);
     queue_destroy_and_destroy_elements(cola_exit,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_prioridad_maxima,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_prioridad_1,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_prioridad_2,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_prioridad_3,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_prioridad_4,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_prioridad_5,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_prioridad_6,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_prioridad_7,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_new_procesos,pcb_destroy);
-    queue_destroy_and_destroy_elements(cola_ready_procesos,pcb_destroy);
+    queue_destroy_and_destroy_elements(cola_ready_fifo,t_hilo_planificacion_destroy);
 }
 
 /*------------------------------- MISCELANEO --------------------------------*/

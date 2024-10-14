@@ -56,6 +56,15 @@ t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_asociado, t_tcb* tcb_
     return hilo;
 }
 
+t_cola_prioridades* create_priority_queue(int prioridad){
+    t_cola_prioridades* cola_nueva = malloc(sizeof(t_cola_prioridades));
+
+    cola_nueva->cola = queue_create();
+    cola_nueva->prioridad = prioridad;
+
+    return cola_nueva;
+}
+
 /*------------------------------ MISCELANEO --------------------------------*/
 
 bool compare_pid(uint32_t* pid_1, uint32_t* pid_2){
