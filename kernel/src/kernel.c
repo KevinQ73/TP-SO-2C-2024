@@ -176,25 +176,30 @@ void* planificador_corto_plazo(){
     }
 }
 
+void manejar_respuesta_cpu(){ // Hacer? o manejar la respuesta en ejecutar_hilo?
+
+}
+
 t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
     t_hilo_planificacion* hilo;
 
     if (strcmp(planificacion, "FIFO"))
     {
         pthread_mutex_lock(&mutex_cola_ready);
-        hilo = (t_hilo_planificacion)queue_pop(cola_ready_fifo);
+        hilo = (t_hilo_planificacion*)queue_pop(cola_ready_fifo);
         pthread_mutex_unlock(&mutex_cola_ready);
+        log_info(kernel_log, "## [FIFO] Se quitó el hilo (%d:%d) de la COLA READY", hilo->pid, hilo->tcb_asociado->tid);
 
     } else if (strcmp(planificacion, "PRIORIDADES"))
     {
         pthread_mutex_lock(&mutex_cola_ready);
-        hilo = thread_find_by_priority(lista_prioridades);
+        hilo = thread_find_by_priority_schedule(lista_prioridades);
         pthread_mutex_unlock(&mutex_cola_ready);
 
     } else if (strcmp(planificacion, "COLAS_MULTINIVEL"))
     {
         pthread_mutex_lock(&mutex_cola_ready);
-        hilo = thread_find_by_multilevel_queues(lista_colas_multinivel);
+        hilo = thread_find_by_multilevel_queues_schedule(lista_colas_multinivel);
         pthread_mutex_unlock(&mutex_cola_ready);
     }
     return hilo;
@@ -261,7 +266,7 @@ void queue_push_by_priority(t_hilo_planificacion* hilo_del_proceso){
         log_info(kernel_log, "## Se agregó el hilo (%d:%d) a la cola de prioridad %d en estado READY", hilo_del_proceso->pid, hilo_del_proceso->tcb_asociado->tid, hilo_del_proceso->tcb_asociado->prioridad);
     } else {
         t_cola_prioridades* cola_prioridad_nueva = create_priority_queue(hilo_del_proceso->tcb_asociado->prioridad);
-        queue_push(cola_prioridad_nueva, hilo_del_proceso);
+        queue_push(cola_prioridad_nueva->cola, hilo_del_proceso);
         list_add(lista_colas_multinivel, cola_prioridad_nueva);
         log_info(kernel_log, "## Se agregó el hilo (%d:%d) a la NUEVA cola de prioridad %d en estado READY", hilo_del_proceso->pid, hilo_del_proceso->tcb_asociado->tid, hilo_del_proceso->tcb_asociado->prioridad);
     }
@@ -283,10 +288,58 @@ bool queue_find_by_priority(t_list* lista_colas_prioridades, int prioridad){
 	return list_any_satisfy(lista_colas_prioridades, _queue_contains);
 }
 
-t_hilo_planificacion* thread_find_by_multilevel_queues(t_list* lista_colas_multinivel){
-    
+t_hilo_planificacion* list_find_by_minimum_priority(t_list* lista_prioridades){
+    void* _min_priority(void* a, void* b) {
+	    t_hilo_planificacion* hilo_a = (t_hilo_planificacion*) a;
+	    t_hilo_planificacion* hilo_b = (t_hilo_planificacion*) b;
+	    return hilo_a->tcb_asociado->prioridad <= hilo_b->tcb_asociado->prioridad ? hilo_a : hilo_b;
+	}
+	t_hilo_planificacion* hilo_encontrado = list_get_minimum(lista_prioridades, _min_priority);
+    return hilo_encontrado;
 }
 
+t_hilo_planificacion* thread_find_by_priority_schedule(t_list* lista_prioridades){
+    t_hilo_planificacion* hilo = list_find_by_minimum_priority(lista_prioridades);
+    bool removed = list_remove_element(lista_prioridades, hilo);
+    if (removed)
+    {
+        log_info(kernel_log, "## [PRIORIDADES] Se quitó el hilo (%d:%d) de la COLA READY CON PRIORIDAD %d", hilo->pid, hilo->tcb_asociado->tid, hilo->tcb_asociado->prioridad);
+    } else {
+        log_debug(kernel_log, "## [PRIORIDADES] ERROR EN thread_find_by_priority_schedule");
+        abort();
+    }
+}
+
+t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_colas_multinivel){
+    t_hilo_planificacion* hilo_a_ejecutar;
+
+    pthread_mutex_lock(&mutex_colas_multinivel_existentes);
+    for (int i = 0; i < list_size(lista_colas_multinivel); i++)
+    {
+        t_cola_prioridades* cola_hallada = queue_get_by_priority(lista_colas_multinivel, i);
+
+        if (queue_is_empty(cola_hallada->cola))
+        {
+            log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d VACÍA", cola_hallada->prioridad);
+        } else {
+            hilo_a_ejecutar = (t_hilo_planificacion*)queue_pop(cola_hallada->prioridad);
+            log_info(kernel_log, "## [COLAS MULTINIVEL] Se quitó el hilo (%d:%d) de la COLA CON PRIORIDAD %d", hilo_a_ejecutar->pid, hilo_a_ejecutar->tcb_asociado->tid, cola_hallada->prioridad);
+            i = list_size(lista_colas_multinivel);
+        }
+    }
+    pthread_mutex_lock(&mutex_colas_multinivel_existentes);
+
+    return hilo_a_ejecutar;
+}
+
+/*t_cola_prioridades* queue_find_by_minimum_priority(t_list* lista_colas_prioridades){
+    bool _queue_min_priority(void* ptr) {
+	    t_cola_prioridades* cola_a = (t_cola_prioridades*) a;
+	    t_cola_prioridades* cola_b = (t_cola_prioridades*) b;
+	    return cola_a->prioridad <= cola_b->prioridad ? cola_a : cola_b;
+	}
+	return list_any_satisfy(lista_colas_prioridades, _queue_min_priority);
+}*/
 
 /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 

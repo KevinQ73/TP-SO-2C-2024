@@ -12,10 +12,11 @@
     int fd_conexion_dispatch;
     int fd_conexion_interrupt;
     int proceso_ejecutando;
-    int prioridad_
+    int prioridad;
 
     t_pcb* primer_proceso;
-
+    t_hilo_planificacion* hilo_en_ejecucion;
+    
 	char* ip_cpu;
 	char* ip_memoria;
 
@@ -26,6 +27,7 @@
     t_list* procesos_creados;
     t_list* hilo_exec;
     t_list* hilos_block;
+
     t_list* lista_prioridades;
     t_list* lista_colas_multinivel;
 
@@ -87,6 +89,12 @@
     t_cola_prioridades* queue_get_by_priority(t_list* lista_colas_prioridades, int prioridad);
 
     bool queue_find_by_priority(t_list* lista_colas_prioridades, int prioridad);
+
+    t_hilo_planificacion* list_find_by_minimum_priority(t_list* lista_prioridades);
+
+    t_hilo_planificacion* thread_find_by_priority_schedule(t_list* lista_prioridades);
+
+    t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_colas_multinivel);
 
     /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
