@@ -16,7 +16,7 @@
 
     t_pcb* primer_proceso;
     t_hilo_planificacion* hilo_en_ejecucion;
-    
+
 	char* ip_cpu;
 	char* ip_memoria;
 
@@ -90,7 +90,7 @@
 
     bool queue_find_by_priority(t_list* lista_colas_prioridades, int prioridad);
 
-    t_hilo_planificacion* list_find_by_minimum_priority(t_list* lista_prioridades);
+    t_hilo_planificacion* list_find_by_maximum_priority(t_list* lista_prioridades);
 
     t_hilo_planificacion* thread_find_by_priority_schedule(t_list* lista_prioridades);
 

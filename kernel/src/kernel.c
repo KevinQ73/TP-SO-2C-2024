@@ -263,12 +263,12 @@ void queue_push_by_priority(t_hilo_planificacion* hilo_del_proceso){
     {
         t_cola_prioridades* cola_prioridad = queue_get_by_priority(lista_colas_multinivel, hilo_del_proceso->tcb_asociado->prioridad);
         queue_push(cola_prioridad->cola, hilo_del_proceso);
-        log_info(kernel_log, "## Se agregó el hilo (%d:%d) a la cola de prioridad %d en estado READY", hilo_del_proceso->pid, hilo_del_proceso->tcb_asociado->tid, hilo_del_proceso->tcb_asociado->prioridad);
+        log_info(kernel_log, "## [COLAS MULTINIVEL] Se agregó el hilo (%d:%d) a la cola de prioridad %d en estado READY", hilo_del_proceso->pid, hilo_del_proceso->tcb_asociado->tid, hilo_del_proceso->tcb_asociado->prioridad);
     } else {
         t_cola_prioridades* cola_prioridad_nueva = create_priority_queue(hilo_del_proceso->tcb_asociado->prioridad);
         queue_push(cola_prioridad_nueva->cola, hilo_del_proceso);
         list_add(lista_colas_multinivel, cola_prioridad_nueva);
-        log_info(kernel_log, "## Se agregó el hilo (%d:%d) a la NUEVA cola de prioridad %d en estado READY", hilo_del_proceso->pid, hilo_del_proceso->tcb_asociado->tid, hilo_del_proceso->tcb_asociado->prioridad);
+        log_info(kernel_log, "## [COLAS MULTINIVEL] Se agregó el hilo (%d:%d) a la NUEVA cola de prioridad %d en estado READY", hilo_del_proceso->pid, hilo_del_proceso->tcb_asociado->tid, hilo_del_proceso->tcb_asociado->prioridad);
     }
 }
 
@@ -288,7 +288,7 @@ bool queue_find_by_priority(t_list* lista_colas_prioridades, int prioridad){
 	return list_any_satisfy(lista_colas_prioridades, _queue_contains);
 }
 
-t_hilo_planificacion* list_find_by_minimum_priority(t_list* lista_prioridades){
+t_hilo_planificacion* list_find_by_maximum_priority(t_list* lista_prioridades){
     void* _min_priority(void* a, void* b) {
 	    t_hilo_planificacion* hilo_a = (t_hilo_planificacion*) a;
 	    t_hilo_planificacion* hilo_b = (t_hilo_planificacion*) b;
@@ -299,7 +299,7 @@ t_hilo_planificacion* list_find_by_minimum_priority(t_list* lista_prioridades){
 }
 
 t_hilo_planificacion* thread_find_by_priority_schedule(t_list* lista_prioridades){
-    t_hilo_planificacion* hilo = list_find_by_minimum_priority(lista_prioridades);
+    t_hilo_planificacion* hilo = list_find_by_maximum_priority(lista_prioridades);
     bool removed = list_remove_element(lista_prioridades, hilo);
     if (removed)
     {
