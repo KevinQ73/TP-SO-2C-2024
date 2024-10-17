@@ -322,7 +322,7 @@ t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_co
         {
             log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d VACÍA", cola_hallada->prioridad);
         } else {
-            hilo_a_ejecutar = (t_hilo_planificacion*)queue_pop(cola_hallada->prioridad);
+            hilo_a_ejecutar = (t_hilo_planificacion*)queue_pop(cola_hallada->cola);
             log_info(kernel_log, "## [COLAS MULTINIVEL] Se quitó el hilo (%d:%d) de la COLA CON PRIORIDAD %d", hilo_a_ejecutar->pid, hilo_a_ejecutar->tcb_asociado->tid, cola_hallada->prioridad);
             i = list_size(lista_colas_multinivel);
         }
@@ -409,7 +409,7 @@ char* avisar_creacion_hilo_memoria(char* path, int* prioridad, int socket_memori
     );
 
     buffer_add_string(buffer, length, path, kernel_log);
-    buffer_add_uint32(buffer, (uint32_t)prioridad, kernel_log);
+    buffer_add_uint32(buffer, (uint32_t*)prioridad, kernel_log);
 
     paquete->buffer = buffer;
 
