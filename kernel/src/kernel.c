@@ -366,14 +366,21 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
 
 void* esperar_tid_cpu(){
     //TODO
+    /*CAMBIO SYSCALL_A_ATENDER POR OPERACION_A_ATENDER Y QUE AHI ESTE EL SWITCH CON TODAS LAS OPERACIONES QUE PODEMOS RECIBIR 
+        Y QUE ESTA FUNCION SOLO ESPERE A RECIBIR EL TID Y EL MOTIVO PARA METERLO EN LA FUNCION OPERACION_A_ATENDER.
+
+
+    
+     */
 }
 
 void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar){
     /*
-    PETICION_INSTRUCCION,
-    CONTEXTO_EJECUCION,
-    INTERRUPCION_QUANTUM,
-    INTERRUPCION_USUARIO,
+    CASOS POR LOS QUE QUERRIA DESALOJAR:
+        PETICION_INSTRUCCION,
+        CONTEXTO_EJECUCION,
+        INTERRUPCION_QUANTUM,
+        INTERRUPCION_USUARIO,
     */
     //TODO
 }
@@ -423,13 +430,14 @@ char* avisar_creacion_hilo_memoria(char* path, int* prioridad, int socket_memori
 
 /*--------------------------------- SYSCALLS --------------------------------*/
 
-void* syscalls_a_atender(){
-    int syscall = recibir_operacion(fd_conexion_interrupt);
+void* operacion_a_atender(){
+    int operacion = recibir_operacion(fd_conexion_interrupt);
     t_pid_tid pid_tid_recibido = recibir_pid_tid(fd_conexion_interrupt, kernel_log);
-
-    switch (syscall)
+   
+    switch (operacion)
     {
     case PROCESS_CREATE:
+        
         syscall_process_create(pid_tid_recibido.pid, pid_tid_recibido.tid);
         break;
 
@@ -446,10 +454,19 @@ void* syscalls_a_atender(){
         break;
 
     case THREAD_CANCEL:
-            
+        syscall_thread_cancel(pid_tid_recibido.tid);
         break;
 
     case THREAD_EXIT:
+        syscall_thread_exit(pid_tid_recibido.tid);   
+            
+        break;
+
+    case MUTEX_CREATE:
+            
+        break;
+
+    case MUTEX_LOCK:
             
         break;
         
@@ -485,7 +502,7 @@ void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante)
 }   
 
 void* syscall_process_exit(t_pcb* pcb){
-
+    log_info(kernel_log,"(%d:%d) - Solicitó syscall: PROCESS_EXIT", pid_solicitante, tid_solicitante);
     t_paquete* paquete_fin_proceso = crear_paquete(FINALIZAR_PROCESO);
     agregar_a_paquete(paquete_fin_proceso, &pcb->pid, sizeof(uint32_t));
 
@@ -506,6 +523,7 @@ void* syscall_process_exit(t_pcb* pcb){
 }
 
 void* syscall_thread_create(){
+    log_info(kernel_log,"(%d:%d) - Solicitó syscall: THREAD_CREATE", pid_solicitante, tid_solicitante);
     uint32_t largo_string = 0;
     t_buffer* buffer;
     buffer = buffer_recieve(fd_conexion_dispatch);
@@ -566,6 +584,7 @@ void* syscall_thread_join(){
 }
 
 void* syscall_thread_exit(t_hilo_planificacion* hilo){
+    log_info(kernel_log,"(%d:%d) - Solicitó syscall: THREAD_EXIT", pid_solicitante, tid_solicitante);
     t_paquete* paquete_fin_hilo = crear_paquete(FINALIZAR_HILO);
 
     t_buffer* buffer = buffer_create(
@@ -592,6 +611,11 @@ void* syscall_thread_exit(t_hilo_planificacion* hilo){
     } else {
         log_debug(kernel_log, "Rompimos algo con finalizar hilo");
     }
+}
+
+void*syscall_thread_cancel(t_hilo_planificacion* hilo){
+    /*TODO: HACE LO MISMO QUE THREAD_EXIT PERO TENEMOS QUE VERIFICAR SI EXISTE O NO EL HILO QUE NOS PASARON
+    DEBEMOS BLOQUEAR EL HILO QUE LA INVOCO Y AL FINAL HACER QUE SIGA EJECUTANDO */
 }
 
 /*--------------------------- FINALIZACIÓN DE TADS --------------------------*/
