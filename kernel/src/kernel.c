@@ -360,29 +360,34 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
     log_debug(kernel_log, "SE ENVIO PAQUETE");
     eliminar_paquete(paquete);
 
-    //SEMAFORO QUE ESPERE HASTA QUE CPU DEVUELVA EL TID
+    
     esperar_tid_cpu();
 }
 
 void* esperar_tid_cpu(){
-    //TODO
-    /*CAMBIO SYSCALL_A_ATENDER POR OPERACION_A_ATENDER Y QUE AHI ESTE EL SWITCH CON TODAS LAS OPERACIONES QUE PODEMOS RECIBIR 
-        Y QUE ESTA FUNCION SOLO ESPERE A RECIBIR EL TID Y EL MOTIVO PARA METERLO EN LA FUNCION OPERACION_A_ATENDER.
-
-
     
-     */
+    //TODO
+    /*
+        TENGO QUE RECIBIR EL PID Y EL TID MEDIANTE DISPATCH 
+        PARA ESPERAR A RECIBIR EL TID ES MEDIANTE UN RECIVE QUE TENGO QUE ESPERAR EL TID QUE ME MANDE CPU QUE FUE DESALOJADO POR TAL MOTIVO 
+    */
+   
+    
 }
 
-void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar){
+void* desalojar_hilo(){
+    //TODO
     /*
     CASOS POR LOS QUE QUERRIA DESALOJAR:
         PETICION_INSTRUCCION,
-        CONTEXTO_EJECUCION,
-        INTERRUPCION_QUANTUM,
-        INTERRUPCION_USUARIO,
+        INTERRUPCION_QUANTUM, 
+        OTRO CASO PUEDE SER QUE HAYA UN HILO QUE EJECUTE UNA OPERACION QUE LO BLOQUEE Y ESA OPERACION FALLA POR LO QUE HAY QUE MANDAR TODO EL PROCESO A EXIT Y SI HAY ALGUN HILO DE ESE PROCESO
+        QUE ESTA EN "EXEC", HAY QUE INTERRMPIRLO"
     */
-    //TODO
+    
+
+    //enviar_mensaje("DESALOJAR_HILO_POR_QUANTUM",fd_conexion_interrupt);
+
 }
 
 /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
