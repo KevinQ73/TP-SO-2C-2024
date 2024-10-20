@@ -96,6 +96,8 @@
 
     t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_colas_multinivel);
 
+    t_pcb* list_find_by_pid(uint32_t pid);
+
     /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
     void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar);
@@ -110,9 +112,13 @@
 
     char* avisar_creacion_hilo_memoria(char* path, int* prioridad, int socket_memoria, t_log* kernel_log);
 
+    char* avisar_fin_proceso_memoria(uint32_t pid, int socket_memoria);
+
+    char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid, int socket_memoria);
+
     /*--------------------------------- SYSCALLS --------------------------------*/
 
-    void* syscalls_a_atender();
+    void* operacion_a_atender();
 
     void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante);
 
@@ -123,6 +129,8 @@
     void* syscall_thread_join();
 
     void* syscall_thread_exit(t_hilo_planificacion* hilo);
+
+    void* syscall_thread_cancel(uint32_t tid);
 
     /*--------------------------- FINALIZACIÓN DE TADS --------------------------*/
 

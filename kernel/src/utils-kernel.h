@@ -37,7 +37,7 @@
 
     t_pcb* create_pcb(char* path_instrucciones, int size_process);
 
-    t_tcb* create_tcb(t_pcb* pcb, int prioridad);
+    t_tcb* create_tcb(int prioridad);
 
     t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_asociado, t_tcb* tcb_asociado);
 

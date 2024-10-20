@@ -26,6 +26,7 @@ t_pcb* create_pcb(char* path_instrucciones, int size_process){
     pcb->pid = 0; // Crear función incremental
     pcb->tidSig = 0;
     pcb->tids = list_create();
+    pcb->lista_tcbs_new = list_create();
     pcb->mutex_asociados = list_create();
     pcb->program_counter = 0;
     pcb->estado = NEW_STATE;
@@ -35,13 +36,11 @@ t_pcb* create_pcb(char* path_instrucciones, int size_process){
     return pcb;
 }
 
-t_tcb* create_tcb(t_pcb* pcb, int prioridad){
+t_tcb* create_tcb(int prioridad){
     t_tcb* tcb = malloc(sizeof(t_tcb));
 
-    tcb->tid = aplicar_tid(pcb); // Crear función incremental
+    tcb->tid = aplicar_tid(); // Crear función incremental
     tcb->prioridad = prioridad;
-
-    list_add(pcb->tids, tcb);
     return tcb;
 }
 
@@ -52,6 +51,8 @@ t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_asociado, t_tcb* tcb_
     hilo->pid = pcb_asociado->pid;
     hilo->tcb_asociado = tcb_asociado;
     hilo->lista_hilos_block = list_create();
+
+    list_add(pcb_asociado->tids, hilo);
 
     return hilo;
 }
