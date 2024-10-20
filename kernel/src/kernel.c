@@ -468,7 +468,7 @@ void* operacion_a_atender(){
         break;
 
     case PROCESS_EXIT:
-        //syscall_process_exit();
+        syscall_process_exit()
         break;
 
     case THREAD_CREATE:
@@ -528,7 +528,7 @@ void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante)
     log_info(kernel_log,"## PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
 }   
 
-void* syscall_process_exit(t_pcb* pcb){
+/*void* syscall_process_exit(t_pcb* pcb){
     log_info(kernel_log,"(%d:%d) - Solicitó syscall: PROCESS_EXIT", hilo_en_ejecucion->pid, hilo_en_ejecucion->tcb_asociado->tid);
     t_paquete* paquete_fin_proceso = crear_paquete(FINALIZAR_PROCESO);
     agregar_a_paquete(paquete_fin_proceso, &pcb->pid, sizeof(uint32_t));
@@ -542,6 +542,28 @@ void* syscall_process_exit(t_pcb* pcb){
 
     if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
         free(pcb);
+        
+        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
+        inicializar_pcb_en_espera();
+
+    }
+}*/
+
+void* syscall_process_exit(){
+    log_info(kernel_log,"(%d:%d) - Solicitó syscall: PROCESS_EXIT", hilo_en_ejecucion->pid, hilo_en_ejecucion->tcb_asociado->tid);
+    t_paquete* paquete_fin_proceso = crear_paquete(FINALIZAR_PROCESO);
+    agregar_a_paquete(paquete_fin_proceso,  hilo_en_ejecucion->pid, sizeof(uint32_t));
+
+    //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
+    enviar_paquete(paquete_fin_proceso, conexion_memoria);
+    log_debug(kernel_log, "SE ENVIO AVISO DE FINALIZACION DE PROCESO");
+
+    //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
+    char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
+
+    if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
+       t_pcb* pcb_a_liberar =  list_find_by_pid(hilo_en_ejecucion->pid);
+        free(pcb_a_liberar);
         
         log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
         inicializar_pcb_en_espera();
