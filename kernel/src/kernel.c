@@ -237,6 +237,7 @@ void* poner_en_block(){
     t_hilo_planificacion* hilo_a_bloquear = list_remove(hilo_exec, 0);
     //SIGNAL
     list_add(hilos_block,hilo_a_bloquear);
+    hilo_a_bloquear->estado = BLOCKED_STATE;
 }
 
 void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
@@ -501,7 +502,7 @@ void* operacion_a_atender(){
         break;
 
     case DUMP_MEMORY:
-            
+            syscall_dump_memory();
         break;
         
     default:
@@ -549,6 +550,47 @@ void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante)
     }
 }*/
 
+
+ void* syscall_dump_memory(){
+    log_info(kernel_log,"(%d:%d) - Solicitó syscall: DUMP_MEMORY", hilo_en_ejecucion->pid, hilo_en_ejecucion->tcb_asociado->tid);
+    t_paquete* paquete_aviso_dump_memory = crear_paquete(AVISO_DUMP_MEMORY);
+    agregar_a_paquete(paquete_aviso_dump_memory,  hilo_en_ejecucion->pid, sizeof(uint32_t));
+    agregar_a_paquete(paquete_aviso_dump_memory,  hilo_en_ejecucion->tcb_asociado->tid, sizeof(uint32_t));
+
+    //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
+    enviar_paquete(paquete_aviso_dump_memory, conexion_memoria);
+    log_debug(kernel_log, "SE ENVIO AVISO DE DUMP_MEMORY");
+    
+    /*Esta syscall bloqueará al hilo que la invocó*/
+    poner_en_block();
+   
+    //hilo_a_bloquear->estado = BLOCKED_STATE; PUSE ESTO DENTRO DE LA FUNCION PONER EN BLOCK 
+    
+    
+    /*hasta que el módulo memoria confirme la finalización de la operación*/
+
+    char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
+
+    if(strcmp(respuesta_memoria, "OK")){
+
+        /*Caso contrario, el hilo se desbloquea normalmente pasando a READY.*/
+        int posicion_del_hilo = find_posicion_hilo();
+        t_hilo_planificacion* hilo_a_desbloquear = list_remove(hilos_block,0);
+        poner_en_ready(hilo_a_desbloquear);
+
+    }else{
+        /*en caso de error, el proceso se enviará a EXIT. */
+
+         t_pcb* pcb_a_liberar =  list_find_by_pid(hilo_en_ejecucion->pid);
+        free(pcb_a_liberar);
+        
+        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
+        inicializar_pcb_en_espera();
+
+    }
+
+ }
+
 void* syscall_process_exit(){
     log_info(kernel_log,"(%d:%d) - Solicitó syscall: PROCESS_EXIT", hilo_en_ejecucion->pid, hilo_en_ejecucion->tcb_asociado->tid);
     t_paquete* paquete_fin_proceso = crear_paquete(FINALIZAR_PROCESO);
@@ -561,7 +603,7 @@ void* syscall_process_exit(){
     //RECIBO EL PAQUETE CON LA RESPUESTA DE MEMORIA 
     char* respuesta_memoria = recibir_mensaje(conexion_memoria,kernel_log);
 
-    if(respuesta_memoria == "FINALIZACION_ACEPTADA"){
+    if(strcmp(respuesta_memoria, "FINALIZACION_ACEPTADA")){
        t_pcb* pcb_a_liberar =  list_find_by_pid(hilo_en_ejecucion->pid);
         free(pcb_a_liberar);
         
