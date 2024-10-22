@@ -28,7 +28,8 @@ int main(int argc, char* argv[]) {
     log_debug(memoria_log, "Esperando KERNEL...");
     fd_conexion_kernel = esperar_cliente(memoria_log, "KERNEL", fd_conexiones);
 
-    //iniciar multihilos
+    // --------------------- Arrancan funciones de memoria ----------------------
+    iniciar_memoria();
     atender_kernel();
     pthread_create(&hiloMemoriaCpu, NULL, (void *)atender_cpu, NULL);
     pthread_detach(hiloMemoriaCpu);
@@ -54,9 +55,17 @@ void atender_kernel(){
         pthread_detach(hiloFinalizarProceso);
     }
 }
-// PETICION 1: recibo pid para inicializar el pcb
-// PETICION 2: recibo pid para crear el proceso
+void iniciar_memoria(){
+    void* memoria = malloc(memoria_registro.tam_memoria); 
+    lista_particiones = memoria_registro.particiones;
+}
 void* crear_proceso(){
+    if(strcmp(memoria_registro.esquema,"FIJAS")){
+        
+        }
+    else{
+
+    }
     enviar_mensaje("ESPACIO_ASIGNADO", fd_conexion_kernel, memoria_log);
     return NULL;
 }
@@ -65,7 +74,18 @@ void* finalizar_proceso(){
     enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
     return NULL;
 }
-
+void* crear_hilo(){
+    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+    return NULL;
+}
+void* finalizar_hilo(){
+    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+    return NULL;
+}
+void* memory_dump(){
+    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+    return NULL;
+}
 void atender_cpu(){
     while (1)
     {
