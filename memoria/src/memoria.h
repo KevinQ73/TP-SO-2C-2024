@@ -7,6 +7,10 @@
     t_config* memoria_config;
     t_memoria memoria_registro;
 
+    t_dictionary* contexto_ejecucion;
+
+    char** lista_particiones;
+
     int fd_conexiones;
     int conexion_filesystem;
     int fd_conexion_cpu;
