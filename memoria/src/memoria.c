@@ -94,15 +94,33 @@ void atender_cpu(){
         t_pid_tid pid_tid_recibido;
         t_buffer* buffer;
         uint32_t direccion_fisica;
+        uint32_t tamanio_contexto = 11*sizeof(uint32_t);
+
         switch (op){
-        case PID_TID:
-            pid_tid_recibido = recibir_pid_tid(fd_conexion_cpu, memoria_log);
+        case PID_TID: //Aca me solicita el contexto de un pid_tid, hay que ver que enum usamos
+        	buffer = buffer_recieve(fd_conexion_cpu);
+        	pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
             log_debug(memoria_log, "## Contexto <Solicitado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            //Aqui debo buscar el contexto en memoria de usuario
             usleep(memoria_registro.retardo_respuesta * 1000);
-            t_dictionary* registro_solicitado = dictionary_create();
-            // registro_solicitado = buscar_registro(pid_tid_recibido);
-            enviar_contexto_solicitado(registro_solicitado);
+            direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
+            log_debug(memoria_log, "## <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
+            enviar_contexto_solicitado(leer_de_memoria(tamanio_contexto, direccion_fisica), tamanio_contexto);
+            break;
+        case CONTEXTO_EJECUCION: //Aca me pide actualizar el contexto de un pid_tid, hay que ver que enum usamos
+        	buffer = buffer_recieve(fd_conexion_cpu);
+        	pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
+
+            void* contexto_ejecucion;
+            memcpy(contexto_ejecucion, buffer->stream, tamanio_contexto);
+
+            log_debug(memoria_log, "## Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            usleep(memoria_registro.retardo_respuesta * 1000);
+            direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
+            log_debug(memoria_log, "## <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
+            escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
+            enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
             break;
         case PETICION_INSTRUCCION:
         	buffer = buffer_recieve(fd_conexion_cpu);
@@ -150,12 +168,9 @@ void atender_cpu(){
     }
 }
 
-void enviar_contexto_solicitado(t_dictionary* registro_solicitado){
+void enviar_contexto_solicitado(void* buffer, uint32_t tamanio){
     t_paquete* paquete = crear_paquete(CONTEXTO_EJECUCION);
-    for (int i = 0; i < 11; i++) {
-    	uint32_t* registro = (uint32_t*) dictionary_get(registro_solicitado, nombres_registros[i]);
-    	agregar_a_paquete(paquete, registro, sizeof(uint32_t));
-    }
+    agregar_a_paquete(paquete, buffer, tamanio);
     enviar_paquete(paquete, fd_conexion_cpu);
     eliminar_paquete(paquete);
 }
@@ -211,4 +226,13 @@ void enviar_datos_memoria(void* buffer, uint32_t tamanio){
     agregar_a_paquete(paquete, buffer, tamanio);
     enviar_paquete(paquete, fd_conexion_cpu);
     eliminar_paquete(paquete);
+}
+
+uint32_t buscar_contexto(uint32_t pid, uint32_t tid){
+    uint32_t direccion_fisica = 1; //Le puse este valor para prueba nada mas
+    
+    //Aca se debe implementar una funcion que me diga donde empieza el PIT_TID que busco
+    //Aca debo ver como memoria de usuario guarda los TCB y PCB
+
+    return direccion_fisica;
 }

@@ -25,7 +25,8 @@
     int tid_busqueda;
 
     void atender_cpu();
-    void enviar_contexto_solicitado(t_dictionary* registro_solicitado);
+    void enviar_contexto_solicitado(void* buffer, uint32_t tamanio);
+    uint32_t buscar_contexto(uint32_t pid, uint32_t tid);
     char* buscar_path(int pid, int tid);
     char* obtenerInstruccion(char* pathInstrucciones, uint32_t program_counter);
     bool busqueda_pid_tid(t_pseudocodigo* pseudocodigo);
