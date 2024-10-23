@@ -3,6 +3,7 @@
 
     #include <utils-kernel.h>
     #include <utils/serializacion.h>
+    #include <stdbool.h>
     t_log* kernel_log;
     t_config* kernel_config;
     t_kernel kernel_registro;

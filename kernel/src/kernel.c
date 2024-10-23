@@ -236,10 +236,11 @@ void* poner_en_block(){
     //WAIT
     t_hilo_planificacion* hilo_a_bloquear = list_remove(hilo_exec, 0);
     //SIGNAL
-    list_add(hilos_block,hilo_a_bloquear);
     hilo_a_bloquear->estado = BLOCKED_STATE;
-}
 
+    list_add(hilos_block,hilo_a_bloquear);
+   
+}
 void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
     for (int i = 0; i < list_size(hilo->lista_hilos_block); i++)
     {
@@ -550,6 +551,13 @@ void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante)
     }
 }*/
 
+// Función de comparación con valor objetivo como parámetro
+bool es_igual(void* elemento, void* valor_objetivo) {
+    int* valor_elemento = (int*)elemento;
+    int* valor_a_buscar = (int*)valor_objetivo;
+    return *valor_elemento == *valor_a_buscar;
+}
+
 
  void* syscall_dump_memory(){
     log_info(kernel_log,"(%d:%d) - Solicitó syscall: DUMP_MEMORY", hilo_en_ejecucion->pid, hilo_en_ejecucion->tcb_asociado->tid);
@@ -560,12 +568,12 @@ void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante)
     //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
     enviar_paquete(paquete_aviso_dump_memory, conexion_memoria);
     log_debug(kernel_log, "SE ENVIO AVISO DE DUMP_MEMORY");
-    
+
+    int tid_hilo_en_ejecucion =  hilo_en_ejecucion->tcb_asociado->tid;
+
     /*Esta syscall bloqueará al hilo que la invocó*/
-    poner_en_block();
-   
-    //hilo_a_bloquear->estado = BLOCKED_STATE; PUSE ESTO DENTRO DE LA FUNCION PONER EN BLOCK 
-    
+
+    poner_en_block(); 
     
     /*hasta que el módulo memoria confirme la finalización de la operación*/
 
@@ -574,8 +582,8 @@ void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante)
     if(strcmp(respuesta_memoria, "OK")){
 
         /*Caso contrario, el hilo se desbloquea normalmente pasando a READY.*/
-        int posicion_del_hilo = find_posicion_hilo();
-        t_hilo_planificacion* hilo_a_desbloquear = list_remove(hilos_block,0);
+
+        t_hilo_planificacion* hilo_a_desbloquear = list_remove_by_condition(hilos_block,es_igual,tid_hilo_en_ejecucion);
         poner_en_ready(hilo_a_desbloquear);
 
     }else{
