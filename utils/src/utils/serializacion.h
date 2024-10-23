@@ -33,7 +33,7 @@
     typedef enum{
         SET,
         READ_MEM,
-        WRITE_MEM,
+        WRITE_MEM = 5, //Le puse este valor porque se repite con PID_TID y me daba error
         SUM,
         SUB,
         JNZ,

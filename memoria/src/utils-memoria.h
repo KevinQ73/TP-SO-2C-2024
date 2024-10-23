@@ -27,6 +27,12 @@
         char* log_level;
     } t_memoria;
 
+    typedef struct{
+        int pid;
+        int tid;
+        char* pseudocodigo;
+    } t_pseudocodigo;
+
     t_memoria levantar_datos_memoria(t_config* config);
 
 #endif /* MEMORIA_SRC_UTILS_MEMORIA_H_ */

@@ -56,8 +56,9 @@ void atender_kernel(){
     }
 }
 void iniciar_memoria(){
-    void* memoria = malloc(memoria_registro.tam_memoria); 
+    memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
     lista_particiones = memoria_registro.particiones;
+    lista_pseudocodigos = list_create(); //Lo puse aca para iniciar todo junto con la memoria
 }
 void* crear_proceso(){
     if(strcmp(memoria_registro.esquema,"FIJAS")){
@@ -91,8 +92,9 @@ void atender_cpu(){
     {
         int op = recibir_operacion(fd_conexion_cpu);
         t_pid_tid pid_tid_recibido;
-        switch (op)
-        {
+        t_buffer* buffer;
+        uint32_t direccion_fisica;
+        switch (op){
         case PID_TID:
             pid_tid_recibido = recibir_pid_tid(fd_conexion_cpu, memoria_log);
             log_debug(memoria_log, "## Contexto <Solicitado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
@@ -103,19 +105,41 @@ void atender_cpu(){
             enviar_contexto_solicitado(registro_solicitado);
             break;
         case PETICION_INSTRUCCION:
-        	t_buffer* buffer = buffer_recieve(fd_conexion_cpu);
+        	buffer = buffer_recieve(fd_conexion_cpu);
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
         	uint32_t programCounter = buffer_read_uint32(buffer);
 
         	usleep(memoria_registro.retardo_respuesta * 1000);
-        	char* path_pid_tid;
-        	//Aqui debo buscar la forma de encontrar en memoria del sistema
-        	//path_pid_tid = buscar_path(pid, tid);
+        	char* path_pid_tid = buscar_path(pid_tid_recibido.pid, pid_tid_recibido.tid);
         	char* instruccion = obtenerInstruccion(path_pid_tid, programCounter);
 			log_debug(memoria_log, "## Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: <%s>", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
         	enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
         	break;
+        case WRITE_MEM:
+            buffer = buffer_recieve(fd_conexion_cpu);
+            pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
+            direccion_fisica = buffer_read_uint32(buffer);
+            uint32_t dato = buffer_read_uint32(buffer);
+
+            usleep(memoria_registro.retardo_respuesta * 1000);
+            log_debug(memoria_log, "## <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
+
+            escribir_en_memoria(&dato, 4, direccion_fisica);
+            enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
+            break;
+        case READ_MEM:
+            buffer = buffer_recieve(fd_conexion_cpu);
+            pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
+            direccion_fisica = buffer_read_uint32(buffer);
+
+            usleep(memoria_registro.retardo_respuesta * 1000);
+            log_debug(memoria_log, "## <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
+
+            enviar_datos_memoria(leer_de_memoria(4, direccion_fisica), 4);
+            break;
         case DESCONEXION:
             log_error(memoria_log, "Desconexion de Memoria-Cpu");
             break;
@@ -157,3 +181,34 @@ char* obtenerInstruccion(char* pathInstrucciones, uint32_t program_counter){
     return instruccion;
 }
 
+void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura){
+    memcpy(memoria + inicio_escritura, buffer_escritura, tamanio_buffer);
+}
+
+void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura){
+    void* datos_memoria = malloc(tamanio_lectura);
+
+    memcpy(datos_memoria, memoria + inicio_lectura, tamanio_lectura);
+
+    return datos_memoria;
+}
+
+char* buscar_path(int pid, int tid){
+    tid_busqueda = tid;
+    pid_busqueda = pid;
+    
+    t_pseudocodigo* busqueda = (t_pseudocodigo*) list_find(lista_pseudocodigos, (void*) busqueda_pid_tid);
+
+    return busqueda->pseudocodigo;
+}
+
+bool busqueda_pid_tid(t_pseudocodigo* pseudocodigo){
+    return (pseudocodigo->pid == pid_busqueda) && (pseudocodigo->tid == tid_busqueda);
+}
+
+void enviar_datos_memoria(void* buffer, uint32_t tamanio){
+    t_paquete* paquete = crear_paquete(READ_MEM);
+    agregar_a_paquete(paquete, buffer, tamanio);
+    enviar_paquete(paquete, fd_conexion_cpu);
+    eliminar_paquete(paquete);
+}
