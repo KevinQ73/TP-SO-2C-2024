@@ -123,7 +123,7 @@
 
     void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante);
 
-    void* syscall_process_exit(t_pcb* pcb);
+    void* syscall_process_exit();
 
     void* syscall_thread_create();
 
@@ -132,6 +132,8 @@
     void* syscall_thread_exit(t_hilo_planificacion* hilo);
 
     void* syscall_thread_cancel(uint32_t tid);
+
+    void* syscall_dump_memory();
 
     /*--------------------------- FINALIZACIÓN DE TADS --------------------------*/
 

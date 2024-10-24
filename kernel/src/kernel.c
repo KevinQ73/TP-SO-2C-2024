@@ -470,7 +470,7 @@ void* operacion_a_atender(){
         break;
 
     case PROCESS_EXIT:
-        syscall_process_exit()
+        syscall_process_exit();
         break;
 
     case THREAD_CREATE:
@@ -559,7 +559,7 @@ bool es_igual(void* elemento, void* valor_objetivo) {
 }
 
 
- void* syscall_dump_memory(){
+void* syscall_dump_memory(){
     log_info(kernel_log,"(%d:%d) - Solicitó syscall: DUMP_MEMORY", hilo_en_ejecucion->pid, hilo_en_ejecucion->tcb_asociado->tid);
     t_paquete* paquete_aviso_dump_memory = crear_paquete(AVISO_DUMP_MEMORY);
     agregar_a_paquete(paquete_aviso_dump_memory,  hilo_en_ejecucion->pid, sizeof(uint32_t));
@@ -583,16 +583,16 @@ bool es_igual(void* elemento, void* valor_objetivo) {
 
         /*Caso contrario, el hilo se desbloquea normalmente pasando a READY.*/
 
-        t_hilo_planificacion* hilo_a_desbloquear = list_remove_by_condition(hilos_block,es_igual,tid_hilo_en_ejecucion);
+        t_hilo_planificacion* hilo_a_desbloquear = list_remove_by_condition(hilos_block, es_igual);
         poner_en_ready(hilo_a_desbloquear);
 
     }else{
         /*en caso de error, el proceso se enviará a EXIT. */
 
-         t_pcb* pcb_a_liberar =  list_find_by_pid(hilo_en_ejecucion->pid);
+        t_pcb* pcb_a_liberar =  list_find_by_pid(hilo_en_ejecucion->pid);
         free(pcb_a_liberar);
         
-        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
+        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb_a_liberar->pid);
         inicializar_pcb_en_espera();
 
     }
@@ -615,9 +615,8 @@ void* syscall_process_exit(){
        t_pcb* pcb_a_liberar =  list_find_by_pid(hilo_en_ejecucion->pid);
         free(pcb_a_liberar);
         
-        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb->pid);
+        log_debug(kernel_log,"Find de proceso:“## Finaliza el proceso <PID> %d", pcb_a_liberar->pid);
         inicializar_pcb_en_espera();
-
     }
 }
 
