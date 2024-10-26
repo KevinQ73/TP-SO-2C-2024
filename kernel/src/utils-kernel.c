@@ -39,7 +39,7 @@ t_pcb* create_pcb(char* path_instrucciones, int size_process){
 t_tcb* create_tcb(int prioridad){
     t_tcb* tcb = malloc(sizeof(t_tcb));
 
-    tcb->tid = aplicar_tid(); // Crear función incremental
+    tcb->tid = 0; // Crear función incremental
     tcb->prioridad = prioridad;
     return tcb;
 }
