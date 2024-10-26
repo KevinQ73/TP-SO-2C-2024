@@ -1,8 +1,8 @@
 #include <kernel.h>
 #include <cspecs/cspec.h>
 
-context (probando_cosas) {
-    describe("tests") {
+context (probando_kernel) {
+    describe("Inicialización") {
         before {
             printf("Yo inicializo cosas\n");
         } end
@@ -11,19 +11,28 @@ context (probando_cosas) {
             printf("Yo limpio cosas\n");
         } end
 
-        it("test1") {
-            printf("Soy el test 1 y pruebo que 1+1 sea 2\n");
-            should_int(1 + 1) be equal to(2);
-        } end
+        t_pcb* pcb;
+        t_tcb* tcb;
+        t_hilo_planificacion* hilo;
 
-        it("test2") {
-            printf("Soy el test 2 y doy Segmentation Fault\n");
-            char* puntero = NULL;
-            *puntero = 9;
-        } end
+        describe("Creación de estructuras") {
+            it("Creacion de proceso con hilo main") {
+                pcb = create_pcb("P1.txt", 10);
+                tcb = create_tcb(0);
+                
+                should_int(pcb->pid) be equal to(0);
+                should_int(pcb->tidSig) be equal to(0);
+            } end
 
-        it("test3") {
-            printf("Soy el test 3");
+            it("test2") {
+                printf("Soy el test 2 y doy Segmentation Fault\n");
+                char* puntero = NULL;
+                *puntero = 9;
+            } end
+
+            it("test3") {
+                printf("Soy el test 3");
+            } end
         } end
     } end
 }
