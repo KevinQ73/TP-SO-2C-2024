@@ -13,7 +13,9 @@ int main(int argc, char* argv[]) {
     // ------------------------ Iniciar servidor con CPU y Kernel------------------------
 
     fd_conexiones = iniciar_servidor(memoria_log, "MEMORIA", memoria_registro.puerto_escucha);
-    log_debug(memoria_log,"SOCKET LISTEN LISTO PARA RECIBIR CLIENTES");
+    log_debug(memoria_log,"SOCKET LISTEN LISTO PARA RECIBIR A CPU");
+
+    iniciar_memoria();
 
     // --------------------- Conexión como cliente de FILESYSTEM ----------------------
 
@@ -25,14 +27,10 @@ int main(int argc, char* argv[]) {
     log_debug(memoria_log, "Esperando CPU...");
     fd_conexion_cpu = esperar_cliente(memoria_log, "CPU", fd_conexiones);
 
-    log_debug(memoria_log, "Esperando KERNEL...");
-    fd_conexion_kernel = esperar_cliente(memoria_log, "KERNEL", fd_conexiones);
+    atender_solicitudes();
 
     // --------------------- Arrancan funciones de memoria ----------------------
-    iniciar_memoria();
-    atender_kernel();
-    pthread_create(&hiloMemoriaCpu, NULL, (void *)atender_cpu, NULL);
-    pthread_detach(hiloMemoriaCpu);
+
     //FINALIZACION DEL MODULO
 
     log_debug(memoria_log, "TERMINANDO MEMORIA");
@@ -41,20 +39,88 @@ int main(int argc, char* argv[]) {
     //terminar_modulo(conexion_filesystem, memoria_log, memoria_config);
 
 }
-void atender_kernel(){
-    // recibir paquete de kernel
-    t_list* paquete = recibir_paquete(fd_conexion_kernel);
-    int op = recibir_operacion(fd_conexion_kernel);
 
-    if(op == CREAR_PROCESO){
-        pthread_create(&hiloCrearProceso,NULL,crear_proceso(),NULL);
-        pthread_detach(hiloCrearProceso);
-    }
-    else if(op == FINALIZAR_PROCESO){
-        pthread_create(&hiloFinalizarProceso,NULL,finalizar_proceso(),NULL);
-        pthread_detach(hiloFinalizarProceso);
+void atender_solicitudes(){
+    pthread_create(&hiloMemoriaCpu, NULL, atender_cpu, NULL);
+    pthread_detach(hiloMemoriaCpu);
+
+    pthread_create(&hiloMemoriaKernel, NULL, atender_kernel, NULL);
+    pthread_join(hiloMemoriaKernel, NULL);
+}
+
+void* atender_kernel(){
+    bool liberar_hilo = true;
+
+    while(liberar_hilo){
+
+        log_debug(memoria_log, "Esperando solicitud de KERNEL...");
+        fd_conexion_kernel = esperar_cliente(memoria_log, "KERNEL", fd_conexiones);
+
+        if (fd_conexion_kernel < 0) {
+            // Llamar a la función de manejo de errores
+            manejar_error_accept(errno, memoria_log);
+            if (errno == EINTR || errno == ECONNABORTED) {
+                continue;  // Reintentar la operación en caso de interrupción o conexión abortada
+            } else {
+                abort();
+            }
+        }
+
+        t_buffer* buffer;
+        int size = 0;
+        char* path = string_new();
+        uint32_t prioridad;
+
+        int operacion_kernel = recibir_operacion(fd_conexion_kernel);
+
+        buffer = buffer_recieve(fd_conexion_kernel);
+
+        switch (operacion_kernel)
+        {
+        case CREAR_PROCESO:
+            path = buffer_read_string(buffer, &size);
+            uint32_t size_process = buffer_read_uint32(buffer);
+            prioridad = buffer_read_uint32(buffer);
+
+            log_debug(memoria_log, "LLEGÓ CREACIÓN DE PROCESO DE PRIORIDAD: %d, TAMAÑO: %d, Y PATH: %s", prioridad, size_process, path);
+            enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+
+            free(path);
+            close(fd_conexion_kernel);
+            break;
+
+        case CREAR_HILO:
+            path = buffer_read_string(buffer, &size);
+            prioridad = buffer_read_uint32(buffer);
+
+            log_debug(memoria_log, "LLEGÓ CREACIÓN DE HILO DE PRIORIDAD: %d, TAMAÑO: %d, Y PATH: %s", prioridad, size_process, path);
+            enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+            pthread_mutex_unlock(&kernel_operando);
+
+            free(path);
+            close(fd_conexion_kernel);
+            break;
+
+        case FINALIZAR_PROCESO:
+            //aplicar_retardo();
+            //uint32_t pid_proceso_finalizar = recibir_pid(fd_conexion_kernel);
+
+            //finalizar_proceso(pid_proceso_finalizar);
+            //pthread_mutex_unlock(&kernel_operando);
+            break;
+
+        default:
+            log_debug(memoria_log, "OPERACIÓN DE KERNEL ERRONEA");
+            liberar_hilo = false;
+            break;
+        }
     }
 }
+
+void sems(){
+    pthread_mutex_init(&kernel_operando, NULL);
+}
+
 void iniciar_memoria(){
     memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
     lista_particiones = memoria_registro.particiones;

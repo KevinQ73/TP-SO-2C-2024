@@ -1,6 +1,9 @@
 #include <utils/cliente.h>
 
 int crear_conexion(t_log* logger, char* ip, char* puerto){
+    int codigo_handshake = 1;
+    int result;
+
     struct addrinfo hints, *servinfo;
 
     // Init de hints
@@ -27,6 +30,8 @@ int crear_conexion(t_log* logger, char* ip, char* puerto){
         freeaddrinfo(servinfo);
         return 0;
     } else
+        send(socket_cliente, &codigo_handshake, sizeof(int), NULL);
+	    recv(socket_cliente, &result, sizeof(uint32_t), MSG_WAITALL);
         log_info(logger, "Cliente conectado en %s:%s (a %s)\n", ip, puerto, "a");
 
     freeaddrinfo(servinfo); //free

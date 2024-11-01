@@ -26,6 +26,7 @@
         PETICION_INSTRUCCION,
         CONTEXTO_EJECUCION,
         INTERRUPCION_QUANTUM,
+        INTERRUPCION_USUARIO,
         ENVIO_TID,
         EJECUTAR_HILO,
     } cod_inst;
@@ -84,18 +85,18 @@
 
     typedef struct{
         uint32_t pid;
-        uint32_t tidSig;
-        t_list* tids; // TIENE T_HILO_PLANIFICACION
-        t_list* lista_tcbs_new; // TIENE T_TCB
-        t_list* mutex_asociados;
+        uint32_t tid_siguiente;
         uint32_t program_counter;
-        estado_proceso estado;
+        estado_proceso estado_proceso;
         char* path_instrucciones_hilo_main;
         int size_process;
+        t_list* mutex_asociados;
+        t_list* lista_tcb;
     } t_pcb;
 
     typedef struct{
         uint32_t tid;
+        uint32_t tid_siguiente;
         orden_prioridad prioridad;
     } t_tcb;
 
@@ -105,7 +106,7 @@
     } t_pid_tid;
 
     typedef struct{
-        uint32_t pid;
+        t_pcb* pcb_padre;
         t_tcb* tcb_asociado;
         estado_proceso estado;
         t_list* lista_hilos_block;

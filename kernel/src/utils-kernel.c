@@ -22,37 +22,38 @@ t_kernel levantar_datos(t_config* config){
 
 t_pcb* create_pcb(char* path_instrucciones, int size_process){
     t_pcb* pcb = malloc(sizeof(t_pcb));
-        
-    pcb->pid = 0; // Crear función incremental
-    pcb->tidSig = 0;
-    pcb->tids = list_create();
-    pcb->lista_tcbs_new = list_create();
-    pcb->mutex_asociados = list_create();
+
+    pcb->pid = siguiente_pid();
     pcb->program_counter = 0;
-    pcb->estado = NEW_STATE;
+    pcb->estado_proceso = NEW_STATE;
     pcb->path_instrucciones_hilo_main = path_instrucciones;
     pcb->size_process = size_process;
-    
+    pcb->mutex_asociados = list_create();
+    pcb->lista_tcb = list_create();
+
     return pcb;
 }
 
 t_tcb* create_tcb(int prioridad){
     t_tcb* tcb = malloc(sizeof(t_tcb));
 
-    tcb->tid = 0; // Crear función incremental
+    tcb->tid_siguiente = 0;
+    tcb->tid = siguiente_tid(tcb->tid_siguiente);
     tcb->prioridad = prioridad;
+
+    tcb->tid_siguiente++;
     return tcb;
 }
 
-t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_asociado, t_tcb* tcb_asociado){
+t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_padre, t_tcb* tcb_asociado){
     t_hilo_planificacion* hilo = malloc(sizeof(t_hilo_planificacion));
 
-    hilo->estado = pcb_asociado->estado;
-    hilo->pid = pcb_asociado->pid;
+    hilo->pcb_padre = pcb_padre;
     hilo->tcb_asociado = tcb_asociado;
+    hilo->estado = pcb_padre->estado_proceso;
     hilo->lista_hilos_block = list_create();
 
-    list_add(pcb_asociado->tids, hilo);
+    list_add(pcb_padre->lista_tcb, tcb_asociado);
 
     return hilo;
 }
@@ -66,6 +67,13 @@ t_cola_prioridades* create_priority_queue(int prioridad){
     return cola_nueva;
 }
 
+int crear_conexion_con_memoria(t_log* kernel_log, char* ip, char* puerto){
+    int conexion_memoria = crear_conexion(kernel_log, ip, puerto);
+    log_debug(kernel_log, "ME CONECTÉ A MEMORIA");
+
+    return conexion_memoria;
+}
+
 /*------------------------------ MISCELANEO --------------------------------*/
 
 bool compare_pid(uint32_t* pid_1, uint32_t* pid_2){
@@ -75,4 +83,9 @@ bool compare_pid(uint32_t* pid_1, uint32_t* pid_2){
     
     return (*pid_1 == *pid_2);  // Comparar los valores apuntados por a y b
     
+}
+
+uint32_t siguiente_tid(int siguiente_tid){
+    int tid = 0 + siguiente_tid;
+    return tid;
 }

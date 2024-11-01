@@ -6,11 +6,17 @@
     #include <string.h>
     #include <unistd.h>
     #include <netdb.h>
+    #include <errno.h>
     #include <sys/socket.h>
     #include <commons/config.h>
     #include <commons/log.h>
     #include <commons/error.h>
     #include <utils/cliente.h>
+
+    typedef enum{
+        HANDSHAKE_OK = 400,
+        HANDSHAKE_ERROR,
+    } handshake_codes;
 
     /**
     * @fn    iniciar_servidor
@@ -30,6 +36,8 @@
     *                        el cliente podrán conectarse.
     */
     int esperar_cliente(t_log* logger, const char* name, int socket_servidor);
+
+    void manejar_error_accept(int errnum, t_log* log);
 
     /**
     * @fn    terminar_modulo

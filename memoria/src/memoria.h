@@ -14,11 +14,16 @@
     void* memoria;
 
     int fd_conexiones;
+    //int fd_escucha_cpu;
+    //int fd_escucha_kernel;
     int conexion_filesystem;
     int fd_conexion_cpu;
     int fd_conexion_kernel;
     
     pthread_t hiloMemoriaCpu;
+    pthread_t hiloMemoriaKernel;
+
+    pthread_mutex_t kernel_operando;
     t_list* lista_pseudocodigos;
 
     int pid_busqueda;
@@ -36,8 +41,10 @@
 
     pthread_t hiloCrearProceso;
     pthread_t hiloFinalizarProceso;
+    void atender_solicitudes();
+
     void iniciar_memoria();
-    void atender_kernel();
+    void* atender_kernel();
     void* crear_proceso();
     void* finalizar_proceso();
 

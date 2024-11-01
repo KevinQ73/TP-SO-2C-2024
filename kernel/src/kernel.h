@@ -14,6 +14,8 @@
     int fd_conexion_interrupt;
     int proceso_ejecutando;
     int prioridad;
+    int pid_siguiente;
+    int pid_actual = 0;
 
     t_pcb* primer_proceso;
     t_hilo_planificacion* hilo_en_ejecucion;
@@ -35,12 +37,12 @@
     pthread_t hiloNew;
     pthread_t hiloPlanifCortoPlazo;
 
-    pthread_mutex_t mutex_siguiente_id;
     pthread_mutex_t mutex_cola_new;
     pthread_mutex_t mutex_cola_ready;
     pthread_mutex_t mutex_uso_fd_memoria;
     pthread_mutex_t mutex_lista_procesos_ready;
     pthread_mutex_t mutex_colas_multinivel_existentes;
+    pthread_mutex_t mutex_siguiente_id;
 
     sem_t contador_procesos_en_new;
     sem_t aviso_exit_proceso;
@@ -60,8 +62,6 @@
     void iniciar_planificacion();
 
     /*------------------------ FUNCIONES DE PLANIFICACIÓN -----------------------*/
-
-    int aplicar_tid(t_pcb* pcb);
 
     void* planificador_largo_plazo();
 
@@ -109,13 +109,13 @@
 
     /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
 
-    char* avisar_creacion_proceso_memoria(char* path, int* size_process, int* prioridad, int socket_memoria, t_log* kernel_log);
+    char* avisar_creacion_proceso_memoria(char* path, int* size_process, int* prioridad, t_log* kernel_log);
 
-    char* avisar_creacion_hilo_memoria(char* path, int* prioridad, int socket_memoria, t_log* kernel_log);
+    char* avisar_creacion_hilo_memoria(char* path, int* prioridad, t_log* kernel_log);
 
-    char* avisar_fin_proceso_memoria(uint32_t pid, int socket_memoria);
+    char* avisar_fin_proceso_memoria(uint32_t pid);
 
-    char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid, int socket_memoria);
+    char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid);
 
     /*--------------------------------- SYSCALLS --------------------------------*/
 
@@ -150,5 +150,8 @@
     /*------------------------------- MISCELANEO --------------------------------*/
 
     t_pcb* obtener_pcb_from_hilo(t_hilo_planificacion* hilo);
+
+    uint32_t siguiente_pid();
+
     
 #endif /* KERNEL_H_ */

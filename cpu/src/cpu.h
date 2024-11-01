@@ -16,8 +16,8 @@
     t_pid_tid pid_tid_recibido;
     t_dictionary* registros_cpu;
     
-    pthread_t* hilo_kernel_dispatch;
-    pthread_t* hilo_kernel_interrupt;
+    pthread_t hilo_kernel_dispatch;
+    pthread_t hilo_kernel_interrupt;
 
     bool flag_disconect = true;
     bool interrupt_is_called = false;

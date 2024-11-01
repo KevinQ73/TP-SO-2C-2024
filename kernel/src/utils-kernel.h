@@ -43,8 +43,12 @@
 
     t_cola_prioridades* create_priority_queue(int prioridad);
 
+    int crear_conexion_con_memoria(t_log* kernel_log, char* ip, char* puerto);
+
     /*------------------------------ MISCELANEO --------------------------------*/
 
     bool compare_pid(uint32_t* pid_1, uint32_t* pid_2);
+
+    uint32_t siguiente_tid(int siguiente_tid);
 
 #endif /* UTILS_KERNEL_H_ */

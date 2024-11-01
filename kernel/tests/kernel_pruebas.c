@@ -21,7 +21,7 @@ context (probando_kernel) {
                 tcb = create_tcb(0);
                 
                 should_int(pcb->pid) be equal to(0);
-                should_int(pcb->tidSig) be equal to(0);
+
             } end
 
             it("test2") {

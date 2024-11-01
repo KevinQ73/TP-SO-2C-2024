@@ -325,13 +325,15 @@ char* recibir_mensaje(int socket_cliente, t_log* log){
     {
         log_debug(log, "SE RECIBIÓ UN MENSAJE");
     } else {
-        log_warning(log, "ERROR EN EL MENSAJE ENVIADO");
+        log_warning(log, "ERROR EN EL MENSAJE RECIBIDO");
         abort();
     }
 
 	buffer = buffer_recieve(socket_cliente);
 
 	string = buffer_read_string(buffer, &length);
+
+	log_debug(log, "MENSAJE: %s, length: %d", string, length);
 
 	buffer_destroy(buffer);
 	return string;
