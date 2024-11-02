@@ -14,8 +14,6 @@
     void* memoria;
 
     int fd_conexiones;
-    //int fd_escucha_cpu;
-    //int fd_escucha_kernel;
     int conexion_filesystem;
     int fd_conexion_cpu;
     int fd_conexion_kernel;
@@ -29,7 +27,7 @@
     int pid_busqueda;
     int tid_busqueda;
 
-    void atender_cpu();
+    void* atender_cpu();
     void enviar_contexto_solicitado(void* buffer, uint32_t tamanio);
     uint32_t buscar_contexto(uint32_t pid, uint32_t tid);
     char* buscar_path(int pid, int tid);

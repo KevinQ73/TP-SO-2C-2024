@@ -46,6 +46,7 @@
 
     sem_t contador_procesos_en_new;
     sem_t aviso_exit_proceso;
+    sem_t kernel_activo;
 
     t_queue* cola_new;
     t_queue* cola_ready_fifo;
@@ -153,5 +154,6 @@
 
     uint32_t siguiente_pid();
 
+    void signal_handler(int sig);
     
 #endif /* KERNEL_H_ */

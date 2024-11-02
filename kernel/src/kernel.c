@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
 
     kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
 
-    kernel_config = iniciar_config("./files/kernel.config");
+    kernel_config = iniciar_config(argv[3]);
 
     kernel_registro = levantar_datos(kernel_config);
 
@@ -25,16 +25,21 @@ int main(int argc, char* argv[]) {
 
     // --------------------- Inicio del modulo ----------------------
 
-    iniciar_semaforos();
-    iniciar_colas();
-    iniciar_primer_proceso(argv[1], argv[2]);
-    iniciar_planificacion();
-
     procesos_creados = list_create();
     hilo_exec = list_create();
     hilos_block = list_create();
     lista_colas_multinivel = list_create();
     lista_prioridades = list_create();
+
+    signal(SIGTERM, signal_handler);  // Capturar la señal SIGTERM
+    signal(SIGINT, signal_handler);   // Capturar la señal SIGINT (Ctrl+C)
+
+    iniciar_semaforos();
+    iniciar_colas();
+    iniciar_primer_proceso(argv[1], argv[2]);
+    iniciar_planificacion();
+
+    sem_wait(&kernel_activo);
 
     // --------------------- Finalizacion del modulo----------------------
     
@@ -58,6 +63,7 @@ void iniciar_semaforos(){
     pthread_mutex_init(&mutex_lista_procesos_ready, NULL);
 
     sem_init(&contador_procesos_en_new, 0, 0);
+    sem_init(&kernel_activo, 0, 0);
 }
 
 void iniciar_colas(){
@@ -97,13 +103,11 @@ void iniciar_primer_proceso(char* path, char* size){
 }
 
 void iniciar_planificacion(){
-    proceso_ejecutando = 0;
+    pthread_create(&hiloPlanifCortoPlazo, NULL, (void*)planificador_corto_plazo, NULL);
+    pthread_detach(hiloPlanifCortoPlazo);
 
     pthread_create(&hiloNew, NULL, planificador_largo_plazo, NULL);
     pthread_detach(hiloNew);
-
-    pthread_create(&hiloPlanifCortoPlazo, NULL, planificador_corto_plazo, NULL);
-    pthread_detach(hiloPlanifCortoPlazo);
 }
 
 /*------------------------ FUNCIONES DE PLANIFICACIÓN -----------------------*/
@@ -170,7 +174,7 @@ void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
 
 void* planificador_corto_plazo(){
     char* planificacion = kernel_registro.algoritmo_planificacion;
-
+    hilo_en_ejecucion = malloc(sizeof(t_hilo_planificacion));
     while (1)
     {
         hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
@@ -182,20 +186,20 @@ void* planificador_corto_plazo(){
 t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
     t_hilo_planificacion* hilo;
 
-    if (strcmp(planificacion, "FIFO"))
+    if (strcmp(planificacion, "FIFO") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
         hilo = (t_hilo_planificacion*)queue_pop(cola_ready_fifo);
         pthread_mutex_unlock(&mutex_cola_ready);
         log_info(kernel_log, "## [FIFO] Se quitó el hilo (%d:%d) de la COLA READY", hilo->pcb_padre->pid, hilo->tcb_asociado->tid);
 
-    } else if (strcmp(planificacion, "PRIORIDADES"))
+    } else if (strcmp(planificacion, "PRIORIDADES") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
         hilo = thread_find_by_priority_schedule(lista_prioridades);
         pthread_mutex_unlock(&mutex_cola_ready);
 
-    } else if (strcmp(planificacion, "COLAS_MULTINIVEL"))
+    } else if (strcmp(planificacion, "COLAS_MULTINIVEL") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
         hilo = thread_find_by_multilevel_queues_schedule(lista_colas_multinivel);
@@ -215,13 +219,13 @@ void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso){
     pthread_mutex_lock(&mutex_cola_ready);
     hilo_del_proceso->estado = READY_STATE;
     
-    if(strcmp(kernel_registro.algoritmo_planificacion, "FIFO")){
+    if(strcmp(kernel_registro.algoritmo_planificacion, "FIFO") == 0){
         queue_push(cola_ready_fifo, hilo_del_proceso);
 
-    } else if(strcmp(kernel_registro.algoritmo_planificacion, "PRIORIDADES")){
+    } else if(strcmp(kernel_registro.algoritmo_planificacion, "PRIORIDADES") == 0){
         list_add(lista_prioridades, hilo_del_proceso);
 
-    }else if(strcmp(kernel_registro.algoritmo_planificacion, "COLAS_MULTINIVEL")){
+    }else if(strcmp(kernel_registro.algoritmo_planificacion, "COLAS_MULTINIVEL") == 0){
         queue_push_by_priority(hilo_del_proceso);
     }else{
         log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
@@ -351,12 +355,12 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
         2*(sizeof(uint32_t))
         );
 
-    buffer_add_uint32(buffer_envio, &(hilo_a_ejecutar->pcb_padre->pid), kernel_log);
-    buffer_add_uint32(buffer_envio, &(hilo_a_ejecutar->tcb_asociado->tid), kernel_log);
+    buffer_add_uint32(buffer_envio, &hilo_a_ejecutar->pcb_padre->pid, kernel_log);
+    buffer_add_uint32(buffer_envio, &hilo_a_ejecutar->tcb_asociado->tid, kernel_log);
 
     paquete->buffer = buffer_envio;
 
-    enviar_paquete(paquete,fd_conexion_dispatch);
+    enviar_paquete(paquete, fd_conexion_dispatch);
     log_debug(kernel_log, "SE ENVIO PAQUETE");
     eliminar_paquete(paquete);
 
@@ -777,4 +781,11 @@ uint32_t siguiente_pid(){
     pid_siguiente = pid_actual++;
     pthread_mutex_unlock(&mutex_siguiente_id);
     return pid_siguiente;
+}
+
+void signal_handler(int sig) {
+    if (sig == SIGTERM || sig == SIGINT) {
+        printf("Recibida señal para terminar el servidor.\n");
+        sem_post(&kernel_activo);  // Desbloquear el servidor
+    }
 }

@@ -46,12 +46,12 @@ void recibir_paquete_memoria(t_dictionary* registros, int fd_memoria, t_log* cpu
 
     buffer = buffer_recieve(fd_memoria);
 
-    while (i < 11)
+    for (int i = 0; i < 11; i++)
     {
         valor = buffer_read_uint32(buffer);
         modificar_registro(registros, nombres_registros[i], valor, cpu_log);
+        i++;
     }
-
     buffer_destroy(buffer);
 }
 
@@ -100,7 +100,7 @@ char* fetch(t_pid_tid pid_tid_recibido, uint32_t* program_counter, int fd_memori
     buffer_add_uint32(buffer, &(pid_tid_recibido.tid), log);
     log_debug(log, "TID A ENVIAR: %d", pid_tid_recibido.tid);
     buffer_add_uint32(buffer, program_counter, log);
-    log_debug(log, "PROGRAM COUNTER A ENVIAR: %d", program_counter);
+    log_debug(log, "PROGRAM COUNTER A ENVIAR: %d", *program_counter);
 
     paquete_memoria->buffer = buffer;
     enviar_paquete(paquete_memoria, fd_memoria);

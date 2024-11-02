@@ -19,7 +19,8 @@
     pthread_t hilo_kernel_dispatch;
     pthread_t hilo_kernel_interrupt;
 
-    bool flag_disconect = true;
+    bool flag_disconect_dispatch = true;
+    bool flag_disconect_interrupt = true;
     bool interrupt_is_called = false;
 
     /*--------------------- Atender conexiones a la CPU ---------------------*/

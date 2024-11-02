@@ -63,7 +63,7 @@ int esperar_cliente(t_log* logger, const char* name, int socket_servidor) {
 		send(socket_cliente, &resultError, sizeof(uint32_t), NULL);
 	}
 
-	log_info(logger, "Se conecto: %s", name);
+	log_info(logger, "## Se conecto: %s\n", name);
 
 	return socket_cliente;
 }

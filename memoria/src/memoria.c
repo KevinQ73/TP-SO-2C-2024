@@ -6,21 +6,21 @@ int main(int argc, char* argv[]) {
 
     memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
 
-    memoria_config = iniciar_config("./files/memoria.config");
+    memoria_config = iniciar_config(argv[1]);
 
     memoria_registro = levantar_datos_memoria(memoria_config);
 
     // ------------------------ Iniciar servidor con CPU y Kernel------------------------
 
+    iniciar_memoria();
+
     fd_conexiones = iniciar_servidor(memoria_log, "MEMORIA", memoria_registro.puerto_escucha);
     log_debug(memoria_log,"SOCKET LISTEN LISTO PARA RECIBIR A CPU");
 
-    iniciar_memoria();
-
     // --------------------- Conexión como cliente de FILESYSTEM ----------------------
 
-    conexion_filesystem = crear_conexion(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
-    log_debug(memoria_log, "ME CONECTÉ A FILESYSTEM");
+    //conexion_filesystem = crear_conexion(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
+    //log_debug(memoria_log, "ME CONECTÉ A FILESYSTEM");
 
     // --------------------- Conexiones de clientes con el servidor ----------------------
     
@@ -40,6 +40,14 @@ int main(int argc, char* argv[]) {
 
 }
 
+void iniciar_memoria(){
+    log_info(memoria_log, "MEMORIA INICIALIZADA\n");
+    memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
+
+    lista_particiones = memoria_registro.particiones;
+    lista_pseudocodigos = list_create(); //Lo puse aca para iniciar todo junto con la memoria
+}
+
 void atender_solicitudes(){
     pthread_create(&hiloMemoriaCpu, NULL, atender_cpu, NULL);
     pthread_detach(hiloMemoriaCpu);
@@ -49,9 +57,9 @@ void atender_solicitudes(){
 }
 
 void* atender_kernel(){
-    bool liberar_hilo = true;
+    bool liberar_hilo_kernel = true;
 
-    while(liberar_hilo){
+    while(liberar_hilo_kernel){
 
         log_debug(memoria_log, "Esperando solicitud de KERNEL...");
         fd_conexion_kernel = esperar_cliente(memoria_log, "KERNEL", fd_conexiones);
@@ -82,7 +90,7 @@ void* atender_kernel(){
             uint32_t size_process = buffer_read_uint32(buffer);
             prioridad = buffer_read_uint32(buffer);
 
-            log_debug(memoria_log, "LLEGÓ CREACIÓN DE PROCESO DE PRIORIDAD: %d, TAMAÑO: %d, Y PATH: %s", prioridad, size_process, path);
+            log_debug(memoria_log, "## [MEMORIA:KERNEL] LLEGÓ CREACIÓN DE PROCESO DE PRIORIDAD: %d, TAMAÑO: %d, Y PATH: %s", prioridad, size_process, path);
             enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
 
             free(path);
@@ -93,7 +101,7 @@ void* atender_kernel(){
             path = buffer_read_string(buffer, &size);
             prioridad = buffer_read_uint32(buffer);
 
-            log_debug(memoria_log, "LLEGÓ CREACIÓN DE HILO DE PRIORIDAD: %d, TAMAÑO: %d, Y PATH: %s", prioridad, size_process, path);
+            log_debug(memoria_log, "## [MEMORIA:KERNEL] LLEGÓ CREACIÓN DE HILO DE PRIORIDAD: %d, Y PATH: %s", prioridad, path);
             enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
             pthread_mutex_unlock(&kernel_operando);
 
@@ -110,22 +118,104 @@ void* atender_kernel(){
             break;
 
         default:
-            log_debug(memoria_log, "OPERACIÓN DE KERNEL ERRONEA");
-            liberar_hilo = false;
+            log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
+            liberar_hilo_kernel = false;
             break;
         }
     }
 }
 
+void* atender_cpu(){
+    bool liberar_hilo_cpu = true;
+
+    while(liberar_hilo_cpu){
+        t_pid_tid pid_tid_recibido;
+        t_buffer* buffer;
+        uint32_t direccion_fisica;
+        uint32_t tamanio_contexto = 11*sizeof(uint32_t);
+
+        int op = recibir_operacion(fd_conexion_cpu);
+
+        switch (op){
+        case PID_TID: //Aca me solicita el contexto de un pid_tid, hay que ver que enum usamos
+        	buffer = buffer_recieve(fd_conexion_cpu);
+        	pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
+            
+            log_debug(memoria_log, "## [MEMORIA:CPU] Contexto <Solicitado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            usleep(memoria_registro.retardo_respuesta * 1000);
+            direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
+            log_debug(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
+            enviar_contexto_solicitado(leer_de_memoria(tamanio_contexto, direccion_fisica), tamanio_contexto);
+            break;
+        case CONTEXTO_EJECUCION: //Aca me pide actualizar el contexto de un pid_tid, hay que ver que enum usamos
+        	buffer = buffer_recieve(fd_conexion_cpu);
+        	pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
+
+            void* contexto_ejecucion;
+            memcpy(contexto_ejecucion, buffer->stream, tamanio_contexto);
+
+            log_debug(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            usleep(memoria_registro.retardo_respuesta * 1000);
+            direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
+            log_debug(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
+            escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
+            enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
+            break;
+        case PETICION_INSTRUCCION:
+        	buffer = buffer_recieve(fd_conexion_cpu);
+        	pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
+        	uint32_t programCounter = buffer_read_uint32(buffer);
+
+        	usleep(memoria_registro.retardo_respuesta * 1000);
+        	char* path_pid_tid = buscar_path(pid_tid_recibido.pid, pid_tid_recibido.tid);
+        	char* instruccion = obtenerInstruccion(path_pid_tid, programCounter);
+			log_debug(memoria_log, "## [MEMORIA:CPU] Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: <%s>", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
+        	enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
+        	break;
+        case WRITE_MEM:
+            buffer = buffer_recieve(fd_conexion_cpu);
+            pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
+            direccion_fisica = buffer_read_uint32(buffer);
+            uint32_t dato = buffer_read_uint32(buffer);
+
+            usleep(memoria_registro.retardo_respuesta * 1000);
+            log_debug(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
+
+            escribir_en_memoria(&dato, 4, direccion_fisica);
+            enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
+            break;
+        case READ_MEM:
+            buffer = buffer_recieve(fd_conexion_cpu);
+            pid_tid_recibido.pid = buffer_read_uint32(buffer);
+        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
+            direccion_fisica = buffer_read_uint32(buffer);
+
+            usleep(memoria_registro.retardo_respuesta * 1000);
+            log_debug(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
+
+            enviar_datos_memoria(leer_de_memoria(4, direccion_fisica), 4);
+            break;
+        case DESCONEXION:
+            log_error(memoria_log, "## [MEMORIA:CPU] Desconexion de Memoria-Cpu");
+            liberar_hilo_cpu = false;
+            break;
+        default:
+            log_warning(memoria_log, "## [MEMORIA:CPU] Operacion desconocida de Memoria-Cpu");
+            liberar_hilo_cpu = false;
+            break;
+        }
+    }
+}
+
+
 void sems(){
     pthread_mutex_init(&kernel_operando, NULL);
 }
 
-void iniciar_memoria(){
-    memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
-    lista_particiones = memoria_registro.particiones;
-    lista_pseudocodigos = list_create(); //Lo puse aca para iniciar todo junto con la memoria
-}
 void* crear_proceso(){
     if(strcmp(memoria_registro.esquema,"FIJAS")){
         
@@ -152,86 +242,6 @@ void* finalizar_hilo(){
 void* memory_dump(){
     enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
     return NULL;
-}
-void atender_cpu(){
-    while (1)
-    {
-        int op = recibir_operacion(fd_conexion_cpu);
-        t_pid_tid pid_tid_recibido;
-        t_buffer* buffer;
-        uint32_t direccion_fisica;
-        uint32_t tamanio_contexto = 11*sizeof(uint32_t);
-
-        switch (op){
-        case PID_TID: //Aca me solicita el contexto de un pid_tid, hay que ver que enum usamos
-        	buffer = buffer_recieve(fd_conexion_cpu);
-        	pid_tid_recibido.pid = buffer_read_uint32(buffer);
-        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
-            log_debug(memoria_log, "## Contexto <Solicitado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            usleep(memoria_registro.retardo_respuesta * 1000);
-            direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
-            log_debug(memoria_log, "## <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
-            enviar_contexto_solicitado(leer_de_memoria(tamanio_contexto, direccion_fisica), tamanio_contexto);
-            break;
-        case CONTEXTO_EJECUCION: //Aca me pide actualizar el contexto de un pid_tid, hay que ver que enum usamos
-        	buffer = buffer_recieve(fd_conexion_cpu);
-        	pid_tid_recibido.pid = buffer_read_uint32(buffer);
-        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
-
-            void* contexto_ejecucion;
-            memcpy(contexto_ejecucion, buffer->stream, tamanio_contexto);
-
-            log_debug(memoria_log, "## Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            usleep(memoria_registro.retardo_respuesta * 1000);
-            direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
-            log_debug(memoria_log, "## <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
-            escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
-            enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
-            break;
-        case PETICION_INSTRUCCION:
-        	buffer = buffer_recieve(fd_conexion_cpu);
-        	pid_tid_recibido.pid = buffer_read_uint32(buffer);
-        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
-        	uint32_t programCounter = buffer_read_uint32(buffer);
-
-        	usleep(memoria_registro.retardo_respuesta * 1000);
-        	char* path_pid_tid = buscar_path(pid_tid_recibido.pid, pid_tid_recibido.tid);
-        	char* instruccion = obtenerInstruccion(path_pid_tid, programCounter);
-			log_debug(memoria_log, "## Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: <%s>", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
-        	enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
-        	break;
-        case WRITE_MEM:
-            buffer = buffer_recieve(fd_conexion_cpu);
-            pid_tid_recibido.pid = buffer_read_uint32(buffer);
-        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
-            direccion_fisica = buffer_read_uint32(buffer);
-            uint32_t dato = buffer_read_uint32(buffer);
-
-            usleep(memoria_registro.retardo_respuesta * 1000);
-            log_debug(memoria_log, "## <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
-
-            escribir_en_memoria(&dato, 4, direccion_fisica);
-            enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
-            break;
-        case READ_MEM:
-            buffer = buffer_recieve(fd_conexion_cpu);
-            pid_tid_recibido.pid = buffer_read_uint32(buffer);
-        	pid_tid_recibido.tid = buffer_read_uint32(buffer);
-            direccion_fisica = buffer_read_uint32(buffer);
-
-            usleep(memoria_registro.retardo_respuesta * 1000);
-            log_debug(memoria_log, "## <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
-
-            enviar_datos_memoria(leer_de_memoria(4, direccion_fisica), 4);
-            break;
-        case DESCONEXION:
-            log_error(memoria_log, "Desconexion de Memoria-Cpu");
-            break;
-        default:
-            log_warning(memoria_log, "Operacion desconocida de Memoria-Cpu");
-            break;
-        }
-    }
 }
 
 void enviar_contexto_solicitado(void* buffer, uint32_t tamanio){

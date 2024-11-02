@@ -52,12 +52,12 @@ int main(int argc, char* argv[]) {
 
 
 void atender_puerto_dispatch(){
-    while (flag_disconect)
+    while (flag_disconect_dispatch)
     {
         int op = recibir_operacion(fd_conexion_dispatch);
         switch (op)
         {
-        case PID_TID:
+        case EJECUTAR_HILO:
             pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
             log_debug(cpu_log, "PID RECIBIDO: %d, TID RECIBIDO: %d", pid_tid_recibido.pid, pid_tid_recibido.tid);
             ejecutar_hilo(pid_tid_recibido);
@@ -65,17 +65,18 @@ void atender_puerto_dispatch(){
         
         case DESCONEXION:
             log_error(cpu_log, "Desconexion de Kernel - Dispatch");
-            flag_disconect = false;
+            flag_disconect_dispatch = false;
             break;
         default:
             log_warning(cpu_log, "Operacion desconocida de Kernel - Dispatch");
+            flag_disconect_dispatch = false;
             break;
         }
     }
 }
 
 void atender_puerto_interrupt(){
-    while (flag_disconect)
+    while (flag_disconect_interrupt)
     {
         int op = recibir_operacion(fd_conexion_interrupt);
         switch (op)
@@ -93,7 +94,8 @@ void atender_puerto_interrupt(){
             break;
 
         default:
-            log_debug(cpu_log, "ERROR EN ATENDER_PUERTO_INTERRUPT");
+            log_debug(cpu_log, "Operacion desconocida de Kernel - Interrupt");
+            flag_disconect_interrupt = false;
             break;
         }
     }
@@ -135,12 +137,19 @@ void ejecutar_hilo(t_pid_tid pid_tid_recibido){
         uint32_t pc = dictionary_get(registros_cpu, "PC");
         char* instruccion = fetch(pid_tid_recibido, &pc, conexion_memoria, cpu_log);
 
-        char** instruccion_parseada = decode(instruccion);
+        if (strcmp(instruccion, "NO_INSTRUCCION") == 0)
+        {
+            interrupt_is_called = true;
+        } else {
+            char** instruccion_parseada = decode(instruccion);
 
-        execute(registros_cpu, instruccion_parseada, cpu_log);
+            log_debug(cpu_log, "INSTRUCCIÓN SOLICITADA: %s, REGISTRO: %s, VALOR: %s", instruccion_parseada[0], instruccion_parseada[1], instruccion_parseada[2]);
 
-        string_array_destroy(instruccion_parseada);
-        free(instruccion);
+            execute(registros_cpu, instruccion_parseada, cpu_log);
+
+            string_array_destroy(instruccion_parseada);
+            free(instruccion);
+        }
 
     } while (!interrupt_is_called);
 }
