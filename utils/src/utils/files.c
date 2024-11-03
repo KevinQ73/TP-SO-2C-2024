@@ -41,10 +41,10 @@ t_list* leer_instrucciones(char* path, t_log* log_modulo){
     FILE* archivo_instrucciones = fopen(path, "rb");
 
     if (archivo_instrucciones == NULL) {
-            log_error(log_modulo,"ARCHIVO DE INSTRUCCIONES INEXISTENTE");
-            fclose(archivo_instrucciones);
-            exit(EXIT_SUCCESS);
-        }
+        log_error(log_modulo,"ARCHIVO DE INSTRUCCIONES INEXISTENTE");
+        fclose(archivo_instrucciones);
+        abort();
+    }
 
 	char* instruccion = NULL;
 	size_t len = 0;
@@ -53,18 +53,11 @@ t_list* leer_instrucciones(char* path, t_log* log_modulo){
 		int largo = strlen(instruccion);
 		if(instruccion[largo - 1] == '\n') 
 		{
-
 			instruccion[largo - 1] = '\0';
-
 		}
-
 		log_debug(log_modulo, "Se parseó la siguiente instrucción: %s", instruccion);
-
-		char** instruccion_parseada = parsear_instruccion(instruccion);
-
-		list_add(lista_instrucciones_a_devolver, instruccion_parseada);
+        list_add(lista_instrucciones_a_devolver, instruccion);
 	}
-    free(path);
     free(instruccion);
     fclose(archivo_instrucciones);
     log_debug(log_modulo, "SE LEYERON %d INSTRUCCIONES", list_size(lista_instrucciones_a_devolver));

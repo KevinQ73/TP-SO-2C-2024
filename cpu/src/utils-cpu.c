@@ -36,7 +36,7 @@ void recibir_paquete_memoria(t_dictionary* registros, int fd_memoria, t_log* cpu
 
     int op = recibir_operacion(fd_memoria);
 
-    if (op == CONTEXTO_EJECUCION)
+    if (op == ENVIAR_CONTEXTO_EJECUCION)
     {
         log_debug(cpu_log, "SE RECIBIÓ EL CONTEXTO DE EJECUCIÓN DE MEMORIA");
     } else {

@@ -42,6 +42,8 @@ int main(int argc, char* argv[]) {
 
 }
 
+/*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
+
 void iniciar_memoria(){
     log_info(memoria_log, "MEMORIA INICIALIZADA\n");
     memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
@@ -61,6 +63,12 @@ void iniciar_memoria(){
     lista_pseudocodigos = list_create(); //Lo puse aca para iniciar todo junto con la memoria
 }
 
+void iniciar_semaforos(){
+    pthread_mutex_init(&kernel_operando, NULL);
+    pthread_mutex_init(&contexto_ejecucion_procesos, NULL);
+    sem_init(&memoria_activo, 0, 0);
+}
+
 void atender_solicitudes(){
     pthread_create(&hiloMemoriaCpu, NULL, atender_cpu, NULL);
     pthread_detach(hiloMemoriaCpu);
@@ -68,6 +76,8 @@ void atender_solicitudes(){
     pthread_create(&hiloMemoriaKernel, NULL, atender_kernel, NULL);
     pthread_detach(hiloMemoriaKernel);
 }
+
+/*---------------------------- FUNCIONES DE KERNEL --------------------------*/
 
 void* atender_kernel(){
     bool liberar_hilo_kernel = true;
@@ -90,6 +100,7 @@ void* atender_kernel(){
         log_info(memoria_log, "## Kernel Conectado - FD del socket: <%d>", fd_conexion_kernel);
 
         t_buffer* buffer;
+        uint32_t pid;
         int size = 0;
         char* path = string_new();
 
@@ -100,7 +111,7 @@ void* atender_kernel(){
         switch (operacion_kernel)
         {
         case CREAR_PROCESO:
-            uint32_t pid = buffer_read_uint32(buffer);
+            pid = buffer_read_uint32(buffer);
             uint32_t size_process = buffer_read_uint32(buffer);
 
             if (crear_proceso(pid, size_process))
@@ -116,10 +127,14 @@ void* atender_kernel(){
 
         case CREAR_HILO:
             path = buffer_read_string(buffer, &size);
-            int prioridad = buffer_read_uint32(buffer);
+            pid = buffer_read_uint32(buffer);
+            uint32_t tid = buffer_read_uint32(buffer);
+            uint32_t prioridad = buffer_read_uint32(buffer);
 
-            log_debug(memoria_log, "## [MEMORIA:KERNEL] LLEGÓ CREACIÓN DE HILO DE PRIORIDAD: %d, Y PATH: %s", prioridad, path);
+            crear_hilo(pid, tid, prioridad, path);
+
             enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+            log_debug(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s", pid, tid, prioridad, path);
 
             free(path);
             close(fd_conexion_kernel);
@@ -141,6 +156,52 @@ void* atender_kernel(){
     }
 }
 
+bool crear_proceso(uint32_t pid, uint32_t size){
+    bool memoria_asignada;
+    
+    uint32_t base_asignada = hay_particion_disponible(pid, size, memoria_registro.esquema);
+    
+    if (base_asignada){
+        char* key = string_itoa(pid);
+        t_contexto_proceso* contexto_proceso = crear_contexto_proceso(pid, base_asignada, size);
+        pthread_mutex_lock(&contexto_ejecucion_procesos);
+        dictionary_put(contexto_ejecucion, key, contexto_proceso);
+        pthread_mutex_unlock(&contexto_ejecucion_procesos);
+        free(key);
+        memoria_asignada = true;
+    } else {
+        log_error(memoria_log, "## [MEMORIA] OUT OF MEMORY");
+        memoria_asignada = false;
+    }
+    return memoria_asignada;
+}
+
+void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path){
+    char* key = string_itoa(pid);
+    pthread_mutex_lock(&contexto_ejecucion_procesos);
+    t_contexto_proceso* contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    t_contexto_hilo* contexto_hilo = crear_contexto_hilo(tid, prioridad, path);
+
+    list_add(contexto_proceso->lista_hilos, contexto_hilo);
+    pthread_mutex_unlock(&contexto_ejecucion_procesos);
+}
+
+void* finalizar_proceso(){
+    enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
+    return NULL;
+}
+void* finalizar_hilo(){
+    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+    return NULL;
+}
+
+void* memory_dump(){
+    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+    return NULL;
+}
+
+/*----------------------------- FUNCIONES DE CPU ----------------------------*/
+
 void* atender_cpu(){
     bool liberar_hilo_cpu = true;
 
@@ -153,19 +214,19 @@ void* atender_cpu(){
         int op = recibir_operacion(fd_conexion_cpu);
 
         switch (op){
-        case PID_TID: //Aca me solicita el contexto de un pid_tid, hay que ver que enum usamos
-        	buffer = buffer_recieve(fd_conexion_cpu);
+        case SOLICITAR_CONTEXTO_EJECUCION: //Aca me solicita el contexto de un pid_tid, hay que ver que enum usamos
+        	usleep(memoria_registro.retardo_respuesta * 1000);
+
+            buffer = buffer_recieve(fd_conexion_cpu);
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
             
             log_debug(memoria_log, "## [MEMORIA:CPU] Contexto <Solicitado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            usleep(memoria_registro.retardo_respuesta * 1000);
-            direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
-            log_debug(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
-            enviar_contexto_solicitado(leer_de_memoria(tamanio_contexto, direccion_fisica), tamanio_contexto);
+            t_contexto* contexto_hallado = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
+            enviar_contexto_solicitado(contexto_hallado);
             break;
 
-        case CONTEXTO_EJECUCION: //Aca me pide actualizar el contexto de un pid_tid, hay que ver que enum usamos
+        case ACTUALIZAR_CONTEXTO_EJECUCION: //Aca me pide actualizar el contexto de un pid_tid, hay que ver que enum usamos
         	buffer = buffer_recieve(fd_conexion_cpu);
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
@@ -191,9 +252,9 @@ void* atender_cpu(){
         	usleep(memoria_registro.retardo_respuesta * 1000);
 
         	char* path_pid_tid = buscar_path(pid_tid_recibido.pid, pid_tid_recibido.tid);
-        	char* instruccion = obtenerInstruccion(path_pid_tid, programCounter);
-			log_debug(memoria_log, "## [MEMORIA:CPU] Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: <%s>", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
-        	enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
+        	//char* instruccion = obtenerInstruccion(path_pid_tid, programCounter);
+			//log_debug(memoria_log, "## [MEMORIA:CPU] Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: <%s>", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
+        	//enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
         	break;
         case WRITE_MEM:
             buffer = buffer_recieve(fd_conexion_cpu);
@@ -231,28 +292,7 @@ void* atender_cpu(){
     }
 }
 
-void sems(){
-    pthread_mutex_init(&kernel_operando, NULL);
-
-    sem_init(&memoria_activo, 0, 0);
-}
-
-bool crear_proceso(uint32_t pid, uint32_t size){
-    bool memoria_asignada;
-    
-    uint32_t base_asignada = hay_particion_disponible(pid, size, memoria_registro.esquema);
-    
-    if (base_asignada){
-        char* key = string_itoa(pid);
-        t_contexto_proceso* contexto_proceso = crear_contexto_proceso(pid, base_asignada, size);
-        dictionary_put(contexto_ejecucion, key, contexto_proceso);
-        memoria_asignada = true;
-    } else {
-        log_error(memoria_log, "## [MEMORIA] OUT OF MEMORY");
-        memoria_asignada = false;
-    }    
-    return memoria_asignada;
-}
+/*-------------------- FUNCIONES DE CONTEXTO DE EJECUCION -------------------*/
 
 t_contexto_proceso* crear_contexto_proceso(uint32_t pid, uint32_t base, uint32_t limite){
     t_contexto_proceso* contexto = malloc(sizeof(t_contexto_proceso));
@@ -263,6 +303,51 @@ t_contexto_proceso* crear_contexto_proceso(uint32_t pid, uint32_t base, uint32_t
     contexto->lista_hilos = list_create();
 
     return contexto;
+}
+
+t_contexto_hilo* crear_contexto_hilo(uint32_t tid, uint32_t prioridad, char* path){
+    t_contexto_hilo* contexto = malloc(sizeof(t_contexto_hilo));
+
+    contexto->lista_instrucciones = leer_instrucciones(path, memoria_log);
+    contexto->tid = tid;
+    contexto->prioridad = prioridad;
+    contexto->pc = 0;
+    contexto->ax = 0;
+    contexto->bx = 0;
+    contexto->cx = 0;
+    contexto->dx = 0;
+    contexto->ex = 0;
+    contexto->fx = 0;
+    contexto->gx = 0;
+    contexto->hx = 0;
+
+    return contexto;
+}
+
+t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
+    t_contexto* contexto_a_enviar = malloc(sizeof(t_contexto));
+    t_contexto_proceso* contexto_proceso;
+    t_contexto_hilo* contexto_hilo;
+
+    char* key = string_itoa(pid);
+    pthread_mutex_lock(&contexto_ejecucion_procesos);
+    contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    contexto_hilo = list_get(contexto_proceso->lista_hilos, tid);
+
+    contexto_a_enviar->base = contexto_proceso->base;
+    contexto_a_enviar->limite = contexto_proceso->limite;
+    contexto_a_enviar->pc = contexto_hilo->pc;
+    contexto_a_enviar->ax = contexto_hilo->ax;
+    contexto_a_enviar->bx = contexto_hilo->bx;
+    contexto_a_enviar->cx = contexto_hilo->cx;
+    contexto_a_enviar->dx = contexto_hilo->dx;
+    contexto_a_enviar->ex = contexto_hilo->ex;
+    contexto_a_enviar->fx = contexto_hilo->fx;
+    contexto_a_enviar->gx = contexto_hilo->gx;
+    contexto_a_enviar->hx = contexto_hilo->hx;
+    pthread_mutex_unlock(&contexto_ejecucion_procesos);
+    free(key);
+    return contexto_a_enviar;
 }
 
 uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
@@ -306,55 +391,32 @@ uint32_t obtener_espacio_desocupado(){
     }
 }
 
-// PETICION 3: recibo pid para finalizar el proceso
-void* finalizar_proceso(){
-    enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
-    return NULL;
-}
-void* crear_hilo(){
-    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-    return NULL;
-}
-void* finalizar_hilo(){
-    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-    return NULL;
-}
-void* memory_dump(){
-    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-    return NULL;
-}
+/*-------------------------------- MISCELANEO -------------------------------*/
 
-void enviar_contexto_solicitado(void* buffer, uint32_t tamanio){
-    t_paquete* paquete = crear_paquete(CONTEXTO_EJECUCION);
-    agregar_a_paquete(paquete, buffer, tamanio);
+void enviar_contexto_solicitado(t_contexto* contexto){
+    t_paquete* paquete = crear_paquete(ENVIAR_CONTEXTO_EJECUCION);
+    t_buffer* buffer;
+
+    buffer = buffer_create(
+        sizeof(uint32_t)*11
+    );
+
+    buffer_add_uint32(buffer, &contexto->base, memoria_log);
+    buffer_add_uint32(buffer, &contexto->limite, memoria_log);
+    buffer_add_uint32(buffer, &contexto->pc, memoria_log);
+    buffer_add_uint32(buffer, &contexto->ax, memoria_log);
+    buffer_add_uint32(buffer, &contexto->bx, memoria_log);
+    buffer_add_uint32(buffer, &contexto->cx, memoria_log);
+    buffer_add_uint32(buffer, &contexto->dx, memoria_log);
+    buffer_add_uint32(buffer, &contexto->ex, memoria_log);
+    buffer_add_uint32(buffer, &contexto->fx, memoria_log);
+    buffer_add_uint32(buffer, &contexto->gx, memoria_log);
+    buffer_add_uint32(buffer, &contexto->hx, memoria_log);
+
+    paquete->buffer = buffer;
+
     enviar_paquete(paquete, fd_conexion_cpu);
     eliminar_paquete(paquete);
-}
-
-char* obtenerInstruccion(char* pathInstrucciones, uint32_t program_counter){
-    FILE* archivo_instrucciones = fopen(pathInstrucciones, "rb");
-
-    if (archivo_instrucciones == NULL) {
-        log_error(memoria_log,"ARCHIVO DE INSTRUCCIONES INEXISTENTE");
-        fclose(archivo_instrucciones);
-        abort();
-    }
-
-    int numLineaActual = 0;
-    char lineaActual[1000];
-
-    char* instruccion = malloc(sizeof(char*));
-
-    while(feof(archivo_instrucciones) == 0){
-    	fgets(lineaActual, 1000, file);
-    	if(numLineaActual == program_counter){
-    		instruccion = strtok(lineaActual, "\n");
-    		break;
-    	}
-    	numLineaActual++;
-    }
-    fclose(archivo_instrucciones);
-    return instruccion;
 }
 
 void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura){
@@ -383,13 +445,4 @@ void enviar_datos_memoria(void* buffer, uint32_t tamanio){
     agregar_a_paquete(paquete, buffer, tamanio);
     enviar_paquete(paquete, fd_conexion_cpu);
     eliminar_paquete(paquete);
-}
-
-uint32_t buscar_contexto(uint32_t pid, uint32_t tid){
-    uint32_t direccion_fisica = 1; //Le puse este valor para prueba nada mas
-    
-    //Aca se debe implementar una funcion que me diga donde empieza el PIT_TID que busco
-    //Aca debo ver como memoria de usuario guarda los TCB y PCB
-
-    return direccion_fisica;
 }

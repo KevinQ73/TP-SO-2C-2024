@@ -24,7 +24,9 @@
         FINALIZAR_HILO,
         AVISO_DUMP_MEMORY,
         PETICION_INSTRUCCION,
-        CONTEXTO_EJECUCION,
+        SOLICITAR_CONTEXTO_EJECUCION,
+        ACTUALIZAR_CONTEXTO_EJECUCION,
+        ENVIAR_CONTEXTO_EJECUCION,
         INTERRUPCION_QUANTUM,
         INTERRUPCION_USUARIO,
         ENVIO_TID,
@@ -121,8 +123,10 @@
     } t_contexto_proceso;
 
     typedef struct{
+        t_list* lista_instrucciones;
         uint32_t tid;
         uint32_t prioridad;
+        uint32_t pc;
         uint32_t ax;
         uint32_t bx;
         uint32_t cx;
@@ -132,6 +136,21 @@
         uint32_t gx;
         uint32_t hx;
     } t_contexto_hilo;
+
+    typedef struct{
+        uint32_t base;
+        uint32_t limite;
+        uint32_t pc;
+        uint32_t ax;
+        uint32_t bx;
+        uint32_t cx;
+        uint32_t dx;
+        uint32_t ex;
+        uint32_t fx;
+        uint32_t gx;
+        uint32_t hx;
+    } t_contexto;
+    
 
     extern char* nombres_registros[11];
 
