@@ -29,6 +29,8 @@ int main(int argc, char* argv[]) {
 
     atender_solicitudes();
 
+    sem_wait(&memoria_activo);
+
     // --------------------- Arrancan funciones de memoria ----------------------
 
     //FINALIZACION DEL MODULO
@@ -44,7 +46,18 @@ void iniciar_memoria(){
     log_info(memoria_log, "MEMORIA INICIALIZADA\n");
     memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
 
+    contexto_ejecucion = dictionary_create();
     lista_particiones = memoria_registro.particiones;
+
+    int size_lista_particiones = string_array_size(lista_particiones);
+    char* bitmap_espacio_reservado[size_lista_particiones];
+
+    for (int i = 0; i < size_lista_particiones; i++){
+        bitmap_espacio_reservado[i] = 0;
+    }
+    
+    bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
+
     lista_pseudocodigos = list_create(); //Lo puse aca para iniciar todo junto con la memoria
 }
 
@@ -53,7 +66,7 @@ void atender_solicitudes(){
     pthread_detach(hiloMemoriaCpu);
 
     pthread_create(&hiloMemoriaKernel, NULL, atender_kernel, NULL);
-    pthread_join(hiloMemoriaKernel, NULL);
+    pthread_detach(hiloMemoriaKernel);
 }
 
 void* atender_kernel(){
@@ -74,10 +87,11 @@ void* atender_kernel(){
             }
         }
 
+        log_info(memoria_log, "## Kernel Conectado - FD del socket: <%d>", fd_conexion_kernel);
+
         t_buffer* buffer;
         int size = 0;
         char* path = string_new();
-        uint32_t prioridad;
 
         int operacion_kernel = recibir_operacion(fd_conexion_kernel);
 
@@ -86,24 +100,26 @@ void* atender_kernel(){
         switch (operacion_kernel)
         {
         case CREAR_PROCESO:
-            path = buffer_read_string(buffer, &size);
+            uint32_t pid = buffer_read_uint32(buffer);
             uint32_t size_process = buffer_read_uint32(buffer);
-            prioridad = buffer_read_uint32(buffer);
 
-            log_debug(memoria_log, "## [MEMORIA:KERNEL] LLEGÓ CREACIÓN DE PROCESO DE PRIORIDAD: %d, TAMAÑO: %d, Y PATH: %s", prioridad, size_process, path);
-            enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-
-            free(path);
+            if (crear_proceso(pid, size_process))
+            {
+                enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+                log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Creado> - PID: <%d> - Tamaño: <%d>", pid, size_process);
+            } else {
+                enviar_mensaje("ERROR_CREAR_PROCESO", fd_conexion_kernel, memoria_log);
+                log_error(memoria_log, "## [MEMORIA:KERNEL] Fallo en la creación del proceso");
+            }
             close(fd_conexion_kernel);
             break;
 
         case CREAR_HILO:
             path = buffer_read_string(buffer, &size);
-            prioridad = buffer_read_uint32(buffer);
+            int prioridad = buffer_read_uint32(buffer);
 
             log_debug(memoria_log, "## [MEMORIA:KERNEL] LLEGÓ CREACIÓN DE HILO DE PRIORIDAD: %d, Y PATH: %s", prioridad, path);
             enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-            pthread_mutex_unlock(&kernel_operando);
 
             free(path);
             close(fd_conexion_kernel);
@@ -148,6 +164,7 @@ void* atender_cpu(){
             log_debug(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
             enviar_contexto_solicitado(leer_de_memoria(tamanio_contexto, direccion_fisica), tamanio_contexto);
             break;
+
         case CONTEXTO_EJECUCION: //Aca me pide actualizar el contexto de un pid_tid, hay que ver que enum usamos
         	buffer = buffer_recieve(fd_conexion_cpu);
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
@@ -160,16 +177,19 @@ void* atender_cpu(){
             usleep(memoria_registro.retardo_respuesta * 1000);
             direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
             log_debug(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
-            escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
+            //escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
             enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
             break;
+            
         case PETICION_INSTRUCCION:
         	buffer = buffer_recieve(fd_conexion_cpu);
+
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
         	uint32_t programCounter = buffer_read_uint32(buffer);
 
         	usleep(memoria_registro.retardo_respuesta * 1000);
+
         	char* path_pid_tid = buscar_path(pid_tid_recibido.pid, pid_tid_recibido.tid);
         	char* instruccion = obtenerInstruccion(path_pid_tid, programCounter);
 			log_debug(memoria_log, "## [MEMORIA:CPU] Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: <%s>", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
@@ -185,7 +205,7 @@ void* atender_cpu(){
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_debug(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
 
-            escribir_en_memoria(&dato, 4, direccion_fisica);
+            //escribir_en_memoria(&dato, 4, direccion_fisica);
             enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
             break;
         case READ_MEM:
@@ -211,21 +231,81 @@ void* atender_cpu(){
     }
 }
 
-
 void sems(){
     pthread_mutex_init(&kernel_operando, NULL);
+
+    sem_init(&memoria_activo, 0, 0);
 }
 
-void* crear_proceso(){
-    if(strcmp(memoria_registro.esquema,"FIJAS")){
-        
+bool crear_proceso(uint32_t pid, uint32_t size){
+    bool memoria_asignada;
+    
+    uint32_t base_asignada = hay_particion_disponible(pid, size, memoria_registro.esquema);
+    
+    if (base_asignada){
+        char* key = string_itoa(pid);
+        t_contexto_proceso* contexto_proceso = crear_contexto_proceso(pid, base_asignada, size);
+        dictionary_put(contexto_ejecucion, key, contexto_proceso);
+        memoria_asignada = true;
+    } else {
+        log_error(memoria_log, "## [MEMORIA] OUT OF MEMORY");
+        memoria_asignada = false;
+    }    
+    return memoria_asignada;
+}
+
+t_contexto_proceso* crear_contexto_proceso(uint32_t pid, uint32_t base, uint32_t limite){
+    t_contexto_proceso* contexto = malloc(sizeof(t_contexto_proceso));
+
+    contexto->pid = pid;
+    contexto->base = base;
+    contexto->limite = limite;
+    contexto->lista_hilos = list_create();
+
+    return contexto;
+}
+
+uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
+
+    uint32_t valor_resultado;
+    int size_particion = atoi(lista_particiones[0]);
+
+    if (strcmp(esquema, "FIJAS") == 0)
+    {
+        if (obtener_espacio_desocupado() == OUT_OF_MEMORY)
+        {
+            valor_resultado = 0;
+        } if (size > size_particion){
+            valor_resultado = 0;
+        } else {
+            valor_resultado = obtener_espacio_desocupado();
         }
-    else{
-
+    } else {
+        // DINAMICO
     }
-    enviar_mensaje("ESPACIO_ASIGNADO", fd_conexion_kernel, memoria_log);
-    return NULL;
+    return valor_resultado;
 }
+
+uint32_t obtener_espacio_desocupado(){
+    uint32_t base_particion = -1;
+
+    uint32_t largo_bitmap = bitarray_get_max_bit(bitmap_particion_fija);
+    uint32_t i = 0;
+    while(i < largo_bitmap && (base_particion < 0)){
+        if(bitarray_test_bit(bitmap_particion_fija, i) == 0){
+            base_particion = i;
+            bitarray_set_bit(bitmap_particion_fija, i);
+        } else {
+            i++;
+        }
+    }
+    if (i == largo_bitmap){
+        return OUT_OF_MEMORY;
+    } else {
+        return base_particion;
+    }
+}
+
 // PETICION 3: recibo pid para finalizar el proceso
 void* finalizar_proceso(){
     enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
@@ -252,15 +332,20 @@ void enviar_contexto_solicitado(void* buffer, uint32_t tamanio){
 }
 
 char* obtenerInstruccion(char* pathInstrucciones, uint32_t program_counter){
-    FILE* file;
+    FILE* archivo_instrucciones = fopen(pathInstrucciones, "rb");
 
-    file = fopen(pathInstrucciones, "rt");
+    if (archivo_instrucciones == NULL) {
+        log_error(memoria_log,"ARCHIVO DE INSTRUCCIONES INEXISTENTE");
+        fclose(archivo_instrucciones);
+        abort();
+    }
+
     int numLineaActual = 0;
     char lineaActual[1000];
 
     char* instruccion = malloc(sizeof(char*));
 
-    while(feof(file) == 0){
+    while(feof(archivo_instrucciones) == 0){
     	fgets(lineaActual, 1000, file);
     	if(numLineaActual == program_counter){
     		instruccion = strtok(lineaActual, "\n");
@@ -268,12 +353,8 @@ char* obtenerInstruccion(char* pathInstrucciones, uint32_t program_counter){
     	}
     	numLineaActual++;
     }
-    fclose(file);
+    fclose(archivo_instrucciones);
     return instruccion;
-}
-
-void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura){
-    memcpy(memoria + inicio_escritura, buffer_escritura, tamanio_buffer);
 }
 
 void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura){

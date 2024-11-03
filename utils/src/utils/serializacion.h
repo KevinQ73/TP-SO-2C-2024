@@ -29,12 +29,13 @@
         INTERRUPCION_USUARIO,
         ENVIO_TID,
         EJECUTAR_HILO,
+        OUT_OF_MEMORY,
     } cod_inst;
 
     typedef enum{
-        SET,
+        SET = 100,
         READ_MEM,
-        WRITE_MEM = 5, //Le puse este valor porque se repite con PID_TID y me daba error
+        WRITE_MEM, //Le puse este valor porque se repite con PID_TID y me daba error
         SUM,
         SUB,
         JNZ,
@@ -111,7 +112,27 @@
         estado_proceso estado;
         t_list* lista_hilos_block;
     } t_hilo_planificacion;
-    
+
+    typedef struct{
+        uint32_t pid;
+        uint32_t base;
+        uint32_t limite;
+        t_list* lista_hilos; // Guarde t_contexto_hilos;
+    } t_contexto_proceso;
+
+    typedef struct{
+        uint32_t tid;
+        uint32_t prioridad;
+        uint32_t ax;
+        uint32_t bx;
+        uint32_t cx;
+        uint32_t dx;
+        uint32_t ex;
+        uint32_t fx;
+        uint32_t gx;
+        uint32_t hx;
+    } t_contexto_hilo;
+
     extern char* nombres_registros[11];
 
     /*-----------------------------------------------------------------------*/

@@ -75,14 +75,12 @@ void iniciar_colas(){
 void iniciar_primer_proceso(char* path, char* size){
     int size_process = atoi(size);
     int prioridad = PRIORIDAD_MAXIMA;
-    char* response_memoria = avisar_creacion_proceso_memoria(path, &size_process, &prioridad, kernel_log);
 
-    int num = strcmp(response_memoria, "OK");
-    log_debug(kernel_log, "NUMERO STRCMP: %d", num);
+    primer_proceso = create_pcb(path, size_process);
+    char* response_memoria = avisar_creacion_proceso_memoria(&(primer_proceso->pid), &size_process, kernel_log);
 
     if (strcmp(response_memoria, "OK") == 0)
     {
-        primer_proceso = create_pcb(path, size_process);
         char* respuesta_creacion_hilo = avisar_creacion_hilo_memoria(path, &prioridad, kernel_log);
 
         if (strcmp(respuesta_creacion_hilo, "OK") == 0)
@@ -99,6 +97,7 @@ void iniciar_primer_proceso(char* path, char* size){
         }
     } else {
         log_error(kernel_log, "ERROR AL INICIAR PRIMER PROCESO");
+        abort();
     }
 }
 
@@ -129,7 +128,7 @@ void* inicializar_pcb_en_espera(){
         //t_tcb* tcb_asociado = list_remove(pcb->lista_tcbs_new, 0);
         //int prioridad = tcb_asociado->prioridad;
 
-        char* respuesta_memoria = avisar_creacion_proceso_memoria(pcb->path_instrucciones_hilo_main, &(pcb->size_process), &prioridad, kernel_log);
+        char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->size_process), &prioridad, kernel_log);
 
         if (strcmp(respuesta_memoria, "OK"))
         {
@@ -154,7 +153,7 @@ void* inicializar_pcb_en_espera(){
 void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
     t_tcb* tcb_asociado = list_get(pcb->lista_tcb, 0);
     int prioridad = tcb_asociado->prioridad;
-    char* respuesta_memoria = avisar_creacion_proceso_memoria(pcb->path_instrucciones_hilo_main, &(pcb->size_process), &prioridad, kernel_log);
+    char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->size_process), &prioridad, kernel_log);
 
         if (strcmp(respuesta_memoria, "OK"))
         {
@@ -384,16 +383,14 @@ void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar){
 
 /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
 
-char* avisar_creacion_proceso_memoria(char* path, int* size_process, int* prioridad, t_log* kernel_log){
-    int length = strlen(path) + 1;
+char* avisar_creacion_proceso_memoria(int* pid, int* size_process, t_log* kernel_log){
     t_paquete* paquete = crear_paquete(CREAR_PROCESO);
     t_buffer* buffer = buffer_create(
-        length + sizeof(int) + sizeof(int)
+        sizeof(int)*2
     );
 
-    buffer_add_string(buffer, length, path, kernel_log);
+    buffer_add_uint32(buffer, pid, kernel_log);
     buffer_add_uint32(buffer, size_process, kernel_log);
-    buffer_add_uint32(buffer, prioridad, kernel_log);
 
     paquete->buffer = buffer;
 

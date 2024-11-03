@@ -6,6 +6,7 @@
     t_log* memoria_log;
     t_config* memoria_config;
     t_memoria memoria_registro;
+    t_bitarray* bitmap_particion_fija;
 
     t_dictionary* contexto_ejecucion;
 
@@ -22,6 +23,7 @@
     pthread_t hiloMemoriaKernel;
 
     pthread_mutex_t kernel_operando;
+    sem_t memoria_activo;
     t_list* lista_pseudocodigos;
 
     int pid_busqueda;
@@ -43,7 +45,14 @@
 
     void iniciar_memoria();
     void* atender_kernel();
-    void* crear_proceso();
+    void sems();
+    bool crear_proceso(uint32_t pid, uint32_t size);
     void* finalizar_proceso();
+
+    t_contexto_proceso* crear_contexto_proceso(uint32_t pid, uint32_t base, uint32_t limite);
+    
+    uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema);
+
+    uint32_t obtener_espacio_desocupado();
 
 #endif /* MEMORIA_SRC_MEMORIA_H_ */

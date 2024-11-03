@@ -110,7 +110,7 @@
 
     /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
 
-    char* avisar_creacion_proceso_memoria(char* path, int* size_process, int* prioridad, t_log* kernel_log);
+    char* avisar_creacion_proceso_memoria(int* pid, int* size_process, t_log* kernel_log);
 
     char* avisar_creacion_hilo_memoria(char* path, int* prioridad, t_log* kernel_log);
 

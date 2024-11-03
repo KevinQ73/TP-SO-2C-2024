@@ -316,6 +316,7 @@ void enviar_mensaje(char* mensaje, int socket_server, t_log* log){
 }
 
 char* recibir_mensaje(int socket_cliente, t_log* log){
+	
 	t_buffer* buffer;
 	uint32_t length = 0;
 	char* string;
