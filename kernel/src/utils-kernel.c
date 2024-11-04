@@ -74,6 +74,17 @@ int crear_conexion_con_memoria(t_log* kernel_log, char* ip, char* puerto){
     return conexion_memoria;
 }
 
+
+t_mutex* create_mutex(char* nombreMutex){
+    t_mutex* mutex = malloc(sizeof(t_mutex));
+
+    mutex->nombre = nombreMutex;
+    mutex->valor = 1;
+    mutex->tid_tomado = NULL;
+    mutex->cola_bloqueados= list_create();
+
+    return mutex;
+}
 /*------------------------------ MISCELANEO --------------------------------*/
 
 bool compare_pid(uint32_t* pid_1, uint32_t* pid_2){

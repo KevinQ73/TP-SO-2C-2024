@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "memoria.h": "c",
-        "utils-memoria.h": "c"
+        "utils-memoria.h": "c",
+        "typeinfo": "c"
     }
 }

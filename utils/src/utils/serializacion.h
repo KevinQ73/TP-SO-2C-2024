@@ -123,6 +123,13 @@
     } t_contexto_proceso;
 
     typedef struct{
+        char* nombre;
+        uint32_t valor;
+        uint32_t tid_tomado;
+        t_list* cola_bloqueados;
+    }t_mutex;
+
+    typedef struct{
         t_list* lista_instrucciones;
         uint32_t tid;
         uint32_t prioridad;

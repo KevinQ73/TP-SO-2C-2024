@@ -508,11 +508,12 @@ void* operacion_a_atender(){
         break;
 
     case MUTEX_CREATE:
-            
+    /*LE TENGO QUE PASAR UN NOMBRE AL MUTEX A CREAR?*/
+            syscall_mutex_create(nombreMutex , pid_tid_recibido.pid);
         break;
 
     case MUTEX_LOCK:
-            
+            syscall_mutex_lock(nombreMutex,pid_tid_recibido);
         break;
         
     case MUTEX_UNLOCK:
@@ -526,6 +527,56 @@ void* operacion_a_atender(){
     default:
         break;
     }
+}
+
+ pthread_mutex_t* find_by_name(t_list* lista_de_mutex, char* name) {
+    bool _name_equals(void* ptr) {
+        t_mutex* mutexAEncontrar = (t_mutex*) ptr;
+        return strcmp(mutexAEncontrar->nombre, name) == 0;
+    }
+    return list_find(lista_de_mutex, _name_equals);
+}
+
+void* syscall_mutex_lock(char* nombreMutex ,t_pid_tid* pid_tid_recibido){
+    t_pcb* pcb = list_find_by_pid(pid_tid_recibido->pid);
+
+    t_mutex* mutex_encontrado = find_by_name(pcb->mutex_asociados,nombreMutex );
+
+    if(mutex_encontrado != NULL){
+
+       if(mutex_encontrado->tid_tomado == NULL){
+
+            mutex_encontrado->tid_tomado = pid_tid_recibido->tid ;
+
+       }else{
+        /*el hilo que realizó MUTEX_LOCK se bloqueará en la cola de bloqueados correspondiente a dicho mutex.*/
+            mutex_encontrado->valor=0;
+            
+       }
+    }
+}
+
+
+void* syscall_mutex_unlock(char* nombreMutex ,t_pid_tid* pid_tid_recibido){
+    t_pcb* pcb = list_find_by_pid(pid_tid_recibido->pid);
+
+    t_mutex* mutex_encontrado = find_by_name(pcb->mutex_asociados,nombreMutex );
+
+    if(mutex_encontrado != NULL){
+       if(mutex_encontrado->tid_tomado == pid_tid_recibido->tid){
+             ;
+       }else{
+        /*el hilo que realizó MUTEX_LOCK se bloqueará en la cola de bloqueados correspondiente a dicho mutex.*/
+       }
+    }
+}
+
+
+void*  syscall_mutex_create(char* nombreMutex, uint32_t pid){
+    t_mutex* mutexCreado = create_mutex(nombreMutex);
+
+    t_pcb* pcb = list_find_by_pid(pid);
+    list_add(pcb->mutex_asociados,mutexCreado);
 }
 
 void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante){
