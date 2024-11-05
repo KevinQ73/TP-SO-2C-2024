@@ -39,4 +39,46 @@
     
     void ejecutar_hilo(t_pid_tid pid_tid_recibido);
 
+    /*-------------------------- Funciones execute --------------------------*/
+
+    void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instruccion_parseada);
+
+    void execute_set(t_contexto* registro_cpu, char* registro, char* valor);
+
+    void execute_read_mem();
+
+    void execute_write_mem();
+
+    void execute_sum();
+
+    void execute_sub();
+
+    void execute_jnz();
+
+    void execute_log();
+
+    void execute_dump_memory();
+
+    void execute_io();
+
+    void execute_process_create();
+
+    void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad);
+
+    void execute_thread_join();
+
+    void execute_thread_cancel();
+
+    void execute_mutex_create();
+
+    void execute_mutex_lock();
+
+    void execute_mutex_unlock();
+
+    void execute_thread_exit();
+
+    void execute_process_exit();
+
+    /*-----------------------------------------------------------------------*/
+
 #endif /* CPU_H_ */

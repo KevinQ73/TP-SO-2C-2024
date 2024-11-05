@@ -29,6 +29,13 @@ t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
     return pid_tid;
 }
 
+void enviar_paquete_kernel(t_buffer* buffer, int socket_memoria, cod_inst codigo_instruccion){
+    t_paquete* paquete = crear_paquete(codigo_instruccion);
+    paquete->buffer = buffer;
+
+    enviar_paquete(paquete, socket_memoria);
+}
+
 void recibir_contexto_memoria(t_contexto* registros_cpu, int fd_memoria, t_log* cpu_log){
     t_buffer* buffer;
     uint32_t valor = 0;
@@ -228,193 +235,28 @@ char** decode(char* instruccion){
     return instruccion_parseada;
 }
 
-void execute(t_contexto* registros_cpu, uint32_t tid, char** instruccion_parseada, int socket_memoria, t_log* log){
-    inst_cpu op = obtener_codigo_instruccion(instruccion_parseada[0]);
-
-    switch (op)
-    {
-    case SET:
-        log_info(log, "## TID: <%d> - Ejecutando: <SET> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_set(registros_cpu, instruccion_parseada[1], instruccion_parseada[2], log);
-        break;
+void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, int conexion_memoria, t_log* log){
+    t_paquete* paquete = crear_paquete(ACTUALIZAR_CONTEXTO_EJECUCION);
     
-    case READ_MEM:
-        log_info(log, "## TID: <%d> - Ejecutando: <READ_MEM> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_read_mem();
-        break;
-
-    case WRITE_MEM:
-        log_info(log, "## TID: <%d> - Ejecutando: <WRITE_MEM> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_write_mem();
-        break;
-
-    case SUM:
-        log_info(log, "## TID: <%d> - Ejecutando: <SUM> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_sum();
-        break;
-
-    case SUB:
-        log_info(log, "## TID: <%d> - Ejecutando: <SUB> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_sub();
-        break;
-
-    case JNZ:
-        log_info(log, "## TID: <%d> - Ejecutando: <JNZ> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_jnz();
-        break;
-
-    case LOG:
-        log_info(log, "## TID: <%d> - Ejecutando: <LOG> - <%s>", tid, instruccion_parseada[1]);
-        execute_log();
-        break;
-
-    case DUMP_MEMORY:
-        log_info(log, "## TID: <%d> - Ejecutando: <DUMP_MEMORY>", tid);
-        execute_dump_memory();
-        break;
-
-    case IO:
-        log_info(log, "## TID: <%d> - Ejecutando: <IO> - <%s>", tid, instruccion_parseada[1]);
-        execute_io();
-        break;
-
-    case PROCESS_CREATE:
-        log_info(log, "## TID: <%d> - Ejecutando: <PROCESS_CREATE> - <%s> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2], instruccion_parseada[3]);
-        execute_process_create();
-        break;
-
-    case THREAD_CREATE:
-        log_info(log, "## TID: <%d> - Ejecutando: <THREAD_CREATE> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_thread_create(registros_cpu, socket_memoria, instruccion_parseada[1], instruccion_parseada[2], log);
-        break;
-
-    case THREAD_JOIN:
-        log_info(log, "## TID: <%d> - Ejecutando: <THREAD_JOIN> - <%s>", tid, instruccion_parseada[1]);
-        execute_thread_join();
-        break;
-
-    case THREAD_CANCEL:
-        log_info(log, "## TID: <%d> - Ejecutando: <THREAD_CANCEL> - <%s>", tid, instruccion_parseada[1]);
-        execute_thread_cancel();
-        break;
-
-    case MUTEX_CREATE:
-        log_info(log, "## TID: <%d> - Ejecutando: <MUTEX_CREATE> - <%s>", tid, instruccion_parseada[1]);
-        execute_mutex_create();
-        break;
-
-    case MUTEX_LOCK:
-        log_info(log, "## TID: <%d> - Ejecutando: <MUTEX_LOCK> - <%s>", tid, instruccion_parseada[1]);
-        execute_mutex_lock();
-        break;
-
-    case MUTEX_UNLOCK:
-        log_info(log, "## TID: <%d> - Ejecutando: <MUTEX_UNLOCK> - <%s>", tid, instruccion_parseada[1]);
-        execute_mutex_unlock();
-        break;
-
-    case THREAD_EXIT:
-        log_info(log, "## TID: <%d> - Ejecutando: <THREAD_EXIT>", tid);
-        execute_thread_exit();
-        break;
-
-    case PROCESS_EXIT:
-        log_info(log, "## TID: <%d> - Ejecutando: <PROCESS_EXIT>", tid);
-        execute_process_exit();
-        break;
-
-    default:
-        break;
-    }
-}
-
-void execute_set(t_contexto* registro_cpu, char* registro, char* valor, t_log* log){
-    int valor_int = (int)strtol(valor, NULL, 10);
-    modificar_registro(registro_cpu, registro, valor_int, log);
-    program_counter_update(registro_cpu, log);
-}
-
-void execute_read_mem(){
-
-}
-
-void execute_write_mem(){
-    
-}
-
-void execute_sum(){
-    
-}
-
-void execute_sub(){
-    
-}
-
-void execute_jnz(){
-    
-}
-
-void execute_log(){
-    
-}
-
-void execute_dump_memory(){
-    
-}
-
-void execute_io(){
-    
-}
-
-void execute_process_create(){
-    
-}
-
-void execute_thread_create(t_contexto* registro_cpu, int socket_memoria, char* path, char* prioridad, t_log* log){
-    int valor_int = atoi(prioridad);
-    int length = strlen(path) + 1;
-
     t_buffer* buffer = buffer_create(
-        sizeof(int) + length
+        sizeof(uint32_t)*13
     );
 
-    buffer_add_uint32(buffer, &valor_int, log);
-    buffer_add_string(buffer, length, path, log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, log);
+    buffer_add_uint32(buffer, &registro_cpu->base, log);
+    buffer_add_uint32(buffer, &registro_cpu->limite, log);
+    buffer_add_uint32(buffer, &registro_cpu->pc, log);
+    buffer_add_uint32(buffer, &registro_cpu->ax, log);
+    buffer_add_uint32(buffer, &registro_cpu->bx, log);
+    buffer_add_uint32(buffer, &registro_cpu->cx, log);
+    buffer_add_uint32(buffer, &registro_cpu->dx, log);
+    buffer_add_uint32(buffer, &registro_cpu->ex, log);
+    buffer_add_uint32(buffer, &registro_cpu->fx, log);
+    buffer_add_uint32(buffer, &registro_cpu->gx, log);
+    buffer_add_uint32(buffer, &registro_cpu->hx, log);
 
-    enviar_paquete_kernel(buffer, socket_memoria, THREAD_CREATE);
-}
-
-void execute_thread_join(){
-    
-}
-
-void execute_thread_cancel(){
-    
-}
-
-void execute_mutex_create(){
-    
-}
-
-void execute_mutex_lock(){
-    
-}
-
-void execute_mutex_unlock(){
-    
-}
-
-void execute_thread_exit(){
-    
-}
-
-void execute_process_exit(){
-    
-}
-
-void enviar_paquete_kernel(t_buffer* buffer, int socket_memoria, cod_inst codigo_instruccion){
-    t_paquete* paquete = crear_paquete(codigo_instruccion);
     paquete->buffer = buffer;
 
-    enviar_paquete(paquete, socket_memoria);
+    enviar_paquete(paquete, conexion_memoria);
 }

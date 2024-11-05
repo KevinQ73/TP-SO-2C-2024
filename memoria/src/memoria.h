@@ -65,6 +65,8 @@
 
     t_contexto* buscar_contexto(uint32_t pid, uint32_t tid);
 
+    t_contexto* recibir_contexto(t_buffer* buffer);
+
     uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema);
 
     uint32_t obtener_espacio_desocupado();
@@ -82,6 +84,8 @@
     bool busqueda_pid_tid(t_pseudocodigo* pseudocodigo);
 
     void enviar_datos_memoria(void* buffer, uint32_t tamanio);
+
+    void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, uint32_t tid);
 
     //void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
 

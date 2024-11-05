@@ -77,6 +77,7 @@ void iniciar_primer_proceso(char* path, char* size){
 
     if (strcmp(response_memoria, "OK") == 0)
     {   
+        log_info(kernel_log, "## (<PID>:%d) Se crea el proceso - Estado: NEW", primer_proceso->pid);
         t_tcb* primer_hilo = create_tcb(PRIORIDAD_MAXIMA);
         char* respuesta_creacion_hilo = avisar_creacion_hilo_memoria(&primer_proceso->pid, &primer_hilo->tid, path, &prioridad, kernel_log);
 
@@ -85,8 +86,8 @@ void iniciar_primer_proceso(char* path, char* size){
             t_hilo_planificacion* hilo = create_hilo_planificacion(primer_proceso, primer_hilo);
 
             poner_en_ready(hilo);
+            log_info(kernel_log, "## (<%d>:<%d>) Se crea el Hilo - Estado: READY", primer_proceso->pid, primer_hilo->tid);
             poner_en_ready_procesos(primer_proceso);
-            log_debug(kernel_log, "SE CREÓ EL PRIMER PROCESO CON PID: %d, Y PRIMER TID: %d", primer_proceso->pid, primer_hilo->tid);
         } else {
             log_error(kernel_log, "ERROR AL INICIAR PRIMER HILO");
             abort();
@@ -500,6 +501,7 @@ void* operacion_a_atender(){
         break;
 
     case THREAD_CREATE:
+        
         syscall_thread_create(pid_tid_recibido.pid, pid_tid_recibido.tid);
         break;
 

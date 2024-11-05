@@ -84,7 +84,7 @@ void* atender_kernel(){
 
     while(liberar_hilo_kernel){
 
-        log_debug(memoria_log, "Esperando solicitud de KERNEL...");
+        log_info(memoria_log, "Esperando solicitud de KERNEL...\n");
         fd_conexion_kernel = esperar_cliente(memoria_log, "KERNEL", fd_conexiones);
 
         if (fd_conexion_kernel < 0) {
@@ -122,6 +122,7 @@ void* atender_kernel(){
                 enviar_mensaje("ERROR_CREAR_PROCESO", fd_conexion_kernel, memoria_log);
                 log_error(memoria_log, "## [MEMORIA:KERNEL] Fallo en la creación del proceso");
             }
+            log_info(memoria_log, "## Solicitud CREAR_PROCESO de Kernel finalizada. Cerrando FD del socket.\n");
             close(fd_conexion_kernel);
             break;
 
@@ -137,6 +138,7 @@ void* atender_kernel(){
             log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s", pid, tid, prioridad, path);
 
             free(path);
+            log_info(memoria_log, "## Solicitud CREAR_HILO de Kernel finalizada. Cerrando FD del socket.\n");
             close(fd_conexion_kernel);
             break;
 
@@ -212,6 +214,7 @@ void* atender_cpu(){
         t_buffer* buffer;
         uint32_t direccion_fisica;
         uint32_t tamanio_contexto = 11*sizeof(uint32_t);
+        t_contexto* contexto;
 
         int op = recibir_operacion(fd_conexion_cpu);
 
@@ -223,9 +226,9 @@ void* atender_cpu(){
             
            	usleep(memoria_registro.retardo_respuesta * 1000);
 
-            log_debug(memoria_log, "## [MEMORIA:CPU] Contexto <Solicitado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            t_contexto* contexto_hallado = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
-            enviar_contexto_solicitado(contexto_hallado);
+            log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Solicitado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            contexto = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
+            enviar_contexto_solicitado(contexto);
             break;
 
         case ACTUALIZAR_CONTEXTO_EJECUCION: //Aca me pide actualizar el contexto de un pid_tid, hay que ver que enum usamos
@@ -233,14 +236,13 @@ void* atender_cpu(){
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
 
-            void* contexto_ejecucion;
-            memcpy(contexto_ejecucion, buffer->stream, tamanio_contexto);
+            t_contexto* contexto_recibido = recibir_contexto(buffer);
 
-            log_debug(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
             usleep(memoria_registro.retardo_respuesta * 1000);
 
-            direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
-            log_debug(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
+            contexto = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
+            actualizar_contexto_ejecucion(contexto, pid_tid_recibido.pid, pid_tid_recibido.tid);
+            log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
             //escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
             enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
             break;
@@ -267,7 +269,7 @@ void* atender_cpu(){
             uint32_t dato = buffer_read_uint32(buffer);
 
             usleep(memoria_registro.retardo_respuesta * 1000);
-            log_debug(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
+            log_info(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
 
             //escribir_en_memoria(&dato, 4, direccion_fisica);
             enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
@@ -279,7 +281,7 @@ void* atender_cpu(){
             direccion_fisica = buffer_read_uint32(buffer);
 
             usleep(memoria_registro.retardo_respuesta * 1000);
-            log_debug(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
+            log_info(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
 
             enviar_datos_memoria(leer_de_memoria(4, direccion_fisica), 4);
             break;
@@ -335,7 +337,7 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
     char* key = string_itoa(pid);
     pthread_mutex_lock(&contexto_ejecucion_procesos);
     contexto_proceso = dictionary_get(contexto_ejecucion, key);
-    contexto_hilo = list_get(contexto_proceso->lista_hilos, tid);
+    contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
 
     contexto_a_enviar->base = contexto_proceso->base;
     contexto_a_enviar->limite = contexto_proceso->limite;
@@ -351,6 +353,35 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
     free(key);
     return contexto_a_enviar;
+}
+
+t_contexto* recibir_contexto(t_buffer* buffer){
+    t_contexto* contexto = malloc(sizeof(t_contexto));
+
+    contexto->base = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "BASE RECIBIDO: %d", contexto->base);
+    contexto->limite = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "LIMITE RECIBIDO: %d", contexto->limite);
+    contexto->pc = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "PC RECIBIDO: %d", contexto->pc);
+    contexto->ax = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "AX RECIBIDO: %d", contexto->ax);
+    contexto->bx = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "BX RECIBIDO: %d", contexto->bx);
+    contexto->cx = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "CX RECIBIDO: %d", contexto->cx);
+    contexto->dx = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "DX RECIBIDO: %d", contexto->dx);
+    contexto->ex = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "EX RECIBIDO: %d", contexto->ex);
+    contexto->fx = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "FX RECIBIDO: %d", contexto->fx);
+    contexto->gx = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "GX RECIBIDO: %d", contexto->gx);
+    contexto->hx = buffer_read_uint32(buffer);
+    log_debug(memoria_log, "HX RECIBIDO: %d", contexto->hx);
+
+    return contexto;
 }
 
 uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
@@ -461,4 +492,40 @@ void enviar_datos_memoria(void* buffer, uint32_t tamanio){
     agregar_a_paquete(paquete, buffer, tamanio);
     enviar_paquete(paquete, fd_conexion_cpu);
     eliminar_paquete(paquete);
+}
+
+void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, uint32_t tid){
+    t_contexto_proceso* contexto_proceso;
+    t_contexto_hilo* contexto_hilo;
+
+    char* key = string_itoa(pid);
+    pthread_mutex_lock(&contexto_ejecucion_procesos);
+    contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
+    
+    log_info(memoria_log, "## Registro BASE cambia valor %d a %d", contexto_proceso->base, contexto_recibido->base);
+    contexto_proceso->base = contexto_recibido->base;
+    log_info(memoria_log, "## Registro LIMITE cambia valor %d a %d", contexto_proceso->limite, contexto_recibido->limite);
+    contexto_proceso->limite = contexto_recibido->limite;
+    log_info(memoria_log, "## Registro PC cambia valor %d a %d", contexto_hilo->pc, contexto_recibido->pc);
+    contexto_hilo->pc = contexto_recibido->pc;
+    log_info(memoria_log, "## Registro AX cambia valor %d a %d", contexto_hilo->ax, contexto_recibido->ax);
+    contexto_hilo->ax = contexto_recibido->ax;
+    log_info(memoria_log, "## Registro BX cambia valor %d a %d", contexto_hilo->bx, contexto_recibido->bx);
+    contexto_hilo->bx = contexto_recibido->bx;
+    log_info(memoria_log, "## Registro CX cambia valor %d a %d", contexto_hilo->cx, contexto_recibido->cx);
+    contexto_hilo->cx = contexto_recibido->cx;
+    log_info(memoria_log, "## Registro DX cambia valor %d a %d", contexto_hilo->dx, contexto_recibido->dx);
+    contexto_hilo->dx = contexto_recibido->dx;
+    log_info(memoria_log, "## Registro EX cambia valor %d a %d", contexto_hilo->ex, contexto_recibido->ex);
+    contexto_hilo->ex = contexto_recibido->ex;
+    log_info(memoria_log, "## Registro FX cambia valor %d a %d", contexto_hilo->fx, contexto_recibido->fx);
+    contexto_hilo->fx = contexto_recibido->fx;
+    log_info(memoria_log, "## Registro GX cambia valor %d a %d", contexto_hilo->gx, contexto_recibido->gx);
+    contexto_hilo->gx = contexto_recibido->gx;
+    log_info(memoria_log, "## Registro HX cambia valor %d a %d", contexto_hilo->hx, contexto_recibido->hx);
+    contexto_hilo->hx = contexto_recibido->hx;
+
+    dictionary_put(contexto_ejecucion, key, contexto_proceso);
+    pthread_mutex_unlock(&contexto_ejecucion_procesos);
 }

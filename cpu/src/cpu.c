@@ -140,11 +140,203 @@ void ejecutar_hilo(t_pid_tid pid_tid_recibido){
         } else {
             char** instruccion_parseada = decode(instruccion);
 
-            execute(registros_cpu, pid_tid_recibido.tid, instruccion_parseada, conexion_memoria, cpu_log);
+            execute(registros_cpu, pid_tid_recibido, instruccion_parseada);
 
             string_array_destroy(instruccion_parseada);
             free(instruccion);
         }
 
     } while (!interrupt_is_called);
+}
+
+void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instruccion_parseada){
+    inst_cpu op = obtener_codigo_instruccion(instruccion_parseada[0]);
+
+    switch (op)
+    {
+    case SET:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SET> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_set(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
+        break;
+    
+    case READ_MEM:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <READ_MEM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_read_mem();
+        break;
+
+    case WRITE_MEM:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <WRITE_MEM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_write_mem();
+        break;
+
+    case SUM:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SUM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_sum();
+        break;
+
+    case SUB:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SUB> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_sub();
+        break;
+
+    case JNZ:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <JNZ> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_jnz();
+        break;
+
+    case LOG:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <LOG> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+        execute_log();
+        break;
+
+    case DUMP_MEMORY:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <DUMP_MEMORY>", pid_tid_recibido.tid);
+        execute_dump_memory();
+        break;
+
+    case IO:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <IO> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+        execute_io();
+        break;
+
+    case PROCESS_CREATE:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <PROCESS_CREATE> - <%s> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2], instruccion_parseada[3]);
+        execute_process_create();
+        break;
+
+    case THREAD_CREATE:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_CREATE> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_thread_create(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
+        break;
+
+    case THREAD_JOIN:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_JOIN> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+        execute_thread_join();
+        break;
+
+    case THREAD_CANCEL:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_CANCEL> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+        execute_thread_cancel();
+        break;
+
+    case MUTEX_CREATE:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_CREATE> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+        execute_mutex_create();
+        break;
+
+    case MUTEX_LOCK:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_LOCK> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+        execute_mutex_lock();
+        break;
+
+    case MUTEX_UNLOCK:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_UNLOCK> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+        execute_mutex_unlock();
+        break;
+
+    case THREAD_EXIT:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_EXIT>", pid_tid_recibido.tid);
+        execute_thread_exit();
+        break;
+
+    case PROCESS_EXIT:
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <PROCESS_EXIT>", pid_tid_recibido.tid);
+        execute_process_exit();
+        break;
+
+    default:
+        break;
+    }
+}
+
+void execute_set(t_contexto* registro_cpu, char* registro, char* valor){
+    int valor_int = (int)strtol(valor, NULL, 10);
+    modificar_registro(registro_cpu, registro, valor_int, cpu_log);
+    program_counter_update(registro_cpu, cpu_log);
+}
+
+void execute_read_mem(){
+
+}
+
+void execute_write_mem(){
+    
+}
+
+void execute_sum(){
+    
+}
+
+void execute_sub(){
+    
+}
+
+void execute_jnz(){
+    
+}
+
+void execute_log(){
+    
+}
+
+void execute_dump_memory(){
+    
+}
+
+void execute_io(){
+    
+}
+
+void execute_process_create(){
+    
+}
+
+void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad){
+    int valor_int = atoi(prioridad);
+    int length = strlen(path) + 1;
+
+    t_buffer* buffer = buffer_create(
+        sizeof(int) + length
+    );
+
+    buffer_add_uint32(buffer, &valor_int, cpu_log);
+    buffer_add_string(buffer, length, path, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, THREAD_CREATE);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    char* respuesta_kernel = recibir_mensaje(fd_conexion_dispatch, cpu_log);
+
+    if (strcmp(respuesta_kernel, "HILO_CREADO") != 0)
+    {
+        log_error(cpu_log, "## La Syscall THREAD_CREATE falló");
+    }
+    
+}
+
+void execute_thread_join(){
+    
+}
+
+void execute_thread_cancel(){
+    
+}
+
+void execute_mutex_create(){
+    
+}
+
+void execute_mutex_lock(){
+    
+}
+
+void execute_mutex_unlock(){
+    
+}
+
+void execute_thread_exit(){
+    
+}
+
+void execute_process_exit(){
+    
 }
