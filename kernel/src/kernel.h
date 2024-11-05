@@ -112,7 +112,7 @@
 
     char* avisar_creacion_proceso_memoria(int* pid, int* size_process, t_log* kernel_log);
 
-    char* avisar_creacion_hilo_memoria(char* path, int* prioridad, t_log* kernel_log);
+    char* avisar_creacion_hilo_memoria(int* pid, int* tid, char* path, int* prioridad, t_log* kernel_log);
 
     char* avisar_fin_proceso_memoria(uint32_t pid);
 

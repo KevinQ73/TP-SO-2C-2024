@@ -18,10 +18,6 @@ int main(int argc, char* argv[]) {
     fd_conexion_interrupt = crear_conexion(kernel_log, kernel_registro.ip_cpu, kernel_registro.puerto_cpu_interrupt);
     log_debug(kernel_log, "ME CONECTÉ A CPU INTERRUPT");
 
-    // --------------------- Conexión como cliente de MEMORIA ----------------------
-
-    //conexion_memoria = crear_conexion(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
-    //log_debug(kernel_log, "ME CONECTÉ A MEMORIA");
 
     // --------------------- Inicio del modulo ----------------------
 
@@ -80,12 +76,12 @@ void iniciar_primer_proceso(char* path, char* size){
     char* response_memoria = avisar_creacion_proceso_memoria(&(primer_proceso->pid), &size_process, kernel_log);
 
     if (strcmp(response_memoria, "OK") == 0)
-    {
-        char* respuesta_creacion_hilo = avisar_creacion_hilo_memoria(path, &prioridad, kernel_log);
+    {   
+        t_tcb* primer_hilo = create_tcb(PRIORIDAD_MAXIMA);
+        char* respuesta_creacion_hilo = avisar_creacion_hilo_memoria(&primer_proceso->pid, &primer_hilo->tid, path, &prioridad, kernel_log);
 
         if (strcmp(respuesta_creacion_hilo, "OK") == 0)
         {
-            t_tcb* primer_hilo = create_tcb(PRIORIDAD_MAXIMA);
             t_hilo_planificacion* hilo = create_hilo_planificacion(primer_proceso, primer_hilo);
 
             poner_en_ready(hilo);
@@ -128,12 +124,12 @@ void* inicializar_pcb_en_espera(){
         //t_tcb* tcb_asociado = list_remove(pcb->lista_tcbs_new, 0);
         //int prioridad = tcb_asociado->prioridad;
 
-        char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->size_process), &prioridad, kernel_log);
+        char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->pid), &pcb->size_process, kernel_log);
 
         if (strcmp(respuesta_memoria, "OK"))
         {
             t_tcb* tcb_main = list_get(pcb->lista_tcb, 0);
-            char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(pcb->path_instrucciones_hilo_main, &(tcb_main->prioridad), kernel_log);
+            char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(&pcb->pid, &tcb_main->tid, pcb->path_instrucciones_hilo_main, &(tcb_main->prioridad), kernel_log);
             if (strcmp(respuesta_memoria_hilo, "OK"))
             {
                 t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_main);
@@ -157,7 +153,7 @@ void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
 
         if (strcmp(respuesta_memoria, "OK"))
         {
-            char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(pcb->path_instrucciones_hilo_main, &prioridad, kernel_log);
+            char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(&pcb->pid, &tcb_asociado->tid, pcb->path_instrucciones_hilo_main, &prioridad, kernel_log);
             if (strcmp(respuesta_memoria_hilo, "OK"))
             {
                 t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_asociado);
@@ -405,14 +401,16 @@ char* avisar_creacion_proceso_memoria(int* pid, int* size_process, t_log* kernel
     return response_memoria;
 }
 
-char* avisar_creacion_hilo_memoria(char* path, int* prioridad, t_log* kernel_log){
+char* avisar_creacion_hilo_memoria(int* pid, int* tid, char* path, int* prioridad, t_log* kernel_log){
     int length = strlen(path) + 1;
     t_paquete* paquete = crear_paquete(CREAR_HILO);
     t_buffer* buffer = buffer_create(
-        length + sizeof(int)
+        length + sizeof(int)*3
     );
 
     buffer_add_string(buffer, length, path, kernel_log);
+    buffer_add_uint32(buffer, (uint32_t*)pid, kernel_log);
+    buffer_add_uint32(buffer, (uint32_t*)tid, kernel_log);
     buffer_add_uint32(buffer, (uint32_t*)prioridad, kernel_log);
 
     paquete->buffer = buffer;

@@ -18,6 +18,20 @@
         char* log_level;
     } t_cpu;
 
+    typedef enum{
+        BASE,
+        LIMITE,
+        PC,
+        AX,
+        BX,
+        CX,
+        DX,
+        EX,
+        FX,
+        GX,
+        HX,
+    } t_registro_handler;
+
     /*------------------------- Funciones de inicio -------------------------*/
 
     t_cpu levantar_datos(t_config* config);
@@ -29,18 +43,20 @@
 
     t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* kernel_log);
 
-    void recibir_paquete_memoria(t_dictionary* registros, int fd_memoria, t_log* cpu_log);
+    void recibir_contexto_memoria(t_contexto* registros_cpu, int fd_memoria, t_log* cpu_log);
 
-    t_dictionary* solicitar_contexto_ejecucion(t_pid_tid, int fd_memoria, t_log* log_cpu);
+    void solicitar_contexto_ejecucion(t_contexto* registros_cpu, t_pid_tid pid_tid, int fd_memoria, t_log* log_cpu);
 
     /*-----------------------------------------------------------------------*/
     /*-------------------- Funciones de registro de CPU ---------------------*/
 
-    void actualizar_registros_cpu(t_dictionary* registro_destino, t_dictionary* registro_inicial, t_log* log);
+    t_registro_handler get_register_id(char* registro);
 
-    void modificar_registro(t_dictionary* registro_destino, char* key, int nuevo_valor, t_log* log);
+    void actualizar_registros_cpu(t_contexto* registros_cpu, t_buffer* registro_destino, t_log* log);
 
-    void program_counter_update(t_dictionary* registro_cpu, t_log* log);
+    void modificar_registro(t_contexto* registro_destino, char* registro, int nuevo_valor, t_log* log);
+
+    void program_counter_update(t_contexto* registro_cpu, t_log* log);
 
     /*-----------------------------------------------------------------------*/
     /*----------------------- Ciclo de instrucciones ------------------------*/
@@ -49,12 +65,12 @@
 
     char** decode(char* instruccion);
 
-    void execute(t_dictionary* registro_a_modificar, char** instruccion_parseada, t_log* log);
+    void execute(t_contexto* registros_cpu, uint32_t tid, char** instruccion_parseada, int socket_memoria, t_log* log);
 
     /*-----------------------------------------------------------------------*/
     /*-------------------------- Funciones execute --------------------------*/
 
-    void execute_set(t_dictionary* registro_cpu, char* registro, char* valor, t_log* log);
+    void execute_set(t_contexto* registro_cpu, char* registro, char* valor, t_log* log);
 
     void execute_read_mem();
 
@@ -74,7 +90,7 @@
 
     void execute_process_create();
 
-    void execute_thread_create();
+    void execute_thread_create(t_contexto* registro_cpu, int socket_memoria, char* path, char* prioridad, t_log* log);
 
     void execute_thread_join();
 

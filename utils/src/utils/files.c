@@ -36,9 +36,11 @@ void eliminar_config(t_config* config){
     }
 }
 
-t_list* leer_instrucciones(char* path, t_log* log_modulo){
+t_list* leer_instrucciones(char* path, char* carpeta, t_log* log_modulo){
 	t_list* lista_instrucciones_a_devolver = list_create();
-    FILE* archivo_instrucciones = fopen(path, "rb");
+	char* path_instrucciones = string_duplicate(carpeta);
+	string_append(&path_instrucciones, path);
+    FILE* archivo_instrucciones = fopen(path_instrucciones, "rb");
 
     if (archivo_instrucciones == NULL) {
         log_error(log_modulo,"ARCHIVO DE INSTRUCCIONES INEXISTENTE");
@@ -56,12 +58,14 @@ t_list* leer_instrucciones(char* path, t_log* log_modulo){
 			instruccion[largo - 1] = '\0';
 		}
 		log_debug(log_modulo, "Se parseó la siguiente instrucción: %s", instruccion);
-        list_add(lista_instrucciones_a_devolver, instruccion);
+		char* copia_instruccion = string_duplicate(instruccion);
+        list_add(lista_instrucciones_a_devolver, copia_instruccion);
 	}
-    free(instruccion);
+	free(instruccion);
     fclose(archivo_instrucciones);
     log_debug(log_modulo, "SE LEYERON %d INSTRUCCIONES", list_size(lista_instrucciones_a_devolver));
-    return lista_instrucciones_a_devolver;
+
+	return lista_instrucciones_a_devolver;
 }
 
 char** parsear_instruccion(char* instruccion){

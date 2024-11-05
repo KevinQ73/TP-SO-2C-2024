@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
     // ------------------------ INICIAR CPU -------------------------
 
-    registros_cpu = inicializar_registros();
+    registros_cpu = malloc(sizeof(t_contexto));
 
     pthread_create(&hilo_kernel_dispatch, NULL, (void *)atender_puerto_dispatch, NULL);
     pthread_detach(hilo_kernel_dispatch);
@@ -128,14 +128,11 @@ void interrupt_results(uint32_t* tid, char* motivo){
     /*-------------------------- Ciclo de ejecución -------------------------*/
 
 void ejecutar_hilo(t_pid_tid pid_tid_recibido){
-    t_dictionary* contexto_ejecucion = solicitar_contexto_ejecucion(pid_tid_recibido, conexion_memoria, cpu_log);
-
-    actualizar_registros_cpu(registros_cpu, contexto_ejecucion, cpu_log);
-
+    solicitar_contexto_ejecucion(registros_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
     do
     {
-        uint32_t pc = dictionary_get(registros_cpu, "PC");
-        char* instruccion = fetch(pid_tid_recibido, &pc, conexion_memoria, cpu_log);
+        char* instruccion = fetch(pid_tid_recibido, &registros_cpu->pc, conexion_memoria, cpu_log);
+        log_info(cpu_log, "## TID: <%d> - FETCH - Program Counter: <%d>", pid_tid_recibido.tid, registros_cpu->pc);
 
         if (strcmp(instruccion, "NO_INSTRUCCION") == 0)
         {
@@ -143,9 +140,7 @@ void ejecutar_hilo(t_pid_tid pid_tid_recibido){
         } else {
             char** instruccion_parseada = decode(instruccion);
 
-            log_debug(cpu_log, "INSTRUCCIÓN SOLICITADA: %s, REGISTRO: %s, VALOR: %s", instruccion_parseada[0], instruccion_parseada[1], instruccion_parseada[2]);
-
-            execute(registros_cpu, instruccion_parseada, cpu_log);
+            execute(registros_cpu, pid_tid_recibido.tid, instruccion_parseada, cpu_log);
 
             string_array_destroy(instruccion_parseada);
             free(instruccion);

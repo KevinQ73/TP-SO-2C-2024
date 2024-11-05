@@ -134,7 +134,7 @@ void* atender_kernel(){
             crear_hilo(pid, tid, prioridad, path);
 
             enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-            log_debug(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s", pid, tid, prioridad, path);
+            log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s", pid, tid, prioridad, path);
 
             free(path);
             close(fd_conexion_kernel);
@@ -183,6 +183,8 @@ void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path){
     t_contexto_hilo* contexto_hilo = crear_contexto_hilo(tid, prioridad, path);
 
     list_add(contexto_proceso->lista_hilos, contexto_hilo);
+
+    dictionary_put(contexto_ejecucion, key, contexto_proceso);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
 }
 
@@ -215,12 +217,12 @@ void* atender_cpu(){
 
         switch (op){
         case SOLICITAR_CONTEXTO_EJECUCION: //Aca me solicita el contexto de un pid_tid, hay que ver que enum usamos
-        	usleep(memoria_registro.retardo_respuesta * 1000);
-
             buffer = buffer_recieve(fd_conexion_cpu);
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
             
+           	usleep(memoria_registro.retardo_respuesta * 1000);
+
             log_debug(memoria_log, "## [MEMORIA:CPU] Contexto <Solicitado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
             t_contexto* contexto_hallado = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
             enviar_contexto_solicitado(contexto_hallado);
@@ -236,6 +238,7 @@ void* atender_cpu(){
 
             log_debug(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
             usleep(memoria_registro.retardo_respuesta * 1000);
+
             direccion_fisica = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
             log_debug(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <%d>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica, tamanio_contexto);
             //escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
@@ -251,11 +254,11 @@ void* atender_cpu(){
 
         	usleep(memoria_registro.retardo_respuesta * 1000);
 
-        	char* path_pid_tid = buscar_path(pid_tid_recibido.pid, pid_tid_recibido.tid);
-        	//char* instruccion = obtenerInstruccion(path_pid_tid, programCounter);
-			//log_debug(memoria_log, "## [MEMORIA:CPU] Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: <%s>", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
-        	//enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
+        	char* instruccion = buscar_instruccion(pid_tid_recibido.pid, pid_tid_recibido.tid, programCounter);
+      	    log_info(memoria_log, "## Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: %s", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
+            enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
         	break;
+
         case WRITE_MEM:
             buffer = buffer_recieve(fd_conexion_cpu);
             pid_tid_recibido.pid = buffer_read_uint32(buffer);
@@ -308,7 +311,7 @@ t_contexto_proceso* crear_contexto_proceso(uint32_t pid, uint32_t base, uint32_t
 t_contexto_hilo* crear_contexto_hilo(uint32_t tid, uint32_t prioridad, char* path){
     t_contexto_hilo* contexto = malloc(sizeof(t_contexto_hilo));
 
-    contexto->lista_instrucciones = leer_instrucciones(path, memoria_log);
+    contexto->lista_instrucciones = leer_instrucciones(path, memoria_registro.path_instrucciones ,memoria_log);
     contexto->tid = tid;
     contexto->prioridad = prioridad;
     contexto->pc = 0;
@@ -372,7 +375,7 @@ uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
 }
 
 uint32_t obtener_espacio_desocupado(){
-    uint32_t base_particion = -1;
+    int base_particion = -1;
 
     uint32_t largo_bitmap = bitarray_get_max_bit(bitmap_particion_fija);
     uint32_t i = 0;
@@ -427,13 +430,26 @@ void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura){
     return datos_memoria;
 }
 
-char* buscar_path(int pid, int tid){
-    tid_busqueda = tid;
-    pid_busqueda = pid;
-    
-    t_pseudocodigo* busqueda = (t_pseudocodigo*) list_find(lista_pseudocodigos, (void*) busqueda_pid_tid);
+t_contexto_hilo* thread_get_by_tid(t_list* lista_hilos, int tid){
+    bool _list_contains(void* ptr) {
+	    t_contexto_hilo* hilo = (t_contexto_hilo*) ptr;
+	    return (tid == hilo->tid);
+	}
+	return list_find(lista_hilos, _list_contains);
+}
 
-    return busqueda->pseudocodigo;
+char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
+    char* key = string_itoa(pid);
+    t_contexto_proceso* contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    t_contexto_hilo* contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
+    char* instruccion = string_new();
+
+    if(list_size(contexto_hilo->lista_instrucciones) > program_counter){
+        instruccion = list_get(contexto_hilo->lista_instrucciones, program_counter);
+    } else {
+        instruccion = "NO_INSTRUCCION";
+    }
+    return instruccion;
 }
 
 bool busqueda_pid_tid(t_pseudocodigo* pseudocodigo){

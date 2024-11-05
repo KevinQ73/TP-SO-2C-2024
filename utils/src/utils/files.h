@@ -47,7 +47,7 @@
     */
     void        eliminar_config(t_config* config);
 
-    t_list* leer_instrucciones(char* path, t_log* log_modulo);
+    t_list* leer_instrucciones(char* path, char* carpeta, t_log* log_modulo);
 
     char** parsear_instruccion(char* instruccion);
 

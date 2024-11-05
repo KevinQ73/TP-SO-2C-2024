@@ -14,7 +14,7 @@
     int fd_conexion_interrupt;
 
     t_pid_tid pid_tid_recibido;
-    t_dictionary* registros_cpu;
+    t_contexto* registros_cpu;
     
     pthread_t hilo_kernel_dispatch;
     pthread_t hilo_kernel_interrupt;

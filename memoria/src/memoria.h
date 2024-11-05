@@ -75,12 +75,14 @@
 
     void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura);
 
-    char* buscar_path(int pid, int tid);
+    t_contexto_hilo* thread_get_by_tid(t_list* lista_hilos, int tid);
+
+    char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter);
 
     bool busqueda_pid_tid(t_pseudocodigo* pseudocodigo);
 
     void enviar_datos_memoria(void* buffer, uint32_t tamanio);
 
-    void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
+    //void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
 
 #endif /* MEMORIA_SRC_MEMORIA_H_ */
