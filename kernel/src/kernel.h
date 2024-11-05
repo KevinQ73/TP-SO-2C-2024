@@ -100,6 +100,11 @@
 
     t_pcb* list_find_by_pid(uint32_t pid);
 
+    t_hilo_planificacion* thread_find_by_tid(t_list* lista, uint32_t tid);
+
+    pthread_mutex_t* find_by_name(t_list* lista_de_mutex, char* name);
+
+
     /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
     void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar);
@@ -126,13 +131,19 @@
 
     void* syscall_process_exit();
 
-    void* syscall_thread_create();
+    void* syscall_thread_create(uint32_t pid_solicitante, uint32_t tid_solicitante);
 
     void* syscall_thread_join();
 
     void* syscall_thread_exit(t_hilo_planificacion* hilo);
 
     void* syscall_thread_cancel(uint32_t tid);
+
+    void* syscall_mutex_create(char* nombreMutex, uint32_t pid);
+
+    void* syscall_mutex_lock(char* nombreMutex ,t_pid_tid pid_tid_recibido);
+
+    void* syscall_mutex_unlock(char* nombreMutex ,t_pid_tid pid_tid_recibido);
 
     void* syscall_dump_memory();
 

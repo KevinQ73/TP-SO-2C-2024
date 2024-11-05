@@ -255,6 +255,14 @@ void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
     }
 }
 
+t_hilo_planificacion* thread_find_by_tid(t_list* lista, uint32_t tid){
+    bool _list_contains(void* ptr) {
+	    t_hilo_planificacion* hilo = (t_hilo_planificacion*) ptr;
+	    return (tid == hilo->tcb_asociado->tid);
+	}
+	return list_find(lista, _list_contains);
+}
+
 /*--------------------------- FUNCIONES DE COLAS ----------------------------*/
 
 void queue_push_by_priority(t_hilo_planificacion* hilo_del_proceso){
@@ -474,9 +482,12 @@ char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid){
 /*--------------------------------- SYSCALLS --------------------------------*/
 
 void* operacion_a_atender(){
+    int length;
+    char* nombreMutex = string_new();
     int operacion = recibir_operacion(fd_conexion_interrupt);
-    t_pid_tid pid_tid_recibido = recibir_pid_tid(fd_conexion_interrupt, kernel_log);
-   
+    t_buffer* buffer = buffer_recieve(fd_conexion_interrupt);
+    t_pid_tid pid_tid_recibido = recibir_pid_tid(buffer, kernel_log);
+    
     switch (operacion)
     {
     case PROCESS_CREATE:
@@ -506,20 +517,22 @@ void* operacion_a_atender(){
         break;
 
     case MUTEX_CREATE:
-    /*LE TENGO QUE PASAR UN NOMBRE AL MUTEX A CREAR?*/
-            syscall_mutex_create(nombreMutex , pid_tid_recibido.pid);
+        nombreMutex = buffer_read_string(buffer, &length);
+        syscall_mutex_create(nombreMutex , pid_tid_recibido.pid);
         break;
 
     case MUTEX_LOCK:
-            syscall_mutex_lock(nombreMutex,pid_tid_recibido);
+        nombreMutex = buffer_read_string(buffer, &length);
+        syscall_mutex_lock(nombreMutex, pid_tid_recibido);
         break;
         
     case MUTEX_UNLOCK:
-            
+        nombreMutex = buffer_read_string(buffer, &length);
+        syscall_mutex_unlock(nombreMutex, pid_tid_recibido);
         break;
 
     case DUMP_MEMORY:
-            syscall_dump_memory();
+        syscall_dump_memory();
         break;
         
     default:
@@ -527,16 +540,16 @@ void* operacion_a_atender(){
     }
 }
 
- pthread_mutex_t* find_by_name(t_list* lista_de_mutex, char* name) {
+pthread_mutex_t* find_by_name(t_list* lista_de_mutex, char* name){
     bool _name_equals(void* ptr) {
         t_mutex* mutexAEncontrar = (t_mutex*) ptr;
-        return strcmp(mutexAEncontrar->nombre, name) == 0;
+        return name == mutexAEncontrar->nombre;
     }
     return list_find(lista_de_mutex, _name_equals);
 }
 
-void* syscall_mutex_lock(char* nombreMutex ,t_pid_tid* pid_tid_recibido){
-    t_pcb* pcb = list_find_by_pid(pid_tid_recibido->pid);
+void* syscall_mutex_lock(char* nombreMutex ,t_pid_tid pid_tid_recibido){
+    t_pcb* pcb = list_find_by_pid(pid_tid_recibido.pid);
 
     t_mutex* mutex_encontrado = find_by_name(pcb->mutex_asociados,nombreMutex );
 
@@ -544,33 +557,33 @@ void* syscall_mutex_lock(char* nombreMutex ,t_pid_tid* pid_tid_recibido){
 
        if(mutex_encontrado->tid_tomado == NULL){
 
-            mutex_encontrado->tid_tomado = pid_tid_recibido->tid ;
-
+            mutex_encontrado->tid_tomado = pid_tid_recibido.tid;
        }else{
         /*el hilo que realizó MUTEX_LOCK se bloqueará en la cola de bloqueados correspondiente a dicho mutex.*/
-            mutex_encontrado->valor=0;
-            
+            poner_en_block(hilo_en_ejecucion);
+            queue_push(mutex_encontrado->cola_bloqueados, pid_tid_recibido.tid);
        }
     }
 }
 
+void* syscall_mutex_unlock(char* nombreMutex ,t_pid_tid pid_tid_recibido){
+    t_pcb* pcb = list_find_by_pid(pid_tid_recibido.pid);
 
-void* syscall_mutex_unlock(char* nombreMutex ,t_pid_tid* pid_tid_recibido){
-    t_pcb* pcb = list_find_by_pid(pid_tid_recibido->pid);
-
-    t_mutex* mutex_encontrado = find_by_name(pcb->mutex_asociados,nombreMutex );
+    t_mutex* mutex_encontrado = find_by_name(pcb->mutex_asociados, nombreMutex);
 
     if(mutex_encontrado != NULL){
-       if(mutex_encontrado->tid_tomado == pid_tid_recibido->tid){
-             ;
-       }else{
-        /*el hilo que realizó MUTEX_LOCK se bloqueará en la cola de bloqueados correspondiente a dicho mutex.*/
-       }
+        if(mutex_encontrado->tid_tomado == pid_tid_recibido.tid){
+            uint32_t tid_encontado = queue_pop(mutex_encontrado->cola_bloqueados);
+            mutex_encontrado->tid_tomado = tid_encontado;
+            t_hilo_planificacion* hilo = thread_find_by_tid(hilos_block, pid_tid_recibido.tid);
+            poner_en_ready(hilo);
+        }else{
+            log_warning(kernel_log, "## [KERNEL] Se hizo UNLOCK de un MUTEX que no existe para el proceso PID: %d TID: %d",pid_tid_recibido.pid, pid_tid_recibido.tid);
+        }
     }
 }
 
-
-void*  syscall_mutex_create(char* nombreMutex, uint32_t pid){
+void* syscall_mutex_create(char* nombreMutex, uint32_t pid){
     t_mutex* mutexCreado = create_mutex(nombreMutex);
 
     t_pcb* pcb = list_find_by_pid(pid);

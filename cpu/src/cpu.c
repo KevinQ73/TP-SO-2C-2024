@@ -140,7 +140,7 @@ void ejecutar_hilo(t_pid_tid pid_tid_recibido){
         } else {
             char** instruccion_parseada = decode(instruccion);
 
-            execute(registros_cpu, pid_tid_recibido.tid, instruccion_parseada, cpu_log);
+            execute(registros_cpu, pid_tid_recibido.tid, instruccion_parseada, conexion_memoria, cpu_log);
 
             string_array_destroy(instruccion_parseada);
             free(instruccion);

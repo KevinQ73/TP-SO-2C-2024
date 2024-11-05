@@ -359,12 +359,9 @@ void enviar_pid_tid(uint32_t* pid, uint32_t* tid, int socket_servidor, t_log* lo
 	eliminar_paquete(paquete);
 }
 
-t_pid_tid recibir_pid_tid(int socket_cliente, t_log* log){
+t_pid_tid recibir_pid_tid(t_buffer* buffer, t_log* log){
 	uint32_t pid = 0;
     uint32_t tid = 0;
-
-	t_buffer* buffer;
-    buffer = buffer_recieve(socket_cliente);
 
 	pid = buffer_read_uint32(buffer);
     tid = buffer_read_uint32(buffer);
@@ -374,8 +371,6 @@ t_pid_tid recibir_pid_tid(int socket_cliente, t_log* log){
 	t_pid_tid pid_tid;
 	pid_tid.pid = pid;
 	pid_tid.tid = tid;
-
-	buffer_destroy(buffer);
 	return pid_tid;
 }
 

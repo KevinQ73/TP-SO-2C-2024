@@ -8,6 +8,7 @@
     #include <unistd.h>
     #include <semaphore.h>
     #include <commons/collections/list.h>
+    #include <commons/collections/queue.h>
     #include <commons/log.h>
     #include <sys/socket.h>
 
@@ -116,18 +117,18 @@
     } t_hilo_planificacion;
 
     typedef struct{
+        char* nombre;
+        uint32_t valor;
+        uint32_t tid_tomado;
+        t_queue* cola_bloqueados;
+    }t_mutex;
+
+    typedef struct{
         uint32_t pid;
         uint32_t base;
         uint32_t limite;
         t_list* lista_hilos; // Guarde t_contexto_hilos;
     } t_contexto_proceso;
-
-    typedef struct{
-        char* nombre;
-        uint32_t valor;
-        uint32_t tid_tomado;
-        t_list* cola_bloqueados;
-    }t_mutex;
 
     typedef struct{
         t_list* lista_instrucciones;
@@ -368,7 +369,7 @@
 
     void enviar_pid_tid(uint32_t* pid, uint32_t* tid, int socket_servidor, t_log* log);
 
-    t_pid_tid recibir_pid_tid(int socket_cliente, t_log* log);
+    t_pid_tid recibir_pid_tid(t_buffer* buffer, t_log* log);
 
     cod_inst obtener_codigo_instruccion(char* operacion);
     

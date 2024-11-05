@@ -23,8 +23,8 @@ t_cpu levantar_datos(t_config* config){
 }*/
 
 t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
-
-    t_pid_tid pid_tid = recibir_pid_tid(socket_kernel, cpu_log);
+    t_buffer* buffer = buffer_recieve(socket_kernel);
+    t_pid_tid pid_tid = recibir_pid_tid(buffer, cpu_log);
     
     return pid_tid;
 }
@@ -285,7 +285,7 @@ void execute(t_contexto* registros_cpu, uint32_t tid, char** instruccion_parsead
 
     case THREAD_CREATE:
         log_info(log, "## TID: <%d> - Ejecutando: <THREAD_CREATE> - <%s> - <%s>", tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_thread_create(registros_cpu, );
+        execute_thread_create(registros_cpu, socket_memoria, instruccion_parseada[1], instruccion_parseada[2], log);
         break;
 
     case THREAD_JOIN:
