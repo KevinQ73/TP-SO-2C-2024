@@ -17,3 +17,10 @@ t_memoria levantar_datos_memoria(t_config* config){
 
     return datos_config;
 }
+
+int crear_conexion_con_fs(t_log* memoria_log, char* ip, char* puerto){
+    int conexion_memoria = crear_conexion(memoria_log, ip, puerto);
+    log_debug(memoria_log, "ME CONECTÉ A FS");
+
+    return conexion_memoria;
+}

@@ -10,4 +10,11 @@
     int fd_escucha_memoria;
     int fd_conexion_memoria;
 
+    pthread_t hilo_memoria;
+
+    void atender_memoria();
+
+    void* atender_solicitudes(void* fd_conexion);
+
+
 #endif /* FILESYSTEM_H_ */

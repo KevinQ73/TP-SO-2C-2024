@@ -26,12 +26,15 @@
     pthread_t hiloMemoriaKernel;
     pthread_t hiloCrearProceso;
     pthread_t hiloFinalizarProceso;
+    pthread_t mutex_fd_filesystem;
 
     pthread_mutex_t kernel_operando;
     pthread_mutex_t contexto_ejecucion_procesos;
     sem_t memoria_activo;
 
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
+
+    void enviar_solicitud_fs();
 
     void iniciar_memoria();
 

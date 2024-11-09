@@ -19,8 +19,10 @@ int main(int argc, char* argv[]) {
 
     // --------------------- Conexión como cliente de FILESYSTEM ----------------------
 
-    //conexion_filesystem = crear_conexion(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
-    //log_debug(memoria_log, "ME CONECTÉ A FILESYSTEM");
+    conexion_filesystem = crear_conexion(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
+    log_debug(memoria_log, "ME CONECTÉ A FILESYSTEM");
+
+    enviar_solicitud_fs();
 
     // --------------------- Conexiones de clientes con el servidor ----------------------
     
@@ -43,6 +45,33 @@ int main(int argc, char* argv[]) {
 }
 
 /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
+
+void enviar_solicitud_fs(){
+
+    for (int i = 0; i < 20; i++)
+    {
+        t_paquete* paquete = crear_paquete(DUMP_MEMORY);
+        t_buffer* buffer = buffer_create(
+            sizeof(uint32_t)*3
+        );
+
+        buffer_add_uint32(buffer, &i, memoria_log);
+        buffer_add_uint32(buffer, &i, memoria_log);
+        buffer_add_uint32(buffer, &i, memoria_log);
+
+        paquete->buffer = buffer;
+        pthread_mutex_lock(&mutex_fd_filesystem);
+            int fd_conexion = crear_conexion_con_fs(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
+            enviar_paquete(paquete, fd_conexion);
+            char* response_fs = recibir_mensaje(fd_conexion, memoria_log);
+            log_debug(memoria_log, "STRING RECIBIDO enviar_solicitud_fs: %s", response_fs);
+            close(fd_conexion);
+        pthread_mutex_unlock(&mutex_fd_filesystem);
+
+        eliminar_paquete(paquete);
+    }
+}
+
 
 void iniciar_memoria(){
     log_info(memoria_log, "MEMORIA INICIALIZADA\n");

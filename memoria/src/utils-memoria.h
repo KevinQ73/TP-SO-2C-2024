@@ -35,4 +35,6 @@
 
     t_memoria levantar_datos_memoria(t_config* config);
 
+    int crear_conexion_con_fs(t_log* memoria_log, char* ip, char* puerto);
+
 #endif /* MEMORIA_SRC_UTILS_MEMORIA_H_ */
