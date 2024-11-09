@@ -89,6 +89,52 @@ void actualizar_registros_cpu(t_contexto* registros_cpu, t_buffer* buffer, t_log
     log_debug(log, "HX RECIBIDO: %d", registros_cpu->hx);
 }
 
+uint32_t get_register(t_contexto* registro_cpu, char* registro){
+    if (strcmp(registro, "BASE") == 0){
+        return registro_cpu->base;
+    }
+
+    if (strcmp(registro, "LIMITE") == 0){
+        return registro_cpu->limite;
+    }
+
+    if (strcmp(registro, "PC") == 0){
+        return registro_cpu->base;
+    }
+
+    if (strcmp(registro, "AX") == 0){
+        return registro_cpu->ax;
+    }
+
+    if (strcmp(registro, "BX") == 0){
+        return registro_cpu->bx;
+    }
+
+    if (strcmp(registro, "CX") == 0){
+        return registro_cpu->cx;
+    }
+
+    if (strcmp(registro, "DX") == 0){
+        return registro_cpu->dx;
+    }
+
+    if (strcmp(registro, "EX") == 0){
+        return registro_cpu->ex;
+    }
+
+    if (strcmp(registro, "FX") == 0){
+        return registro_cpu->fx;
+    }
+
+    if (strcmp(registro, "GX") == 0){
+        return registro_cpu->gx;
+    }
+
+    if (strcmp(registro, "HX") == 0){
+        return registro_cpu->hx;
+    }
+}
+
 t_registro_handler get_register_id(char* registro){
     if (strcmp(registro, "BASE") == 0){
         return BASE;
@@ -204,6 +250,11 @@ void modificar_registro(t_contexto* registro_destino, char* registro, int nuevo_
 void program_counter_update(t_contexto* registro_cpu, t_log* log){
     uint32_t valor_inicial = registro_cpu->pc;
     uint32_t valor_final = valor_inicial + 1;
+    modificar_registro(registro_cpu, "PC", valor_final, log);
+}
+
+void program_counter_jump(t_contexto* registro_cpu, uint32_t salto, t_log* log){
+    uint32_t valor_final = salto;
     modificar_registro(registro_cpu, "PC", valor_final, log);
 }
 

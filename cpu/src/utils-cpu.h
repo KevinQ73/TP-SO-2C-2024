@@ -56,11 +56,15 @@
 
     t_registro_handler get_register_id(char* registro);
 
+    uint32_t get_register(t_contexto* registro_cpu, char* registro);
+
     void actualizar_registros_cpu(t_contexto* registros_cpu, t_buffer* registro_destino, t_log* log);
 
     void modificar_registro(t_contexto* registro_destino, char* registro, int nuevo_valor, t_log* log);
 
     void program_counter_update(t_contexto* registro_cpu, t_log* log);
+
+    void program_counter_jump(t_contexto* registro_cpu, uint32_t salto, t_log* log);
 
     /*-----------------------------------------------------------------------*/
     /*----------------------- Ciclo de instrucciones ------------------------*/

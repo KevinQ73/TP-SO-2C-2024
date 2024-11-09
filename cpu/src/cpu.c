@@ -255,28 +255,40 @@ void execute_set(t_contexto* registro_cpu, char* registro, char* valor){
     program_counter_update(registro_cpu, cpu_log);
 }
 
-void execute_read_mem(){
-
+void execute_read_mem(t_contexto* registro_cpu, char* registro_datos, char* registro_direccion){
+    /**int valor_int = (int)strtol(registro_cpu.registro_direccion, NULL, 10);
+    modificar_registro(registro_cpu, registro_datos, valor_int, cpu_log);
+    program_counter_update(registro_cpu, cpu_log);*/
 }
 
-void execute_write_mem(){
-    
+void execute_write_mem(t_contexto* registro_cpu, char* registro_direccion, char* registro_datos){
+    /**int valor_int = (int)strtol(registro_cpu.registro_direccion, NULL, 10);
+    modificar_registro(registro_cpu, registro_direccion, valor_int, cpu_log);
+    program_counter_update(registro_cpu, cpu_log);*/
 }
 
-void execute_sum(){
-    
+void execute_sum(t_contexto* registro_cpu, char* registro_destino, char* registro_origen){
+    int resultado_int = get_register(registro_cpu, registro_destino) + get_register(registro_cpu, registro_origen);
+    modificar_registro(registro_cpu, registro_destino, resultado_int, cpu_log);
+    program_counter_update(registro_cpu, cpu_log);
 }
 
-void execute_sub(){
-    
+void execute_sub(t_contexto* registro_cpu, char* registro_destino, char* registro_origen){
+    int resultado_int = get_register(registro_cpu, registro_destino) - get_register(registro_cpu, registro_origen);
+    modificar_registro(registro_cpu, registro_destino, resultado_int, cpu_log);
+    program_counter_update(registro_cpu, cpu_log);
 }
 
-void execute_jnz(){
-    
+void execute_jnz(t_contexto* registro_cpu, char* registro, char* instruccion){
+    int valor_int = get_register(registro_cpu, registro);
+    if (valor_int /= 0){
+        program_counter_jump(registro_cpu, instruccion, cpu_log);
+    }
 }
 
-void execute_log(){
-    
+void execute_log(t_contexto* registro_cpu, char* registro){
+    int info_int = get_register(registro_cpu, registro);
+    log_info(cpu_log, "## Registro %s tiene valor %d", registro, info_int);
 }
 
 void execute_dump_memory(){
