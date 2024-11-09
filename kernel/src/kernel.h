@@ -36,6 +36,7 @@
 
     pthread_t hiloNew;
     pthread_t hiloPlanifCortoPlazo;
+    pthread_t hilo_io;
 
     pthread_mutex_t mutex_cola_new;
     pthread_mutex_t mutex_cola_ready;

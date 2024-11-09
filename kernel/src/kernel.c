@@ -195,7 +195,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
         hilo = thread_find_by_priority_schedule(lista_prioridades);
         pthread_mutex_unlock(&mutex_cola_ready);
 
-    } else if (strcmp(planificacion, "COLAS_MULTINIVEL") == 0)
+    } else if (strcmp(planificacion, "CMP") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
         hilo = thread_find_by_multilevel_queues_schedule(lista_colas_multinivel);
@@ -221,7 +221,7 @@ void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso){
     } else if(strcmp(kernel_registro.algoritmo_planificacion, "PRIORIDADES") == 0){
         list_add(lista_prioridades, hilo_del_proceso);
 
-    }else if(strcmp(kernel_registro.algoritmo_planificacion, "COLAS_MULTINIVEL") == 0){
+    }else if(strcmp(kernel_registro.algoritmo_planificacion, "CMP") == 0){
         queue_push_by_priority(hilo_del_proceso);
     }else{
         log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
@@ -335,7 +335,7 @@ t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_co
             i = list_size(lista_colas_multinivel);
         }
     }
-    pthread_mutex_lock(&mutex_colas_multinivel_existentes);
+    pthread_mutex_unlock(&mutex_colas_multinivel_existentes);
 
     return hilo_a_ejecutar;
 }
@@ -485,6 +485,7 @@ char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid){
 void* operacion_a_atender(){
     int length;
     char* nombreMutex = string_new();
+    uint32_t milisegundos_de_trabajo;
     int operacion = recibir_operacion(fd_conexion_interrupt);
     t_buffer* buffer = buffer_recieve(fd_conexion_interrupt);
     t_pid_tid pid_tid_recibido = recibir_pid_tid(buffer, kernel_log);
@@ -536,11 +537,37 @@ void* operacion_a_atender(){
     case DUMP_MEMORY:
         syscall_dump_memory();
         break;
+
+    case IO:
+        milisegundos_de_trabajo = buffer_read_uint32(buffer);
+        syscall_io(milisegundos_de_trabajo);
+    break;
         
     default:
         break;
     }
 }
+
+
+void* ejecutar_io (uint32_t milisegundos){
+
+     usleep(milisegundos); 
+
+    log_info(kernel_log,"Kernel atendio entrada/salida por: %i milisegundos ",milisegundos);
+}
+
+void* syscall_io(uint32_t milisegundos_de_trabajo){
+
+    t_hilo_planificacion* hilo = hilo_en_ejecucion;
+
+    poner_en_block(hilo_en_ejecucion);
+    
+
+    ejecutar_io(milisegundos_de_trabajo);
+    
+    poner_en_ready(hilo);
+
+} 
 
 pthread_mutex_t* find_by_name(t_list* lista_de_mutex, char* name){
     bool _name_equals(void* ptr) {
@@ -778,7 +805,7 @@ t_pcb* list_find_by_pid(uint32_t pid){
     pthread_mutex_lock(&mutex_lista_procesos_ready);
 }
 
-void* tid_find(t_list* lista_tcb, uint32_t tid){
+t_tcb* tid_find(t_list* lista_tcb, uint32_t tid){
     bool _list_contains(void* ptr){
         t_tcb* tcb_a_encontrar = (t_tcb*) ptr;
 	    return (tcb_a_encontrar->tid == tid);
