@@ -32,11 +32,19 @@
         HX,
     } t_registro_handler;
 
+    typedef struct{
+        char* registro;
+        uint32_t tid;
+        uint32_t byte_inicial; 
+    }t_registro;
+
     /*------------------------- Funciones de inicio -------------------------*/
 
     t_cpu levantar_datos(t_config* config);
 
     t_dictionary* inicializar_registros();
+
+    int mmu(uint32_t base, uint32_t limite, int registros_guardados);
 
     /*-----------------------------------------------------------------------*/
     /*----------------------- Conexiones con módulos ------------------------*/

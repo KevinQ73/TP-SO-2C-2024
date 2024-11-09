@@ -15,6 +15,7 @@
 
     t_pid_tid pid_tid_recibido;
     t_contexto* registros_cpu;
+    t_dictionary* direccion_fisica;
     
     pthread_t hilo_kernel_dispatch;
     pthread_t hilo_kernel_interrupt;
@@ -47,7 +48,7 @@
 
     void execute_read_mem();
 
-    void execute_write_mem();
+    void execute_write_mem(t_contexto* registro_cpu, char* registro, char* valor);
 
     void execute_sum();
 

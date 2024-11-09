@@ -13,14 +13,10 @@ t_cpu levantar_datos(t_config* config){
     return datos_config;
 }
 
-/*t_dictionary* inicializar_registros(){
-    t_dictionary* registros = dictionary_create();
-    int valor_inicial = 0;
-    for (int i = 0; i < 11; i++) {
-        dictionary_put(registros, nombres_registros[i], valor_inicial);
-    }
-    return registros;
-}*/
+int mmu(uint32_t base, uint32_t limite, int registros_guardados){
+
+    
+}
 
 t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
     t_buffer* buffer = buffer_recieve(socket_kernel);
