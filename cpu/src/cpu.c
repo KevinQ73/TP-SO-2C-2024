@@ -166,7 +166,7 @@ void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instr
 
     case WRITE_MEM:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <WRITE_MEM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_write_mem();
+        execute_write_mem(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case SUM:
