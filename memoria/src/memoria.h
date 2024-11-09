@@ -24,8 +24,7 @@
     
     pthread_t hiloMemoriaCpu;
     pthread_t hiloMemoriaKernel;
-    pthread_t hiloCrearProceso;
-    pthread_t hiloFinalizarProceso;
+    pthread_t hilo_atender_kernel;
     pthread_t mutex_fd_filesystem;
 
     pthread_mutex_t kernel_operando;
@@ -45,6 +44,8 @@
     /*---------------------------- FUNCIONES DE KERNEL --------------------------*/
 
     void* atender_kernel();
+
+    void* atender_solicitudes_kernel(void* fd_conexion);
 
     bool crear_proceso(uint32_t pid, uint32_t size);
 

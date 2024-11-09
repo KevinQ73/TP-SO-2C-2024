@@ -114,6 +114,8 @@
 
     void* desalojar_hilo(t_hilo_planificacion* hilo_a_desalojar);
 
+    void* ejecutar_io (uint32_t milisegundos);
+
     /*----------------------- FUNCIONES KERNEL - MEMORIA ------------------------*/
 
     char* avisar_creacion_proceso_memoria(int* pid, int* size_process, t_log* kernel_log);
@@ -147,6 +149,8 @@
     void* syscall_mutex_unlock(char* nombreMutex ,t_pid_tid pid_tid_recibido);
 
     void* syscall_dump_memory();
+
+    void* syscall_io(uint32_t milisegundos_de_trabajo);
 
     /*--------------------------- FINALIZACIÓN DE TADS --------------------------*/
 

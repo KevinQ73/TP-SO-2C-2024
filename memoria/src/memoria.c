@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 
 void enviar_solicitud_fs(){
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 2; i++)
     {
         t_paquete* paquete = crear_paquete(DUMP_MEMORY);
         t_buffer* buffer = buffer_create(
@@ -72,7 +72,6 @@ void enviar_solicitud_fs(){
     }
 }
 
-
 void iniciar_memoria(){
     log_info(memoria_log, "MEMORIA INICIALIZADA\n");
     memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
@@ -90,11 +89,14 @@ void iniciar_memoria(){
     bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
 
     lista_pseudocodigos = list_create(); //Lo puse aca para iniciar todo junto con la memoria
+
+    iniciar_semaforos();
 }
 
 void iniciar_semaforos(){
     pthread_mutex_init(&kernel_operando, NULL);
     pthread_mutex_init(&contexto_ejecucion_procesos, NULL);
+    pthread_mutex_init(&mutex_fd_filesystem, NULL);
     sem_init(&memoria_activo, 0, 0);
 }
 
@@ -122,68 +124,73 @@ void* atender_kernel(){
             if (errno == EINTR || errno == ECONNABORTED) {
                 continue;  // Reintentar la operación en caso de interrupción o conexión abortada
             } else {
+                liberar_hilo_kernel = false;
                 abort();
             }
+        } else {
+            log_info(memoria_log, "## Kernel Conectado - FD del socket: <%d>", fd_conexion_kernel);
+            pthread_create(&hilo_atender_kernel, NULL, atender_solicitudes_kernel, (void*)fd_conexion_kernel);
+            pthread_detach(hilo_atender_kernel);
         }
+    }
+}
 
-        log_info(memoria_log, "## Kernel Conectado - FD del socket: <%d>", fd_conexion_kernel);
+void* atender_solicitudes_kernel(void* fd_conexion){
+    int fd_memoria = (int*)fd_conexion;
+    t_buffer* buffer;
+    uint32_t pid;
+    int size = 0;
+    char* path = string_new();
 
-        t_buffer* buffer;
-        uint32_t pid;
-        int size = 0;
-        char* path = string_new();
+    int operacion_kernel = recibir_operacion(fd_memoria);
 
-        int operacion_kernel = recibir_operacion(fd_conexion_kernel);
+    buffer = buffer_recieve(fd_memoria);
 
-        buffer = buffer_recieve(fd_conexion_kernel);
+    switch (operacion_kernel)
+    {
+    case CREAR_PROCESO:
+        pid = buffer_read_uint32(buffer);
+        uint32_t size_process = buffer_read_uint32(buffer);
 
-        switch (operacion_kernel)
+        if (crear_proceso(pid, size_process))
         {
-        case CREAR_PROCESO:
-            pid = buffer_read_uint32(buffer);
-            uint32_t size_process = buffer_read_uint32(buffer);
+            enviar_mensaje("OK", fd_memoria, memoria_log);
+            log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Creado> - PID: <%d> - Tamaño: <%d>", pid, size_process);
+        } else {
+            enviar_mensaje("ERROR_CREAR_PROCESO", fd_memoria, memoria_log);
+            log_error(memoria_log, "## [MEMORIA:KERNEL] Fallo en la creación del proceso");
+        }
+        log_info(memoria_log, "## Solicitud CREAR_PROCESO de Kernel finalizada. Cerrando FD del socket.\n");
+        close(fd_memoria);
+        break;
 
-            if (crear_proceso(pid, size_process))
-            {
-                enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-                log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Creado> - PID: <%d> - Tamaño: <%d>", pid, size_process);
-            } else {
-                enviar_mensaje("ERROR_CREAR_PROCESO", fd_conexion_kernel, memoria_log);
-                log_error(memoria_log, "## [MEMORIA:KERNEL] Fallo en la creación del proceso");
-            }
-            log_info(memoria_log, "## Solicitud CREAR_PROCESO de Kernel finalizada. Cerrando FD del socket.\n");
-            close(fd_conexion_kernel);
-            break;
+    case CREAR_HILO:
+        path = buffer_read_string(buffer, &size);
+        pid = buffer_read_uint32(buffer);
+        uint32_t tid = buffer_read_uint32(buffer);
+        uint32_t prioridad = buffer_read_uint32(buffer);
 
-        case CREAR_HILO:
-            path = buffer_read_string(buffer, &size);
-            pid = buffer_read_uint32(buffer);
-            uint32_t tid = buffer_read_uint32(buffer);
-            uint32_t prioridad = buffer_read_uint32(buffer);
+        crear_hilo(pid, tid, prioridad, path);
 
-            crear_hilo(pid, tid, prioridad, path);
+        enviar_mensaje("OK", fd_memoria, memoria_log);
+        log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s", pid, tid, prioridad, path);
 
-            enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-            log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s", pid, tid, prioridad, path);
+        free(path);
+        log_info(memoria_log, "## Solicitud CREAR_HILO de Kernel finalizada. Cerrando FD del socket.\n");
+        close(fd_memoria);
+        break;
 
-            free(path);
-            log_info(memoria_log, "## Solicitud CREAR_HILO de Kernel finalizada. Cerrando FD del socket.\n");
-            close(fd_conexion_kernel);
-            break;
-
-        case FINALIZAR_PROCESO:
+    case FINALIZAR_PROCESO:
             //aplicar_retardo();
             //uint32_t pid_proceso_finalizar = recibir_pid(fd_conexion_kernel);
 
             //finalizar_proceso(pid_proceso_finalizar);
             //pthread_mutex_unlock(&kernel_operando);
-            break;
+        break;
 
-        default:
-            log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
-            liberar_hilo_kernel = false;
-            break;
-        }
+    default:
+        log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
+        break;
     }
 }
 
