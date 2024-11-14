@@ -285,7 +285,15 @@ t_cola_prioridades* queue_get_by_priority(t_list* lista_colas_prioridades, int p
 	    t_cola_prioridades* cola = (t_cola_prioridades*) ptr;
 	    return (prioridad == cola->prioridad);
 	}
-	return list_find(lista_colas_prioridades, _queue_contains);
+    t_cola_prioridades* cola_hallada = list_find(lista_colas_prioridades, _queue_contains);
+	
+    if (cola_hallada == NULL)
+    {
+        return (t_cola_prioridades*)0x0;
+    }
+    
+    
+    return cola_hallada;
 }
 
 bool queue_find_by_priority(t_list* lista_colas_prioridades, int prioridad){
@@ -326,13 +334,17 @@ t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_co
     {
         t_cola_prioridades* cola_hallada = queue_get_by_priority(lista_colas_multinivel, i);
 
-        if (queue_is_empty(cola_hallada->cola))
-        {
-            log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d VACÍA", cola_hallada->prioridad);
+        if(queue_find_by_priority(lista_colas_multinivel, i)){
+            if (queue_is_empty(cola_hallada->cola))
+            {
+                log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d VACÍA", cola_hallada->prioridad);
+            } else {
+                hilo_a_ejecutar = (t_hilo_planificacion*)queue_pop(cola_hallada->cola);
+                log_info(kernel_log, "## [COLAS MULTINIVEL] Se quitó el hilo (%d:%d) de la COLA CON PRIORIDAD %d", hilo_a_ejecutar->pcb_padre->pid, hilo_a_ejecutar->tcb_asociado->tid, cola_hallada->prioridad);
+                i = list_size(lista_colas_multinivel);
+            }
         } else {
-            hilo_a_ejecutar = (t_hilo_planificacion*)queue_pop(cola_hallada->cola);
-            log_info(kernel_log, "## [COLAS MULTINIVEL] Se quitó el hilo (%d:%d) de la COLA CON PRIORIDAD %d", hilo_a_ejecutar->pcb_padre->pid, hilo_a_ejecutar->tcb_asociado->tid, cola_hallada->prioridad);
-            i = list_size(lista_colas_multinivel);
+            log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d NO EXISTE, TODAVÍA", i);
         }
     }
     pthread_mutex_unlock(&mutex_colas_multinivel_existentes);
@@ -503,7 +515,7 @@ void* operacion_a_atender(){
 
     case THREAD_CREATE:
         
-        syscall_thread_create(pid_tid_recibido.pid, pid_tid_recibido.tid);
+        syscall_thread_create(buffer, pid_tid_recibido.pid, pid_tid_recibido.tid);
         break;
 
     case THREAD_JOIN:
@@ -725,24 +737,23 @@ void* syscall_process_exit(){
     pthread_mutex_unlock(&mutex_uso_fd_memoria);
 }
 
-void* syscall_thread_create(uint32_t pid_solicitante, uint32_t tid_solicitante){
+void* syscall_thread_create(t_buffer* buffer, uint32_t pid_solicitante, uint32_t tid_solicitante){
     log_info(kernel_log,"(%d:%d) - Solicitó syscall: THREAD_CREATE", pid_solicitante, tid_solicitante);
     uint32_t largo_string = 0;
-    t_buffer* buffer;
-    buffer = buffer_recieve(fd_conexion_dispatch);
-    
-    char* path = buffer_read_string(buffer, &largo_string);
+
     int prioridad_hilo = buffer_read_uint32(buffer);
+    char* path = buffer_read_string(buffer, &largo_string);
     
     uint32_t length = strlen(path) + 1;
 
     t_paquete* paquete = crear_paquete(CREAR_HILO);
+
     t_buffer* buffer_envio = buffer_create(
         length
         );
     buffer_add_string(buffer_envio, length, path, kernel_log);
-
     paquete->buffer = buffer_envio;
+
     pthread_mutex_lock(&mutex_uso_fd_memoria);
         int conexion_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, conexion_memoria);
@@ -751,10 +762,9 @@ void* syscall_thread_create(uint32_t pid_solicitante, uint32_t tid_solicitante){
         
         if (strcmp(response_memoria, "OK") == 0)
         {
-            t_pcb* pcb = obtener_pcb_from_hilo(hilo_en_ejecucion);
             t_tcb* tcb = create_tcb(prioridad_hilo);
 
-            t_hilo_planificacion* hilo_a_crear = create_hilo_planificacion(pcb, tcb);
+            t_hilo_planificacion* hilo_a_crear = create_hilo_planificacion(hilo_en_ejecucion->pcb_padre, tcb);
             poner_en_ready(hilo_a_crear);
         } else {
             log_debug(kernel_log, "Rompimos algo con peticion crear hilo");

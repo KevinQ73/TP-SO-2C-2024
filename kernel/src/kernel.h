@@ -134,7 +134,7 @@
 
     void* syscall_process_exit();
 
-    void* syscall_thread_create(uint32_t pid_solicitante, uint32_t tid_solicitante);
+    void* syscall_thread_create(t_buffer* buffer, uint32_t pid_solicitante, uint32_t tid_solicitante);
 
     void* syscall_thread_join();
 

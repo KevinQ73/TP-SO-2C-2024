@@ -308,15 +308,17 @@ void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad
     int length = strlen(path) + 1;
 
     t_buffer* buffer = buffer_create(
-        sizeof(int) + length
+        sizeof(int)*3 + length
     );
-
+    
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
     buffer_add_uint32(buffer, &valor_int, cpu_log);
     buffer_add_string(buffer, length, path, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_dispatch, THREAD_CREATE);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CREATE);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    char* respuesta_kernel = recibir_mensaje(fd_conexion_dispatch, cpu_log);
+    char* respuesta_kernel = recibir_mensaje(fd_conexion_interrupt, cpu_log);
 
     if (strcmp(respuesta_kernel, "HILO_CREADO") != 0)
     {
