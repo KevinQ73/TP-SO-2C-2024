@@ -32,6 +32,8 @@ int main(int argc, char* argv[]) {
 
     registros_cpu = malloc(sizeof(t_contexto));
 
+    iniciar_semaforos();
+
     pthread_create(&hilo_kernel_dispatch, NULL, (void *)atender_puerto_dispatch, NULL);
     pthread_detach(hilo_kernel_dispatch);
 
@@ -50,6 +52,9 @@ int main(int argc, char* argv[]) {
 
     /*--------------------- Atender conexiones a la CPU ---------------------*/
 
+void iniciar_semaforos(){
+    sem_init(&aviso_syscall, 0, 0);
+}
 
 void atender_puerto_dispatch(){
     while (flag_disconect_dispatch)
@@ -59,7 +64,7 @@ void atender_puerto_dispatch(){
         {
         case EJECUTAR_HILO:
             pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
-            log_debug(cpu_log, "PID RECIBIDO: %d, TID RECIBIDO: %d", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            log_info(cpu_log, "## PID: <%d> - TID: <%d> Recibidos para empezar la ejecución: %d", pid_tid_recibido.pid, pid_tid_recibido.tid);
             ejecutar_hilo(pid_tid_recibido);
             break;
         
@@ -91,6 +96,11 @@ void atender_puerto_interrupt(){
             if (check_tid_interrupt(fd_conexion_interrupt)){
                 interrupt_results(&(pid_tid_recibido.tid), "INTERRUPCIÓN POR USUARIO");
             }
+            break;
+
+        case AVISO_EXITO_SYSCALL:
+            recibir_aviso_syscall(fd_conexion_interrupt, cpu_log);
+            sem_post(&aviso_syscall);
             break;
 
         default:
@@ -171,7 +181,7 @@ void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instr
 
     case SUM:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <SUM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_sum();
+        execute_sum(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case SUB:
@@ -318,13 +328,9 @@ void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad
 
     enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CREATE);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    char* respuesta_kernel = recibir_mensaje(fd_conexion_interrupt, cpu_log);
 
-    if (strcmp(respuesta_kernel, "HILO_CREADO") != 0)
-    {
-        log_error(cpu_log, "## La Syscall THREAD_CREATE falló");
-    }
-    
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
 void execute_thread_join(){

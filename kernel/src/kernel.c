@@ -18,7 +18,6 @@ int main(int argc, char* argv[]) {
     fd_conexion_interrupt = crear_conexion(kernel_log, kernel_registro.ip_cpu, kernel_registro.puerto_cpu_interrupt);
     log_debug(kernel_log, "ME CONECTÉ A CPU INTERRUPT");
 
-
     // --------------------- Inicio del modulo ----------------------
 
     procesos_creados = list_create();
@@ -78,7 +77,7 @@ void iniciar_primer_proceso(char* path, char* size){
     if (strcmp(response_memoria, "OK") == 0)
     {   
         log_info(kernel_log, "## (<PID>:%d) Se crea el proceso - Estado: NEW", primer_proceso->pid);
-        t_tcb* primer_hilo = create_tcb(PRIORIDAD_MAXIMA);
+        t_tcb* primer_hilo = create_tcb(primer_proceso, PRIORIDAD_MAXIMA);
         char* respuesta_creacion_hilo = avisar_creacion_hilo_memoria(&primer_proceso->pid, &primer_hilo->tid, path, &prioridad, kernel_log);
 
         if (strcmp(respuesta_creacion_hilo, "OK") == 0)
@@ -256,14 +255,6 @@ void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
     }
 }
 
-t_hilo_planificacion* thread_find_by_tid(t_list* lista, uint32_t tid){
-    bool _list_contains(void* ptr) {
-	    t_hilo_planificacion* hilo = (t_hilo_planificacion*) ptr;
-	    return (tid == hilo->tcb_asociado->tid);
-	}
-	return list_find(lista, _list_contains);
-}
-
 /*--------------------------- FUNCIONES DE COLAS ----------------------------*/
 
 void queue_push_by_priority(t_hilo_planificacion* hilo_del_proceso){
@@ -330,7 +321,10 @@ t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_co
     t_hilo_planificacion* hilo_a_ejecutar;
 
     pthread_mutex_lock(&mutex_colas_multinivel_existentes);
-    for (int i = 0; i < list_size(lista_colas_multinivel); i++)
+
+    int prioridad_maxima = maximum_priority_multilevel_queues_schedule(lista_colas_multinivel);
+
+    for (int i = 0; i <= maximum_priority_multilevel_queues_schedule(lista_colas_multinivel); i++)
     {
         t_cola_prioridades* cola_hallada = queue_get_by_priority(lista_colas_multinivel, i);
 
@@ -341,7 +335,7 @@ t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_co
             } else {
                 hilo_a_ejecutar = (t_hilo_planificacion*)queue_pop(cola_hallada->cola);
                 log_info(kernel_log, "## [COLAS MULTINIVEL] Se quitó el hilo (%d:%d) de la COLA CON PRIORIDAD %d", hilo_a_ejecutar->pcb_padre->pid, hilo_a_ejecutar->tcb_asociado->tid, cola_hallada->prioridad);
-                i = list_size(lista_colas_multinivel);
+                i = maximum_priority_multilevel_queues_schedule(lista_colas_multinivel) +1;
             }
         } else {
             log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d NO EXISTE, TODAVÍA", i);
@@ -352,14 +346,49 @@ t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_co
     return hilo_a_ejecutar;
 }
 
-/*t_cola_prioridades* queue_find_by_minimum_priority(t_list* lista_colas_prioridades){
-    bool _queue_min_priority(void* ptr) {
+t_hilo_planificacion* thread_find_by_tid(t_list* lista, uint32_t tid){
+    bool _list_contains(void* ptr) {
+	    t_hilo_planificacion* hilo = (t_hilo_planificacion*) ptr;
+	    return (tid == hilo->tcb_asociado->tid);
+	}
+	return list_find(lista, _list_contains);
+}
+
+pthread_mutex_t* find_by_name(t_list* lista_de_mutex, char* name){
+    bool _name_equals(void* ptr) {
+        t_mutex* mutexAEncontrar = (t_mutex*) ptr;
+        return name == mutexAEncontrar->nombre;
+    }
+    return list_find(lista_de_mutex, _name_equals);
+}
+
+t_pcb* list_find_by_pid(uint32_t pid){
+    pthread_mutex_lock(&mutex_lista_procesos_ready);
+    bool _list_contains(void* ptr) {
+	    t_pcb* pcb_a_encontrar = (t_pcb*) ptr;
+	    return (pcb_a_encontrar == pid);
+	}
+	return list_find(procesos_creados, _list_contains);
+    pthread_mutex_lock(&mutex_lista_procesos_ready);
+}
+
+t_tcb* tid_find(t_list* lista_tcb, uint32_t tid){
+    bool _list_contains(void* ptr){
+        t_tcb* tcb_a_encontrar = (t_tcb*) ptr;
+	    return (tcb_a_encontrar->tid == tid);
+	}
+	return list_find(lista_tcb, _list_contains);
+}
+
+int maximum_priority_multilevel_queues_schedule(t_list* lista_colas_prioridades){
+    void* _max_priority(void* a, void* b) {
 	    t_cola_prioridades* cola_a = (t_cola_prioridades*) a;
 	    t_cola_prioridades* cola_b = (t_cola_prioridades*) b;
-	    return cola_a->prioridad <= cola_b->prioridad ? cola_a : cola_b;
+	    return cola_a->prioridad >= cola_b->prioridad ? cola_a : cola_b;
 	}
-	return list_any_satisfy(lista_colas_prioridades, _queue_min_priority);
-}*/
+	t_cola_prioridades* cola = list_get_maximum(lista_colas_prioridades, _max_priority);
+	return cola->prioridad;
+}
 
 /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
@@ -492,6 +521,26 @@ char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid){
 
     return response_memoria;
 }
+
+/*------------------------- FUNCIONES KERNEL - CPU --------------------------*/
+
+void enviar_aviso_syscall(char* mensaje, cod_inst* codigo_instruccion){
+    uint32_t length = strlen(mensaje) + 1;
+    t_paquete* paquete = crear_paquete(AVISO_EXITO_SYSCALL);
+
+	t_buffer* buffer;
+
+	buffer = buffer_create(length);
+
+	buffer_add_string(buffer, length, mensaje, kernel_log);
+    buffer_add_uint32(buffer, codigo_instruccion, kernel_log);
+
+	paquete->buffer = buffer;
+
+	enviar_paquete(paquete, fd_conexion_interrupt);
+	eliminar_paquete(paquete);
+}
+
 /*--------------------------------- SYSCALLS --------------------------------*/
 
 void* operacion_a_atender(){
@@ -504,8 +553,7 @@ void* operacion_a_atender(){
     
     switch (operacion)
     {
-    case PROCESS_CREATE:
-        
+    case PROCESS_CREATE:        
         syscall_process_create(pid_tid_recibido.pid, pid_tid_recibido.tid);
         break;
 
@@ -514,7 +562,6 @@ void* operacion_a_atender(){
         break;
 
     case THREAD_CREATE:
-        
         syscall_thread_create(buffer, pid_tid_recibido.pid, pid_tid_recibido.tid);
         break;
 
@@ -528,7 +575,6 @@ void* operacion_a_atender(){
 
     case THREAD_EXIT:
         syscall_thread_exit(hilo_en_ejecucion);   
-            
         break;
 
     case MUTEX_CREATE:
@@ -560,7 +606,6 @@ void* operacion_a_atender(){
     }
 }
 
-
 void* ejecutar_io (uint32_t milisegundos){
 
      usleep(milisegundos); 
@@ -580,14 +625,6 @@ void* syscall_io(uint32_t milisegundos_de_trabajo){
     poner_en_ready(hilo);
 
 } 
-
-pthread_mutex_t* find_by_name(t_list* lista_de_mutex, char* name){
-    bool _name_equals(void* ptr) {
-        t_mutex* mutexAEncontrar = (t_mutex*) ptr;
-        return name == mutexAEncontrar->nombre;
-    }
-    return list_find(lista_de_mutex, _name_equals);
-}
 
 void* syscall_mutex_lock(char* nombreMutex ,t_pid_tid pid_tid_recibido){
     t_pcb* pcb = list_find_by_pid(pid_tid_recibido.pid);
@@ -643,7 +680,7 @@ void* syscall_process_create(uint32_t pid_solicitante, uint32_t tid_solicitante)
     log_info(kernel_log,"(%d:%d) - Solicitó syscall: PROCESS CREATE", pid_solicitante, tid_solicitante);
 
     t_pcb* pcb = create_pcb(path, tam_proceso);
-    t_tcb* tcb_main = create_tcb(prioridad_proceso);
+    t_tcb* tcb_main = create_tcb(pcb, prioridad_proceso);
     list_add(pcb->lista_tcb, tcb_main);
 
     poner_en_new(pcb);
@@ -740,39 +777,23 @@ void* syscall_process_exit(){
 void* syscall_thread_create(t_buffer* buffer, uint32_t pid_solicitante, uint32_t tid_solicitante){
     log_info(kernel_log,"(%d:%d) - Solicitó syscall: THREAD_CREATE", pid_solicitante, tid_solicitante);
     uint32_t largo_string = 0;
+    inst_cpu codigo = THREAD_CREATE;
 
     int prioridad_hilo = buffer_read_uint32(buffer);
     char* path = buffer_read_string(buffer, &largo_string);
-    
-    uint32_t length = strlen(path) + 1;
 
-    t_paquete* paquete = crear_paquete(CREAR_HILO);
+    t_tcb* tcb = create_tcb(hilo_en_ejecucion->pcb_padre, prioridad_hilo);
+    char* respuesta_creacion_hilo = avisar_creacion_hilo_memoria(&hilo_en_ejecucion->pcb_padre->pid, &tcb->tid, path, &prioridad_hilo, kernel_log);
 
-    t_buffer* buffer_envio = buffer_create(
-        length
-        );
-    buffer_add_string(buffer_envio, length, path, kernel_log);
-    paquete->buffer = buffer_envio;
-
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
-        int conexion_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
-        enviar_paquete(paquete, conexion_memoria);
-        char* response_memoria = recibir_mensaje(conexion_memoria, kernel_log);
-        log_debug(kernel_log, "STRING RECIBIDO avisar_fin_hilo_memoria: %s", response_memoria);
-        
-        if (strcmp(response_memoria, "OK") == 0)
-        {
-            t_tcb* tcb = create_tcb(prioridad_hilo);
-
-            t_hilo_planificacion* hilo_a_crear = create_hilo_planificacion(hilo_en_ejecucion->pcb_padre, tcb);
-            poner_en_ready(hilo_a_crear);
-        } else {
-            log_debug(kernel_log, "Rompimos algo con peticion crear hilo");
-        }
-        close(conexion_memoria);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
-
-    eliminar_paquete(paquete);
+    if (strcmp(respuesta_creacion_hilo, "OK") == 0)
+    {
+        t_hilo_planificacion* hilo_a_crear = create_hilo_planificacion(hilo_en_ejecucion->pcb_padre, tcb);
+        poner_en_ready(hilo_a_crear);
+        enviar_aviso_syscall("HILO_CREADO", &codigo);
+    } else {
+        enviar_aviso_syscall("HILO_NO_CREADO", &codigo);
+        log_debug(kernel_log, "Rompimos algo con syscall_thread_create");
+    }
 }
 
 void* syscall_thread_join(){
@@ -803,24 +824,6 @@ void* syscall_thread_exit(t_hilo_planificacion* hilo){
     } else {
         log_debug(kernel_log, "Rompimos algo con finalizar hilo");
     }
-}
-
-t_pcb* list_find_by_pid(uint32_t pid){
-    pthread_mutex_lock(&mutex_lista_procesos_ready);
-    bool _list_contains(void* ptr) {
-	    t_pcb* pcb_a_encontrar = (t_pcb*) ptr;
-	    return (pcb_a_encontrar == pid);
-	}
-	return list_find(procesos_creados, _list_contains);
-    pthread_mutex_lock(&mutex_lista_procesos_ready);
-}
-
-t_tcb* tid_find(t_list* lista_tcb, uint32_t tid){
-    bool _list_contains(void* ptr){
-        t_tcb* tcb_a_encontrar = (t_tcb*) ptr;
-	    return (tcb_a_encontrar->tid == tid);
-	}
-	return list_find(lista_tcb, _list_contains);
 }
 
 void* syscall_thread_cancel(uint32_t tid){

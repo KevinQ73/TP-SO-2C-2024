@@ -33,6 +33,7 @@
         ENVIO_TID,
         EJECUTAR_HILO,
         OUT_OF_MEMORY,
+        AVISO_EXITO_SYSCALL,
     } cod_inst;
 
     typedef enum{
@@ -100,7 +101,6 @@
 
     typedef struct{
         uint32_t tid;
-        uint32_t tid_siguiente;
         orden_prioridad prioridad;
     } t_tcb;
 
@@ -372,18 +372,9 @@
     t_pid_tid recibir_pid_tid(t_buffer* buffer, t_log* log);
 
     cod_inst obtener_codigo_instruccion(char* operacion);
+
+    char* obtener_string_codigo_instruccion(inst_cpu operacion);
     
-    /*
-    void* serializar_pcb(t_pcb* data, t_log* log);
-
-    t_pcb* deserializar_pcb(t_buffer* buffer);
-
-    void enviar_pcb(t_pcb* pcb_a_enviar, estado_proceso estado_pcb, cod_inst codigo_instruccion, int socket_destino, t_log* log);
-    
-    t_pcb* recibir_pcb(int socket_cliente);
-    */
-
-
    /*-----------------------------------------------------------------------*/
 
 #endif /* SERIALIZACION_H_ */

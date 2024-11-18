@@ -469,106 +469,62 @@ cod_inst obtener_codigo_instruccion(char* operacion){
     else {
        return ERROR_CODE;
     }
-	/*
-	// EXIT
-    else if (strcmp(operacion, "EXIT") == 0){
-        return EXIT;
-    }
-
-	// LADO CONSOLA
-
-	// EJECUTAR_SCRIPT
-    else if (strcmp(operacion, "EJECUTAR_SCRIPT") == 0){
-        return EJECUTAR_SCRIPT;
-    }
-
-	// INICIAR_PROCESO
-    else if (strcmp(operacion, "INICIAR_PROCESO") == 0){
-        return INICIAR_PROCESO;
-    }
-
-	// FINALIZAR_PROCESO
-    else if (strcmp(operacion, "FINALIZAR_PROCESO") == 0){
-        return FINALIZAR_PROCESO;
-    }
-
-	// DETENER_PLANIFICACION
-    else if (strcmp(operacion, "DETENER_PLANIFICACION") == 0){
-        return DETENER_PLANIFICACION;
-    }
-
-	// INICIAR_PLANIFICACION
-    else if (strcmp(operacion, "INICIAR_PLANIFICACION") == 0){
-        return INICIAR_PLANIFICACION;
-    }
-
-	// MULTIPROGRAMACION
-    else if (strcmp(operacion, "MULTIPROGRAMACION") == 0){
-        return MULTIPROGRAMACION;
-    }
-
-	// PROCESO_ESTADO
-    else if (strcmp(operacion, "PROCESO_ESTADO") == 0){
-        return PROCESO_ESTADO;
-    }
-	*/
 }
 
-/*
+char* obtener_string_codigo_instruccion(inst_cpu operacion){
 
-void* serializar_pcb(t_pcb* data, t_log* log){ // Nota para el autor: Probar si es necesario agregar t_buffer* buffer como parámetro
-	// Creamos el buffer que vamos a utilizar
-	t_buffer* buffer = buffer_create(sizeof(t_buffer));
-	
-	// Creamos variables auxiliares para usarlos como direcciones de memoria
-	//uint32_t tid = 0;
-	//sem_t* mutex = malloc(sizeof(sem_t));
+	switch (operacion)
+	{
+	case DUMP_MEMORY:
+		return "DUMP_MEMORY";
+		break;
 
-	// Añadimos uno por uno los elementos que componen el PCB
-	buffer_add_uint32(buffer, &data->pid, log);						// PID
-	buffer_add_tids(buffer, data->tids, log);					// Lista de TIDs
-	buffer_add_mutex(buffer, data->mutex_asociados, log);		// Lista de mutex
-	buffer_add_uint32(buffer, &data->program_counter, log);			// Program Counter
-	buffer_add_uint32(buffer, &data->estado, log);					// Estado del PCB
+	case IO:
+		return "IO";
+		break;
 
-	return buffer;
+	case PROCESS_CREATE:
+		return "PROCESS_CREATE";
+		break;
+
+	case THREAD_CREATE:
+		return "THREAD_CREATE";
+		break;
+
+	case THREAD_JOIN:
+		return "THREAD_JOIN";
+		break;
+
+	case THREAD_CANCEL:
+		return "THREAD_CANCEL";
+		break;
+
+	case THREAD_EXIT:
+		return "THREAD_EXIT";
+		break;
+
+	case MUTEX_CREATE:
+		return "MUTEX_CREATE";
+		break;
+
+	case MUTEX_LOCK:
+		return "MUTEX_LOCK";
+		break;
+
+	case MUTEX_UNLOCK:
+		return "MUTEX_UNLOCK";
+		break;
+
+	case PROCESS_EXIT:
+		return "PROCESS_EXIT";
+		break;
+
+	case ERROR_CODE:
+		return "ERROR_CODE";
+		break;
+
+	default:
+		return "NO_CODE";
+		break;
+	}
 }
-
-t_pcb* deserializar_pcb(t_buffer* buffer){
-	// Reservamos memoria para el PCB
-	t_pcb* pcb = malloc(sizeof(t_pcb));
-
-	// Leemos cada elemento del PCB
-	pcb->pid = buffer_read_uint32(buffer);						// PID
-	pcb->tids = buffer_read_tids(buffer);						// Lista de TIDs
-	pcb->mutex_asociados = buffer_read_mutex(buffer);			// Lista de mutex
-	pcb->program_counter = buffer_read_uint32(buffer);			// Program Counter
-	pcb->estado = buffer_read_uint32(buffer);					// Estado del PCB
-
-	// Devolvemos el PCB
-	return pcb;
-}
-
-void enviar_pcb(t_pcb* pcb_a_enviar, estado_proceso estado_pcb, cod_inst codigo_instruccion, int socket_destino, t_log* log){
-	pcb_a_enviar->estado = estado_pcb;
-
-	t_paquete* paquete_pcb = crear_paquete(codigo_instruccion);
-
-    agregar_a_paquete_pcb(paquete_pcb, pcb_a_enviar, log);
-    enviar_paquete(paquete_pcb, socket_destino);
-
-    eliminar_paquete(paquete_pcb);
-}
-
-t_pcb* recibir_pcb(int socket_cliente){
-	t_buffer* buffer = malloc(sizeof(t_buffer));
-	buffer = buffer_recieve(socket_cliente);
-
-	t_pcb* pcb = malloc(sizeof(t_pcb));
-
-	pcb = deserializar_pcb(buffer);
-
-	return pcb;
-}
-
-*/

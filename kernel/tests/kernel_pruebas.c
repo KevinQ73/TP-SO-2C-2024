@@ -18,7 +18,7 @@ context (probando_kernel) {
         describe("Creación de estructuras") {
             it("Creacion de proceso con hilo main") {
                 pcb = create_pcb("P1.txt", 10);
-                tcb = create_tcb(0);
+                tcb = create_tcb(pcb, 0);
                 
                 should_int(pcb->pid) be equal to(0);
 

@@ -59,6 +59,9 @@
 
     void solicitar_contexto_ejecucion(t_contexto* registros_cpu, t_pid_tid pid_tid, int fd_memoria, t_log* log_cpu);
 
+    void recibir_aviso_syscall(int fd_conexion_kernel, t_log* log);
+
+
     /*-----------------------------------------------------------------------*/
     /*-------------------- Funciones de registro de CPU ---------------------*/
 

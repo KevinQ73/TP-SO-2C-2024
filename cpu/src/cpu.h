@@ -20,6 +20,8 @@
     pthread_t hilo_kernel_dispatch;
     pthread_t hilo_kernel_interrupt;
 
+    sem_t aviso_syscall;
+
     bool flag_disconect_dispatch = true;
     bool flag_disconect_interrupt = true;
     bool interrupt_is_called = false;

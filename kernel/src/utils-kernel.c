@@ -24,6 +24,7 @@ t_pcb* create_pcb(char* path_instrucciones, int size_process){
     t_pcb* pcb = malloc(sizeof(t_pcb));
 
     pcb->pid = siguiente_pid();
+    pcb->tid_siguiente = 0;
     pcb->program_counter = 0;
     pcb->estado_proceso = NEW_STATE;
     pcb->path_instrucciones_hilo_main = path_instrucciones;
@@ -34,14 +35,13 @@ t_pcb* create_pcb(char* path_instrucciones, int size_process){
     return pcb;
 }
 
-t_tcb* create_tcb(int prioridad){
+t_tcb* create_tcb(t_pcb* pcb_padre, int prioridad){
     t_tcb* tcb = malloc(sizeof(t_tcb));
 
-    tcb->tid_siguiente = 0;
-    tcb->tid = siguiente_tid(tcb->tid_siguiente);
+    tcb->tid = siguiente_tid(pcb_padre->tid_siguiente);
     tcb->prioridad = prioridad;
 
-    tcb->tid_siguiente++;
+    pcb_padre->tid_siguiente++;
     return tcb;
 }
 

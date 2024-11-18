@@ -307,3 +307,27 @@ void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid pid_tid_recibi
 
     enviar_paquete(paquete, conexion_memoria);
 }
+
+void recibir_aviso_syscall(int fd_conexion_kernel, t_log* log){
+    t_buffer* buffer;
+	uint32_t length = 0;
+    inst_cpu codigo_instruccion = 0;
+	char* mensaje_syscall;
+
+	buffer = buffer_recieve(fd_conexion_kernel);
+
+	mensaje_syscall = buffer_read_string(buffer, &length);
+    codigo_instruccion = buffer_read_uint32(buffer);
+
+    char* string_codigo_instruccion = obtener_string_codigo_instruccion(codigo_instruccion);
+
+    if (strcmp(string_codigo_instruccion, "ERROR_CODE") == 0)
+    {
+        log_error(log, "## La Syscall devolvió el mensaje de estado de ejecución en KERNEL: %s", mensaje_syscall);
+    } else {
+        log_info(log, "## La Syscall %s devolvió el mensaje de estado de ejecución en KERNEL: %s", string_codigo_instruccion, mensaje_syscall);
+    }
+
+    free(mensaje_syscall);
+	buffer_destroy(buffer);
+}

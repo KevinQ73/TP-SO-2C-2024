@@ -89,9 +89,9 @@
 
     void queue_push_by_priority(t_hilo_planificacion* hilo_del_proceso);
 
-    t_cola_prioridades* queue_get_by_priority(t_list* lista_colas_prioridades, int prioridad);
-
     bool queue_find_by_priority(t_list* lista_colas_prioridades, int prioridad);
+
+    t_cola_prioridades* queue_get_by_priority(t_list* lista_colas_prioridades, int prioridad);
 
     t_hilo_planificacion* list_find_by_maximum_priority(t_list* lista_prioridades);
 
@@ -99,12 +99,15 @@
 
     t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_colas_multinivel);
 
-    t_pcb* list_find_by_pid(uint32_t pid);
-
     t_hilo_planificacion* thread_find_by_tid(t_list* lista, uint32_t tid);
 
     pthread_mutex_t* find_by_name(t_list* lista_de_mutex, char* name);
 
+    t_pcb* list_find_by_pid(uint32_t pid);
+
+    t_tcb* tid_find(t_list* lista_tcb, uint32_t tid);
+
+    int maximum_priority_multilevel_queues_schedule(t_list* lista_colas_prioridades);
 
     /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
@@ -125,6 +128,10 @@
     char* avisar_fin_proceso_memoria(uint32_t pid);
 
     char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid);
+
+    /*------------------------- FUNCIONES KERNEL - CPU --------------------------*/
+
+    void enviar_aviso_syscall(char* mensaje, cod_inst* codigo_instruccion);
 
     /*--------------------------------- SYSCALLS --------------------------------*/
 
