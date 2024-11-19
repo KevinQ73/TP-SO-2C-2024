@@ -33,10 +33,10 @@
     } t_registro_handler;
 
     typedef struct{
-        char* registro;
-        uint32_t tid;
-        uint32_t byte_inicial; 
-    }t_registro;
+        uint32_t base;
+        uint32_t desplazamiento;
+        bool segmentation_fault;
+    } t_direccion_fisica;
 
     /*------------------------- Funciones de inicio -------------------------*/
 
@@ -44,7 +44,7 @@
 
     t_dictionary* inicializar_registros();
 
-    int mmu(uint32_t base, uint32_t limite, int registros_guardados);
+    t_direccion_fisica mmu(uint32_t base, uint32_t limite, uint32_t direccion_logica);
 
     /*-----------------------------------------------------------------------*/
     /*----------------------- Conexiones con módulos ------------------------*/
@@ -61,7 +61,10 @@
 
     void recibir_aviso_syscall(int fd_conexion_kernel, t_log* log);
 
+    void enviar_direccion_fisica(t_direccion_fisica dir_fis, int socket_servidor, t_log* log);
 
+    uint32_t recibir_valor_memoria(t_contexto* registros_cpu, char* registro, int socket_memoria, t_log* cpu_log);
+    
     /*-----------------------------------------------------------------------*/
     /*-------------------- Funciones de registro de CPU ---------------------*/
 

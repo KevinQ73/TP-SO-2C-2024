@@ -13,9 +13,59 @@ t_cpu levantar_datos(t_config* config){
     return datos_config;
 }
 
-int mmu(uint32_t base, uint32_t limite, int registros_guardados){
+t_direccion_fisica mmu(uint32_t base, uint32_t limite, uint32_t direccion_logica){
+    t_direccion_fisica dir_fis;
 
+    if (direccion_logica < limite)
+    {
+        dir_fis.base = base;
+        dir_fis.desplazamiento = direccion_logica;
+        dir_fis.segmentation_fault = false;
+    } else {
+        dir_fis.base = 0;
+        dir_fis.desplazamiento = 0;
+        dir_fis.segmentation_fault = true;
+    }
     
+    return dir_fis;
+}
+
+void enviar_direccion_fisica(t_direccion_fisica dir_fis, int socket_servidor, t_log* log){
+    t_buffer* buffer;
+	
+	t_paquete* paquete = crear_paquete(ENVIAR_DIRECCION_FISICA);
+	buffer = buffer_create(
+		(sizeof(uint32_t)*2)
+		);
+
+	buffer_add_uint32(buffer, &dir_fis.base, log);
+	log_debug(log, "BASE A ENVIAR: %d", dir_fis.base);
+    buffer_add_uint32(buffer, &dir_fis.desplazamiento, log);
+	log_debug(log, "DESPLAZAMIENTO A ENVIAR: %d", dir_fis.desplazamiento);
+
+	paquete->buffer = buffer;
+	enviar_paquete(paquete, socket_servidor);
+
+	eliminar_paquete(paquete);
+}
+
+uint32_t recibir_valor_memoria(t_contexto* registros_cpu, char* registro, int socket_memoria, t_log* cpu_log){
+    t_buffer* buffer;
+    
+    int op = recibir_operacion(socket_memoria);
+
+    if (op == RECIBIR_VALOR_MEMORIA)
+    {
+        log_debug(cpu_log, "SE RECIBIÓ EL VALOR DE MEMORIA LEÍDA");
+    } else {
+        log_warning(cpu_log, "ERROR EN EL VALOR DE MEMORIA");
+        abort();
+    }
+    buffer = buffer_recieve(socket_memoria);
+    uint32_t valor_memoria = buffer_read_uint32(buffer);
+
+    modificar_registro(registros_cpu, registro, valor_memoria, cpu_log);
+    buffer_destroy(buffer);
 }
 
 t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
@@ -34,8 +84,6 @@ void enviar_paquete_kernel(t_buffer* buffer, int socket_memoria, cod_inst codigo
 
 void recibir_contexto_memoria(t_contexto* registros_cpu, int fd_memoria, t_log* cpu_log){
     t_buffer* buffer;
-    uint32_t valor = 0;
-    int i = 0;
 
     int op = recibir_operacion(fd_memoria);
 
@@ -331,3 +379,25 @@ void recibir_aviso_syscall(int fd_conexion_kernel, t_log* log){
     free(mensaje_syscall);
 	buffer_destroy(buffer);
 }
+
+void escribir_valor_en_memoria(t_direccion_fisica dir_fis, uint32_t valor_registro, int socket_servidor, t_log* log){
+    t_buffer* buffer;
+	
+	t_paquete* paquete = crear_paquete(ENVIAR_VALOR_REGISTRO);
+	buffer = buffer_create(
+		(sizeof(uint32_t)*3)
+		);
+
+	buffer_add_uint32(buffer, &dir_fis.base, log);
+	log_debug(log, "BASE A ENVIAR: %d", dir_fis.base);
+    buffer_add_uint32(buffer, &dir_fis.desplazamiento, log);
+	log_debug(log, "DESPLAZAMIENTO A ENVIAR: %d", dir_fis.desplazamiento);
+    buffer_add_uint32(buffer, &valor_registro, log);
+	log_debug(log, "VALOR A ESCRIBIR: %d", valor_registro);
+
+	paquete->buffer = buffer;
+	enviar_paquete(paquete, socket_servidor);
+
+	eliminar_paquete(paquete);
+}
+

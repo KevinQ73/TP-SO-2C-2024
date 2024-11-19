@@ -156,7 +156,7 @@ void ejecutar_hilo(t_pid_tid pid_tid_recibido){
             free(instruccion);
         }
 
-    } while (!interrupt_is_called);
+    } while (!interrupt_is_called || !segmentation_fault);
 }
 
 void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instruccion_parseada){
@@ -171,7 +171,7 @@ void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instr
     
     case READ_MEM:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <READ_MEM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_read_mem();
+        execute_read_mem(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case WRITE_MEM:
@@ -266,15 +266,40 @@ void execute_set(t_contexto* registro_cpu, char* registro, char* valor){
 }
 
 void execute_read_mem(t_contexto* registro_cpu, char* registro_datos, char* registro_direccion){
-    /**int valor_int = (int)strtol(registro_cpu.registro_direccion, NULL, 10);
-    modificar_registro(registro_cpu, registro_datos, valor_int, cpu_log);
-    program_counter_update(registro_cpu, cpu_log);*/
+    uint32_t valor_registro_direccion = get_register(registro_cpu, registro_direccion);
+    t_direccion_fisica dir_fis = mmu(registro_cpu->base, registro_cpu->limite, valor_registro_direccion);
+    
+    if (dir_fis.segmentation_fault)
+    {
+        segmentation_fault = true;
+        log_warning(cpu_log, "## TID: <%d> SEGMENTATION FAULT", pid_tid_recibido.tid);
+        enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    } else {
+        log_info(cpu_log, "## TID: <%d> - Acción: <LEER> - Dirección Física: <BASE: %d - DESPLAZAMIENTO: %d>", pid_tid_recibido.tid, dir_fis.base, dir_fis.desplazamiento);
+        enviar_direccion_fisica(dir_fis, conexion_memoria, cpu_log);
+        recibir_valor_memoria(registro_cpu, registro_datos, conexion_memoria, cpu_log);
+        program_counter_update(registro_cpu, cpu_log);
+    }
 }
 
 void execute_write_mem(t_contexto* registro_cpu, char* registro_direccion, char* registro_datos){
-    /**int valor_int = (int)strtol(registro_cpu.registro_direccion, NULL, 10);
-    modificar_registro(registro_cpu, registro_direccion, valor_int, cpu_log);
-    program_counter_update(registro_cpu, cpu_log);*/
+    uint32_t valor_registro_datos = get_register(registro_cpu, registro_datos);
+    uint32_t valor_registro_direccion = get_register(registro_cpu, registro_direccion);
+
+    t_direccion_fisica dir_fis = mmu(registro_cpu->base, registro_cpu->limite, valor_registro_direccion);
+    
+    if (dir_fis.segmentation_fault)
+    {
+        segmentation_fault = true;
+        log_warning(cpu_log, "## TID: <%d> SEGMENTATION FAULT", pid_tid_recibido.tid);
+        enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    } else {
+        log_info(cpu_log, "## TID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <BASE: %d - DESPLAZAMIENTO: %d - VALOR A ESCRIBIR: %d>", pid_tid_recibido.tid, dir_fis.base, dir_fis.desplazamiento, valor_registro_datos);
+        escribir_valor_en_memoria(dir_fis, valor_registro_datos, conexion_memoria, cpu_log);
+        char* response_memoria = recibir_mensaje(conexion_memoria, cpu_log);
+        log_debug(cpu_log, "STRING RECIBIDO execute_write_mem: %s", response_memoria);
+        program_counter_update(registro_cpu, cpu_log);
+    }
 }
 
 void execute_sum(t_contexto* registro_cpu, char* registro_destino, char* registro_origen){
@@ -291,7 +316,7 @@ void execute_sub(t_contexto* registro_cpu, char* registro_destino, char* registr
 
 void execute_jnz(t_contexto* registro_cpu, char* registro, char* instruccion){
     int valor_int = get_register(registro_cpu, registro);
-    if (valor_int /= 0){
+    if (valor_int != 0){
         program_counter_jump(registro_cpu, instruccion, cpu_log);
     }
 }

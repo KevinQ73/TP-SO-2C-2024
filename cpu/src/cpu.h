@@ -25,7 +25,8 @@
     bool flag_disconect_dispatch = true;
     bool flag_disconect_interrupt = true;
     bool interrupt_is_called = false;
-
+    bool segmentation_fault = false;
+    
     /*--------------------- Atender conexiones a la CPU ---------------------*/
 
     void atender_puerto_dispatch();
