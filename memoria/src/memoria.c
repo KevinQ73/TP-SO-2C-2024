@@ -248,6 +248,11 @@ void* atender_cpu(){
     while(liberar_hilo_cpu){
         t_pid_tid pid_tid_recibido;
         t_buffer* buffer;
+
+        uint32_t base;
+        uint32_t desplazamiento;
+        uint32_t valor_a_escribir;
+
         uint32_t direccion_fisica;
         uint32_t tamanio_contexto = 11*sizeof(uint32_t);
         t_contexto* contexto;
@@ -280,7 +285,7 @@ void* atender_cpu(){
             actualizar_contexto_ejecucion(contexto, pid_tid_recibido.pid, pid_tid_recibido.tid);
             log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
             //escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
-            enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
+            enviar_mensaje("OK_CONTEXTO", fd_conexion_cpu, memoria_log);
             break;
             
         case PETICION_INSTRUCCION:
@@ -301,8 +306,10 @@ void* atender_cpu(){
             buffer = buffer_recieve(fd_conexion_cpu);
             pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
-            direccion_fisica = buffer_read_uint32(buffer);
-            uint32_t dato = buffer_read_uint32(buffer);
+
+            base = buffer_read_uint32(buffer);
+            desplazamiento = buffer_read_uint32(buffer);
+            valor_a_escribir = buffer_read_uint32(buffer);
 
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_info(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
@@ -310,21 +317,26 @@ void* atender_cpu(){
             //escribir_en_memoria(&dato, 4, direccion_fisica);
             enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
             break;
+            
         case READ_MEM:
             buffer = buffer_recieve(fd_conexion_cpu);
             pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
-            direccion_fisica = buffer_read_uint32(buffer);
+
+            base = buffer_read_uint32(buffer);
+            desplazamiento = buffer_read_uint32(buffer);
 
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_info(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
 
             enviar_datos_memoria(leer_de_memoria(4, direccion_fisica), 4);
             break;
+
         case DESCONEXION:
             log_error(memoria_log, "## [MEMORIA:CPU] Desconexion de Memoria-Cpu");
             liberar_hilo_cpu = false;
             break;
+
         default:
             log_warning(memoria_log, "## [MEMORIA:CPU] Operacion desconocida de Memoria-Cpu");
             liberar_hilo_cpu = false;

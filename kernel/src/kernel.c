@@ -608,7 +608,7 @@ void* operacion_a_atender(){
 
 void* ejecutar_io (uint32_t milisegundos){
 
-     usleep(milisegundos); 
+    usleep(milisegundos);
 
     log_info(kernel_log,"Kernel atendio entrada/salida por: %i milisegundos ",milisegundos);
 }

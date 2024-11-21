@@ -61,10 +61,12 @@
 
     void recibir_aviso_syscall(int fd_conexion_kernel, t_log* log);
 
-    void enviar_direccion_fisica(t_direccion_fisica dir_fis, int socket_servidor, t_log* log);
+    void enviar_direccion_fisica(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recibido, int socket_servidor, t_log* log);
 
     uint32_t recibir_valor_memoria(t_contexto* registros_cpu, char* registro, int socket_memoria, t_log* cpu_log);
-    
+
+    void escribir_valor_en_memoria(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recibido, uint32_t valor_registro, int socket_servidor, t_log* log);
+
     /*-----------------------------------------------------------------------*/
     /*-------------------- Funciones de registro de CPU ---------------------*/
 

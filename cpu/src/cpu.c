@@ -64,7 +64,7 @@ void atender_puerto_dispatch(){
         {
         case EJECUTAR_HILO:
             pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
-            log_info(cpu_log, "## PID: <%d> - TID: <%d> Recibidos para empezar la ejecución: %d", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            log_info(cpu_log, "## PID: <%d> - TID: <%d> Recibidos para empezar la ejecución", pid_tid_recibido.pid, pid_tid_recibido.tid);
             ejecutar_hilo(pid_tid_recibido);
             break;
         
@@ -171,12 +171,12 @@ void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instr
     
     case READ_MEM:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <READ_MEM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_read_mem(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_read_mem(registros_cpu, pid_tid_recibido, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case WRITE_MEM:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <WRITE_MEM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_write_mem(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
+        execute_write_mem(registros_cpu, pid_tid_recibido, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case SUM:
@@ -186,32 +186,32 @@ void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instr
 
     case SUB:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <SUB> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_sub();
+        execute_sub(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case JNZ:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <JNZ> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
-        execute_jnz();
+        execute_jnz(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case LOG:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <LOG> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
-        execute_log();
+        execute_log(registros_cpu, instruccion_parseada[1]);
         break;
 
     case DUMP_MEMORY:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <DUMP_MEMORY>", pid_tid_recibido.tid);
-        execute_dump_memory();
+        execute_dump_memory(registros_cpu);
         break;
 
     case IO:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <IO> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
-        execute_io();
+        execute_io(registros_cpu, instruccion_parseada[1]);
         break;
 
     case PROCESS_CREATE:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <PROCESS_CREATE> - <%s> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2], instruccion_parseada[3]);
-        execute_process_create();
+        execute_process_create(registros_cpu, instruccion_parseada[1], instruccion_parseada[2], instruccion_parseada[3]);
         break;
 
     case THREAD_CREATE:
@@ -221,40 +221,42 @@ void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instr
 
     case THREAD_JOIN:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_JOIN> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
-        execute_thread_join();
+        execute_thread_join(registros_cpu, instruccion_parseada[1]);
         break;
 
     case THREAD_CANCEL:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_CANCEL> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
-        execute_thread_cancel();
+        execute_thread_cancel(registros_cpu, instruccion_parseada[1]);
         break;
 
     case MUTEX_CREATE:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_CREATE> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
-        execute_mutex_create();
+        execute_mutex_create(registros_cpu, instruccion_parseada[1]);
         break;
 
     case MUTEX_LOCK:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_LOCK> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
-        execute_mutex_lock();
+        execute_mutex_lock(registros_cpu, instruccion_parseada[1]);
         break;
 
     case MUTEX_UNLOCK:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_UNLOCK> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
-        execute_mutex_unlock();
+        execute_mutex_unlock(registros_cpu, instruccion_parseada[1]);
         break;
 
     case THREAD_EXIT:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_EXIT>", pid_tid_recibido.tid);
-        execute_thread_exit();
+        execute_thread_exit(registros_cpu);
         break;
 
     case PROCESS_EXIT:
         log_info(cpu_log, "## TID: <%d> - Ejecutando: <PROCESS_EXIT>", pid_tid_recibido.tid);
-        execute_process_exit();
+        execute_process_exit(registros_cpu);
         break;
 
     default:
+        log_error(cpu_log, "ERROR EN LA INSTRUCCION A EJECUTAR");
+        abort();
         break;
     }
 }
@@ -265,7 +267,7 @@ void execute_set(t_contexto* registro_cpu, char* registro, char* valor){
     program_counter_update(registro_cpu, cpu_log);
 }
 
-void execute_read_mem(t_contexto* registro_cpu, char* registro_datos, char* registro_direccion){
+void execute_read_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, char* registro_datos, char* registro_direccion){
     uint32_t valor_registro_direccion = get_register(registro_cpu, registro_direccion);
     t_direccion_fisica dir_fis = mmu(registro_cpu->base, registro_cpu->limite, valor_registro_direccion);
     
@@ -276,13 +278,13 @@ void execute_read_mem(t_contexto* registro_cpu, char* registro_datos, char* regi
         enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
     } else {
         log_info(cpu_log, "## TID: <%d> - Acción: <LEER> - Dirección Física: <BASE: %d - DESPLAZAMIENTO: %d>", pid_tid_recibido.tid, dir_fis.base, dir_fis.desplazamiento);
-        enviar_direccion_fisica(dir_fis, conexion_memoria, cpu_log);
+        enviar_direccion_fisica(dir_fis, pid_tid_recibido, conexion_memoria, cpu_log);
         recibir_valor_memoria(registro_cpu, registro_datos, conexion_memoria, cpu_log);
         program_counter_update(registro_cpu, cpu_log);
     }
 }
 
-void execute_write_mem(t_contexto* registro_cpu, char* registro_direccion, char* registro_datos){
+void execute_write_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, char* registro_direccion, char* registro_datos){
     uint32_t valor_registro_datos = get_register(registro_cpu, registro_datos);
     uint32_t valor_registro_direccion = get_register(registro_cpu, registro_direccion);
 
@@ -295,7 +297,7 @@ void execute_write_mem(t_contexto* registro_cpu, char* registro_direccion, char*
         enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
     } else {
         log_info(cpu_log, "## TID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <BASE: %d - DESPLAZAMIENTO: %d - VALOR A ESCRIBIR: %d>", pid_tid_recibido.tid, dir_fis.base, dir_fis.desplazamiento, valor_registro_datos);
-        escribir_valor_en_memoria(dir_fis, valor_registro_datos, conexion_memoria, cpu_log);
+        escribir_valor_en_memoria(dir_fis, pid_tid_recibido, valor_registro_datos, conexion_memoria, cpu_log);
         char* response_memoria = recibir_mensaje(conexion_memoria, cpu_log);
         log_debug(cpu_log, "STRING RECIBIDO execute_write_mem: %s", response_memoria);
         program_counter_update(registro_cpu, cpu_log);
@@ -326,16 +328,59 @@ void execute_log(t_contexto* registro_cpu, char* registro){
     log_info(cpu_log, "## Registro %s tiene valor %d", registro, info_int);
 }
 
-void execute_dump_memory(){
+void execute_dump_memory(t_contexto* registro_cpu){
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*2
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, DUMP_MEMORY);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
-void execute_io(){
+void execute_io(t_contexto* registro_cpu, char* tiempo){
+    int valor_tiempo = atoi(tiempo);
+
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*3
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &valor_tiempo, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, IO);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
-void execute_process_create(){
+void execute_process_create(t_contexto* registro_cpu, char* path, char* size_process, char* prioridad_hilo_main){
+    int valor_size = atoi(size_process);
+    int valor_prioridad = atoi(prioridad_hilo_main);
+    int length = strlen(path) + 1;
+
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*4 + length
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &valor_size, cpu_log);
+    buffer_add_uint32(buffer, &valor_prioridad, cpu_log);
+    buffer_add_string(buffer, length, path, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_CREATE);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
 void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad){
@@ -358,30 +403,122 @@ void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad
     sem_wait(&aviso_syscall);
 }
 
-void execute_thread_join(){
+void execute_thread_join(t_contexto* registro_cpu, char* tid_join){
+    int valor_tid_join = atoi(tid_join);
+
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*3
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &valor_tid_join, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_JOIN);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
-void execute_thread_cancel(){
+void execute_thread_cancel(t_contexto* registro_cpu, char* tid_cancel){
+    int valor_tid_cancel = atoi(tid_cancel);
+
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*3
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &valor_tid_cancel, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CANCEL);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
-void execute_mutex_create(){
+void execute_mutex_create(t_contexto* registro_cpu, char* recurso){
+    int length = strlen(recurso) + 1;
+
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*2 + length
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_string(buffer, length, recurso, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_CREATE);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
-void execute_mutex_lock(){
+void execute_mutex_lock(t_contexto* registro_cpu, char* recurso){
+    int length = strlen(recurso) + 1;
+
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*2 + length
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_string(buffer, length, recurso, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_LOCK);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
-void execute_mutex_unlock(){
+void execute_mutex_unlock(t_contexto* registro_cpu, char* recurso){
+    int length = strlen(recurso) + 1;
+
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*2 + length
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_string(buffer, length, recurso, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_UNLOCK);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
-void execute_thread_exit(){
+void execute_thread_exit(t_contexto* registro_cpu){
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*2
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_EXIT);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }
 
-void execute_process_exit(){
+void execute_process_exit(t_contexto* registro_cpu){
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*2
+    );
     
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_EXIT);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
 }

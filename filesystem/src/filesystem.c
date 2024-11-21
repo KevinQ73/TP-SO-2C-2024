@@ -72,5 +72,3 @@ void* atender_solicitudes(void* fd_conexion){
 
     enviar_mensaje("OK_FS", fd_memoria, filesystem_log);
 }
-
-

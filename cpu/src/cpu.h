@@ -49,39 +49,39 @@
 
     void execute_set(t_contexto* registro_cpu, char* registro, char* valor);
 
-    void execute_read_mem();
+    void execute_read_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, char* registro_datos, char* registro_direccion);
 
-    void execute_write_mem(t_contexto* registro_cpu, char* registro, char* valor);
+    void execute_write_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, char* registro_direccion, char* registro_datos);
 
-    void execute_sum();
+    void execute_sum(t_contexto* registro_cpu, char* registro_destino, char* registro_origen);
 
-    void execute_sub();
+    void execute_sub(t_contexto* registro_cpu, char* registro_destino, char* registro_origen);
 
-    void execute_jnz();
+    void execute_jnz(t_contexto* registro_cpu, char* registro, char* instruccion);
 
-    void execute_log();
+    void execute_log(t_contexto* registro_cpu, char* registro);
 
-    void execute_dump_memory();
+    void execute_dump_memory(t_contexto* registro_cpu);
 
-    void execute_io();
+    void execute_io(t_contexto* registro_cpu, char* tiempo);
 
-    void execute_process_create();
+    void execute_process_create(t_contexto* registro_cpu, char* path, char* size_process, char* prioridad_hilo_main);
 
     void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad);
 
-    void execute_thread_join();
+    void execute_thread_join(t_contexto* registro_cpu, char* tid_join);
 
-    void execute_thread_cancel();
+    void execute_thread_cancel(t_contexto* registro_cpu, char* tid_cancel);
 
-    void execute_mutex_create();
+    void execute_mutex_create(t_contexto* registro_cpu, char* recurso);
 
-    void execute_mutex_lock();
+    void execute_mutex_lock(t_contexto* registro_cpu, char* recurso);
 
-    void execute_mutex_unlock();
+    void execute_mutex_unlock(t_contexto* registro_cpu, char* recurso);
 
-    void execute_thread_exit();
+    void execute_thread_exit(t_contexto* registro_cpu);
 
-    void execute_process_exit();
+    void execute_process_exit(t_contexto* registro_cpu);
 
     /*-----------------------------------------------------------------------*/
 
