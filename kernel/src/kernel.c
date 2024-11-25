@@ -21,7 +21,6 @@ int main(int argc, char* argv[]) {
     // --------------------- Inicio del modulo ----------------------
 
     procesos_creados = list_create();
-    hilo_exec = list_create();
     hilos_block = list_create();
     lista_colas_multinivel = list_create();
     lista_prioridades = list_create();
@@ -37,9 +36,6 @@ int main(int argc, char* argv[]) {
     sem_wait(&kernel_activo);
 
     // --------------------- Finalizacion del modulo----------------------
-    
-    //eliminar_paquete(paquete_proceso);
-    //eliminar_paquete(paquete_fin_proceso);
 
     log_debug(kernel_log, "TERMINANDO KERNEL");
     eliminar_logger(kernel_log);
@@ -69,7 +65,7 @@ void iniciar_colas(){
 
 void iniciar_primer_proceso(char* path, char* size){
     int size_process = atoi(size);
-    int prioridad = PRIORIDAD_MAXIMA;
+    int prioridad = 0;
 
     primer_proceso = create_pcb(path, size_process);
     char* response_memoria = avisar_creacion_proceso_memoria(&(primer_proceso->pid), &size_process, kernel_log);
@@ -77,7 +73,7 @@ void iniciar_primer_proceso(char* path, char* size){
     if (strcmp(response_memoria, "OK") == 0)
     {   
         log_info(kernel_log, "## (<PID>:%d) Se crea el proceso - Estado: NEW", primer_proceso->pid);
-        t_tcb* primer_hilo = create_tcb(primer_proceso, PRIORIDAD_MAXIMA);
+        t_tcb* primer_hilo = create_tcb(primer_proceso, 0);
         char* respuesta_creacion_hilo = avisar_creacion_hilo_memoria(&primer_proceso->pid, &primer_hilo->tid, path, &prioridad, kernel_log);
 
         if (strcmp(respuesta_creacion_hilo, "OK") == 0)
@@ -120,9 +116,6 @@ void* inicializar_pcb_en_espera(){
         pthread_mutex_lock(&mutex_cola_new);
         t_pcb* pcb = queue_pop(cola_new);
         pthread_mutex_unlock(&mutex_cola_new);
-
-        //t_tcb* tcb_asociado = list_remove(pcb->lista_tcbs_new, 0);
-        //int prioridad = tcb_asociado->prioridad;
 
         char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->pid), &pcb->size_process, kernel_log);
 
@@ -236,14 +229,14 @@ void poner_en_ready_procesos(t_pcb* pcb){
 }
 
 void* poner_en_block(){
-    //WAIT
+    /*//WAIT
     t_hilo_planificacion* hilo_a_bloquear = list_remove(hilo_exec, 0);
     //SIGNAL
     hilo_a_bloquear->estado = BLOCKED_STATE;
 
-    list_add(hilos_block,hilo_a_bloquear);
-   
+    list_add(hilos_block,hilo_a_bloquear);*/
 }
+
 void liberar_hilos_bloqueados(t_hilo_planificacion* hilo){
     for (int i = 0; i < list_size(hilo->lista_hilos_block); i++)
     {
@@ -408,6 +401,11 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
     enviar_paquete(paquete, fd_conexion_dispatch);
     log_debug(kernel_log, "SE ENVIO PAQUETE");
     eliminar_paquete(paquete);
+
+    if(strcmp(kernel_registro.algoritmo_planificacion, "CMP") == 0){
+        pthread_create(&hilo_quantum, NULL, (void*) iniciar_quantum, NULL);
+        pthread_detach(hilo_quantum);
+    }
 
     operacion_a_atender();
 }
@@ -599,9 +597,13 @@ void* operacion_a_atender(){
     case IO:
         milisegundos_de_trabajo = buffer_read_uint32(buffer);
         syscall_io(milisegundos_de_trabajo);
-    break;
-        
+        break;
+    
+    case FIN_INSTRUCCIONES:
+        break;
+
     default:
+        log_warning(kernel_log, "## Error en la OP enviada desde Kernel");
         break;
     }
 }
@@ -614,16 +616,12 @@ void* ejecutar_io (uint32_t milisegundos){
 }
 
 void* syscall_io(uint32_t milisegundos_de_trabajo){
-
     t_hilo_planificacion* hilo = hilo_en_ejecucion;
 
     poner_en_block(hilo_en_ejecucion);
-    
-
     ejecutar_io(milisegundos_de_trabajo);
     
     poner_en_ready(hilo);
-
 } 
 
 void* syscall_mutex_lock(char* nombreMutex ,t_pid_tid pid_tid_recibido){
@@ -797,7 +795,7 @@ void* syscall_thread_create(t_buffer* buffer, uint32_t pid_solicitante, uint32_t
 }
 
 void* syscall_thread_join(){
-    uint32_t largo_string = 0;
+    /*uint32_t largo_string = 0;
     t_buffer* buffer;
     buffer = buffer_recieve(fd_conexion_dispatch);
     uint32_t tid = buffer_read_uint32(buffer);
@@ -807,7 +805,7 @@ void* syscall_thread_join(){
     hilo_a_bloquear->estado = BLOCKED_STATE;
     
     poner_en_block();
-    buffer_destroy(buffer);
+    buffer_destroy(buffer);*/
 }
 
 void* syscall_thread_exit(t_hilo_planificacion* hilo){
@@ -828,7 +826,6 @@ void* syscall_thread_exit(t_hilo_planificacion* hilo){
 
 void* syscall_thread_cancel(uint32_t tid){
     t_pcb* pcb = list_find_by_pid(hilo_en_ejecucion->pcb_padre->pid);
-
     t_hilo_planificacion* resultado = tid_find(pcb->lista_tcb, tid);
 
     if (resultado != NULL)
@@ -836,7 +833,6 @@ void* syscall_thread_cancel(uint32_t tid){
         liberar_hilos_bloqueados(resultado);
         t_hilo_planificacion_destroy(resultado);
     }
-    
 }
 
 /*--------------------------- FINALIZACIÓN DE TADS --------------------------*/
@@ -848,7 +844,6 @@ void t_hilo_planificacion_destroy(t_hilo_planificacion* hilo) {
 }
 
 void pcb_destroy(t_pcb* pcb){
-   
     free(pcb->lista_tcb);
     list_destroy(pcb->lista_tcb);
     free(pcb->mutex_asociados);
@@ -865,17 +860,12 @@ void eliminar_listas(){
 }
 
 void eliminar_colas(){
-    
     queue_destroy_and_destroy_elements(cola_new,t_hilo_planificacion_destroy);
     queue_destroy_and_destroy_elements(cola_exit,t_hilo_planificacion_destroy);
     queue_destroy_and_destroy_elements(cola_ready_fifo,t_hilo_planificacion_destroy);
 }
 
 /*------------------------------- MISCELANEO --------------------------------*/
-
-t_pcb* obtener_pcb_from_hilo(t_hilo_planificacion* hilo){
-
-}
 
 uint32_t siguiente_pid(){
     pthread_mutex_lock(&mutex_siguiente_id);
@@ -888,5 +878,15 @@ void signal_handler(int sig) {
     if (sig == SIGTERM || sig == SIGINT) {
         printf("Recibida señal para terminar el servidor.\n");
         sem_post(&kernel_activo);  // Desbloquear el servidor
+    }
+}
+
+void iniciar_quantum(){
+    usleep(kernel_registro.quantum * 1000); 
+
+    if(!termino_proceso){
+        t_paquete* paquete = crear_paquete(INTERRUPCION_QUANTUM);
+        enviar_paquete(paquete, fd_conexion_interrupt);
+        eliminar_paquete(paquete);
     }
 }

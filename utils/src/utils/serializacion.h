@@ -59,6 +59,7 @@
         THREAD_EXIT,
         PROCESS_EXIT,
         ERROR_CODE,
+        FIN_INSTRUCCIONES,
     } inst_cpu;
 
     typedef enum{
@@ -68,17 +69,6 @@
         BLOCKED_STATE,
         EXIT_STATE,
     } estado_proceso;
-
-    typedef enum{
-        PRIORIDAD_MAXIMA,
-        PRIORIDAD_1,
-        PRORIDAD_2,
-        PRORIDAD_3,
-        PRORIDAD_4,
-        PRORIDAD_5,
-        PRORIDAD_6,
-        PRORIDAD_7,
-    } orden_prioridad;
 
     typedef struct{
         uint32_t size;
@@ -104,7 +94,7 @@
 
     typedef struct{
         uint32_t tid;
-        orden_prioridad prioridad;
+        uint32_t prioridad;
     } t_tcb;
 
     typedef struct{

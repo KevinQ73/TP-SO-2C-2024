@@ -4,39 +4,39 @@
     #include <utils-kernel.h>
     #include <utils/serializacion.h>
     #include <stdbool.h>
+
     t_log* kernel_log;
     t_config* kernel_config;
     t_kernel kernel_registro;
+
+    t_pcb* primer_proceso;
+    t_hilo_planificacion* hilo_en_ejecucion;
 
     int conexion_cpu;
     int conexion_memoria;
     int fd_conexion_dispatch;
     int fd_conexion_interrupt;
     int proceso_ejecutando;
-    int prioridad;
     int pid_siguiente;
     int pid_actual = 0;
 
-    t_pcb* primer_proceso;
-    t_hilo_planificacion* hilo_en_ejecucion;
-
 	char* ip_cpu;
 	char* ip_memoria;
-
     char* puerto_memoria;
 	char* puerto_cpu_dispatch;
     char* puerto_cpu_interrupt;
 
-    t_list* procesos_creados;
-    t_list* hilo_exec;
-    t_list* hilos_block;
+    bool termino_proceso;
 
+    t_list* procesos_creados;
+    t_list* hilos_block;
     t_list* lista_prioridades;
     t_list* lista_colas_multinivel;
 
     pthread_t hiloNew;
     pthread_t hiloPlanifCortoPlazo;
     pthread_t hilo_io;
+    pthread_t hilo_quantum;
 
     pthread_mutex_t mutex_cola_new;
     pthread_mutex_t mutex_cola_ready;
@@ -173,10 +173,10 @@
 
     /*------------------------------- MISCELANEO --------------------------------*/
 
-    t_pcb* obtener_pcb_from_hilo(t_hilo_planificacion* hilo);
-
     uint32_t siguiente_pid();
 
     void signal_handler(int sig);
+
+    void iniciar_quantum();
     
 #endif /* KERNEL_H_ */
