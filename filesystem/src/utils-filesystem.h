@@ -8,6 +8,19 @@
     #include <utils/files.h>
     #include <utils/servidor.h>
     #include <commons/string.h>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <fcntl.h>
+    #include <math.h>
+    #include <commons/bitarray.h>
+    #include <sys/mman.h>
+    #include <commons/config.h>
+    #include <commons/collections/list.h>
+    #include <dirent.h>
+    #include <stdbool.h>
+    #include <memory.h>
 
     typedef struct{
         char* puerto_escucha;
