@@ -383,8 +383,23 @@ void execute_process_create(t_contexto* registro_cpu, char* path, char* size_pro
     sem_wait(&aviso_syscall);
 }
 
+void execute_process_exit(t_contexto* registro_cpu){
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*2
+    );
+    
+    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_EXIT);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+
+    program_counter_update(registro_cpu, cpu_log);
+    sem_wait(&aviso_syscall);
+}
+
 void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad){
-    int valor_int = atoi(prioridad);
+    int valor_prioridad = atoi(prioridad);
     int length = strlen(path) + 1;
 
     t_buffer* buffer = buffer_create(
@@ -393,7 +408,7 @@ void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad
     
     buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
-    buffer_add_uint32(buffer, &valor_int, cpu_log);
+    buffer_add_uint32(buffer, &valor_prioridad, cpu_log);
     buffer_add_string(buffer, length, path, cpu_log);
 
     enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CREATE);
@@ -502,21 +517,6 @@ void execute_thread_exit(t_contexto* registro_cpu){
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
 
     enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_EXIT);
-    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-
-    program_counter_update(registro_cpu, cpu_log);
-    sem_wait(&aviso_syscall);
-}
-
-void execute_process_exit(t_contexto* registro_cpu){
-    t_buffer* buffer = buffer_create(
-        sizeof(int)*2
-    );
-    
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
-
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_EXIT);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
 
     program_counter_update(registro_cpu, cpu_log);

@@ -25,7 +25,7 @@
     } t_kernel;
 
     typedef struct{
-        t_queue* cola;
+        t_list* cola;
         int prioridad;
     } t_cola_prioridades;
 
@@ -44,6 +44,8 @@
     t_cola_prioridades* create_priority_queue(int prioridad);
 
     int crear_conexion_con_memoria(t_log* kernel_log, char* ip, char* puerto);
+
+    t_mutex* create_mutex(char* nombreMutex);
 
     /*------------------------------ MISCELANEO --------------------------------*/
 

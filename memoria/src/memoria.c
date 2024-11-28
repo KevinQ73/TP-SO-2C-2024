@@ -160,7 +160,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
             enviar_mensaje("ERROR_CREAR_PROCESO", fd_memoria, memoria_log);
             log_error(memoria_log, "## [MEMORIA:KERNEL] Fallo en la creación del proceso");
         }
-        log_info(memoria_log, "## Solicitud CREAR_PROCESO de Kernel finalizada. Cerrando FD del socket.\n");
+        log_info(memoria_log, "## Solicitud PROCESS_CREATE de Kernel finalizada. Cerrando FD del socket.\n");
         close(fd_memoria);
         break;
 
@@ -176,16 +176,15 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s", pid, tid, prioridad, path);
 
         free(path);
-        log_info(memoria_log, "## Solicitud CREAR_HILO de Kernel finalizada. Cerrando FD del socket.\n");
+        log_info(memoria_log, "## Solicitud THREAD_CREATE de Kernel finalizada. Cerrando FD del socket.\n");
         close(fd_memoria);
         break;
 
     case FINALIZAR_PROCESO:
-            //aplicar_retardo();
-            //uint32_t pid_proceso_finalizar = recibir_pid(fd_conexion_kernel);
+        pid = buffer_read_uint32(buffer);
 
-            //finalizar_proceso(pid_proceso_finalizar);
-            //pthread_mutex_unlock(&kernel_operando);
+        finalizar_proceso(pid);
+        log_info(memoria_log, "## Solicitud PROCESS_EXIT de Kernel finalizada. Cerrando FD del socket.\n");
         break;
 
     case DUMP_MEMORY:
@@ -228,6 +227,9 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         free(nombre_archivo);
         break;
 
+    case FINALIZAR_HILO:
+        pid = buffer_read_uint32(buffer);
+        tid = buffer_read_uint32(buffer);
     default:
         log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
         break;

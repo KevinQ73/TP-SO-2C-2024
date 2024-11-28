@@ -85,12 +85,18 @@
         uint32_t pid;
         uint32_t tid_siguiente;
         uint32_t program_counter;
-        estado_proceso estado_proceso;
         char* path_instrucciones_hilo_main;
         int size_process;
         t_list* mutex_asociados;
         t_list* lista_tcb;
     } t_pcb;
+
+    typedef struct{
+        uint32_t tid;
+        estado_proceso estado;
+        uint32_t prioridad;
+        int tid_bloqueante;
+    } t_thread_state;
 
     typedef struct{
         uint32_t tid;
@@ -103,16 +109,15 @@
     } t_pid_tid;
 
     typedef struct{
-        t_pcb* pcb_padre;
-        t_tcb* tcb_asociado;
-        estado_proceso estado;
-        t_list* lista_hilos_block;
+        uint32_t pid_padre;
+        uint32_t tid_asociado;
+        uint32_t prioridad;
     } t_hilo_planificacion;
 
     typedef struct{
         char* nombre;
         uint32_t valor;
-        uint32_t tid_tomado;
+        int tid_tomado;
         t_queue* cola_bloqueados;
     }t_mutex;
 
@@ -151,7 +156,6 @@
         uint32_t gx;
         uint32_t hx;
     } t_contexto;
-    
 
     extern char* nombres_registros[11];
 

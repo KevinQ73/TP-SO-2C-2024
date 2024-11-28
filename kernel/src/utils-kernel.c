@@ -26,7 +26,6 @@ t_pcb* create_pcb(char* path_instrucciones, int size_process){
     pcb->pid = siguiente_pid();
     pcb->tid_siguiente = 0;
     pcb->program_counter = 0;
-    pcb->estado_proceso = NEW_STATE;
     pcb->path_instrucciones_hilo_main = path_instrucciones;
     pcb->size_process = size_process;
     pcb->mutex_asociados = list_create();
@@ -48,10 +47,9 @@ t_tcb* create_tcb(t_pcb* pcb_padre, int prioridad){
 t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_padre, t_tcb* tcb_asociado){
     t_hilo_planificacion* hilo = malloc(sizeof(t_hilo_planificacion));
 
-    hilo->pcb_padre = pcb_padre;
-    hilo->tcb_asociado = tcb_asociado;
-    hilo->estado = pcb_padre->estado_proceso;
-    hilo->lista_hilos_block = list_create();
+    hilo->pid_padre = pcb_padre->pid;
+    hilo->tid_asociado = tcb_asociado->tid;
+    hilo->prioridad = tcb_asociado->prioridad;
 
     list_add(pcb_padre->lista_tcb, tcb_asociado);
 
@@ -61,7 +59,7 @@ t_hilo_planificacion* create_hilo_planificacion(t_pcb* pcb_padre, t_tcb* tcb_aso
 t_cola_prioridades* create_priority_queue(int prioridad){
     t_cola_prioridades* cola_nueva = malloc(sizeof(t_cola_prioridades));
 
-    cola_nueva->cola = queue_create();
+    cola_nueva->cola = list_create();
     cola_nueva->prioridad = prioridad;
 
     return cola_nueva;
@@ -80,8 +78,8 @@ t_mutex* create_mutex(char* nombreMutex){
 
     mutex->nombre = nombreMutex;
     mutex->valor = 1;
-    mutex->tid_tomado = NULL;
-    mutex->cola_bloqueados= list_create();
+    mutex->tid_tomado = -1;
+    mutex->cola_bloqueados= queue_create();
 
     return mutex;
 }

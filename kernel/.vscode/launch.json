@@ -31,7 +31,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-      "args": ["PLANI_PROC", "32", "./files/prueba1.config"],
+      "args": ["PLANI_PROC", "32", "./files/prueba_planificacion.config"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
