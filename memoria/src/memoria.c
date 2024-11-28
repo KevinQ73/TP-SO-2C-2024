@@ -188,6 +188,46 @@ void* atender_solicitudes_kernel(void* fd_conexion){
             //pthread_mutex_unlock(&kernel_operando);
         break;
 
+    case DUMP_MEMORY:
+        pid = buffer_read_uint32(buffer);
+        tid = buffer_read_uint32(buffer);
+        size_process = buffer_read_uint32(buffer);
+
+        char* timestamp = temporal_get_string_time("%H:%M:%S:%MS");
+        char* nombre_archivo = string_new();
+
+        char* nombre_pid = string_itoa(pid);
+        char* nombre_tid = string_itoa(tid);
+        char* nombre_size = string_itoa(size_process);
+
+        t_contexto *contexto = buscar_contexto(pid, tid);
+        void * contenido_proceso = leer_de_memoria(contexto->limite, contexto->base);
+
+        string_append_with_format(&nombre_archivo, "%<",nombre_pid,"%>","%<", nombre_tid,"%>","%<", timestamp,">",".dmp");
+
+        t_paquete *archivo_fs = crear_paquete(DUMP_MEMORY);
+        
+        t_buffer* buffer = buffer_create(sizeof(nombre_archivo)+sizeof(uint32_t)+sizeof(contenido_proceso));
+
+        buffer_add_string(buffer, sizeof(nombre_archivo), nombre_archivo, memoria_log);
+        buffer_add_uint32(buffer, size_process, memoria_log);
+         buffer_add_string(buffer, sizeof(contenido_proceso), contenido_proceso, memoria_log);
+
+        archivo_fs->buffer = buffer;
+
+        enviar_paquete(archivo_fs,memoria_registro.puerto_filesystem);
+
+        log_info(memoria_log, "## Memory Dump solicitado - (PID:TID) - (<%d>:<%d>)",pid,tid);
+
+        char* response_fs = recibir_mensaje(fd_conexion, memoria_log);
+        if(response_fs = "OK_FS"){
+			enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+		}else {
+			enviar_mensaje("ERROR", fd_conexion_kernel, memoria_log);
+		}
+        free(nombre_archivo);
+        break;
+
     default:
         log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
         break;

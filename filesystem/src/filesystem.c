@@ -8,13 +8,15 @@ int main(int argc, char* argv[]) {
 
     filesystem_registro = levantar_datos(filesystem_config);
 
+	obtener_datos_filesystem();
+
     // --------------------- Conexión como servidor de MEMORIA ----------------------
 
     fd_escucha_memoria = iniciar_servidor(filesystem_log, "FILESYSTEM", filesystem_registro.puerto_escucha);
     log_debug(filesystem_log,"SOCKET LISTEN LISTO PARA RECIBIR CLIENTES");
 
     atender_memoria();
-
+	
     //log_debug(filesystem_log, "Esperando MEMORIA...");
     //fd_conexion_memoria = esperar_cliente(filesystem_log, "MEMORIA", fd_escucha_memoria);
 
@@ -57,11 +59,26 @@ void* atender_solicitudes(void* fd_conexion){
 
     if(operacion_memoria == DUMP_MEMORY){
         log_info(filesystem_log, "MEMORY DUMP LEIDO");
+		t_paquete *recibido = recibir_paquete(fd_memoria);
+		buffer = buffer_recieve(fd_memoria);
+
+		uint32_t tamanio_buffer=buffer_read_uint32(buffer);
+	
+		char* nombre = buffer_read_string(buffer,tamanio_buffer);
+		uint32_t tamanio = buffer_read_uint32(buffer);
+		void* contenido = buffer_read_string(buffer,tamanio_buffer);
+
+		if(dump_memory(nombre, tamanio, contenido)){
+			enviar_mensaje("OK_FS", fd_memoria, filesystem_log);
+		}else {
+			enviar_mensaje("ERROR", fd_memoria, filesystem_log);
+		}
     } else {
         log_error(filesystem_log, "OPERACIÓN ERRONEA");
         abort();
     }
 
+	/*
     buffer = buffer_recieve(fd_memoria);
 
     uint32_t pid = buffer_read_uint32(buffer);
@@ -69,8 +86,7 @@ void* atender_solicitudes(void* fd_conexion){
     uint32_t size = buffer_read_uint32(buffer);
 
     log_debug(filesystem_log, "PID RECIBIDO: %d, TID: %d, SIZE: %d", pid, tid, size);
-
-    enviar_mensaje("OK_FS", fd_memoria, filesystem_log);
+	*/
 }
 
 //Funciones del dump_memory

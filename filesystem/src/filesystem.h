@@ -27,6 +27,8 @@
 
     char* ruta_absoluta(char* ruta_relativa);
 
+    void obtener_datos_filesystem();
+
     int crear_archivo(char* ruta, void (*tipo_Archivo)(int));
     int abrir_archivo(char* ruta, void (*tipo_Archivo)(int));
 
