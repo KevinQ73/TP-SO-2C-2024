@@ -24,25 +24,25 @@ int main(int argc, char* argv[]) {
 }
 
 void inicializar_fs(){
-	char* path_mount_dir_bitmap = string_duplicate(filesystem_registro.path_mount_dir);
-	char* path_mount_dir_bloques = string_duplicate(filesystem_registro.path_mount_dir);
-	string_append(&path_mount_dir_bitmap, "/bitmap.dat");
-	string_append(&path_mount_dir_bloques, "/bloques.dat");
+	char* name_bitmap = string_duplicate(filesystem_registro.path_mount_dir);
+	char* name_bloques = string_duplicate(filesystem_registro.path_mount_dir);
+	string_append(&name_bitmap, "/bitmap.dat");
+	string_append(&name_bloques, "/bloques.dat");
 
-	int bitmap_fd = open(path_mount_dir_bitmap, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-	int bloques_fd = open(path_mount_dir_bloques, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	int bitmap_fd = open(name_bitmap, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+	int bloques_fd = open(name_bloques, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 
 	int size_bitmap = ceil((double)filesystem_registro.block_count/(double)8);
 	int size_bloques = filesystem_registro.block_count * filesystem_registro.block_size;
 
-	log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BITMAP.DAT> - Tamaño: <%d>", size_bitmap);
-	log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BLOQUES.DAT> - Tamaño: <%d>", size_bloques);
+	log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BITMAP.DAT> - Tamaño: <%d> PATH: %s", size_bitmap, name_bitmap);
+	log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BLOQUES.DAT> - Tamaño: <%d> PATH: %s", size_bloques, name_bloques);
 
 	crear_bitmap(bitmap_fd, size_bitmap);
 	crear_bloques(bloques_fd, size_bloques);
 
-	free(path_mount_dir_bitmap);
-	free(path_mount_dir_bloques);
+	free(name_bitmap);
+	free(name_bloques);
 }
 
 void atender_memoria(){
