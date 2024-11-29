@@ -274,7 +274,7 @@ int asignar_bloques_bitmap(u_int32_t* puntero_bloques, int longitud){
 //Archivos de metadata
 
 int crear_metadata(char* ruta, int bloque_indexado, int tamanio_archivo){
-	char* ruta_archivo = "/files/";
+	char* ruta_archivo = "./mount_dir/files/";
 	string_append(&ruta_archivo, ruta);
 	
 	/*
@@ -283,17 +283,9 @@ int crear_metadata(char* ruta, int bloque_indexado, int tamanio_archivo){
 	strcat(ruta_archivo, ruta);
 	*/
 
-	FILE* metadata = fopen(ruta_archivo, "wb");
-
-	if (metadata == NULL) {
-        log_error(filesystem_log, "Error al leer metadata");
-        fclose(metadata);
-        abort();
-    }
+	int fd_metadata = open(ruta_archivo, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 
 	//log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BLOQUES.DAT> - Tamaño: <%d>", size_bloques);
-
-	int fd_metadata = fileno(metadata);
 
 	char* bloque_string = malloc(50*sizeof(char));
 	char* tamanio_string = malloc(50*sizeof(char));
