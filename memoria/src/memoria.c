@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     conexion_filesystem = crear_conexion(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
     log_debug(memoria_log, "ME CONECTÉ A FILESYSTEM");
 
-    enviar_solicitud_fs();
+    //enviar_solicitud_fs();
 
     // --------------------- Conexiones de clientes con el servidor ----------------------
     

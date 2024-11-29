@@ -6,23 +6,28 @@
     t_log* filesystem_log;
     t_config* filesystem_config;
     t_filesystem filesystem_registro;
+    t_bitarray* buffer_bitmap;
+
+    pthread_t hilo_memoria;
 
     int fd_escucha_memoria;
     int fd_conexion_memoria;
 
-    pthread_t hilo_memoria;
-
-    void* buffer_bloques;
-    t_bitarray* buffer_bitmap;
-    void* puntero_bitmap;
     int bloques_libres;
+
+    void* buffer_bitmap_2;
+    void* buffer_bloques;
+    void* puntero_bitmap;
+
+
+
 
     void atender_memoria();
 
     void* atender_solicitudes(void* fd_conexion);
 
     int crear_metadata(char* ruta, int bloque_indexado, int tamanio_archivo);
-    int modificar_metadata(char* ruta, int bloque_indexado, int tamanio_archivo);
+    void modificar_metadata(char* ruta, int bloque_indexado, int tamanio_archivo);
     int obtener_archivo(char* ruta, void (*tipo_creacion)(int), void (*tipo_apertura)(int));
 
     char* ruta_absoluta(char* ruta_relativa);
@@ -32,8 +37,8 @@
     int crear_archivo(char* ruta, void (*tipo_Archivo)(int));
     int abrir_archivo(char* ruta, void (*tipo_Archivo)(int));
 
-    void crear_bitmap(int file_descriptor);
-    void crear_bloques(int file_descriptor);
+    void crear_bitmap(int file_descriptor, int size);
+    void crear_bloques(int file_descriptor, int size);
 
     void abrir_bitmap(int file_descriptor);
     void abrir_bloques(int file_descriptor);
