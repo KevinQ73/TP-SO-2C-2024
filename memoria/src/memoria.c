@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     conexion_filesystem = crear_conexion(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
     log_debug(memoria_log, "ME CONECTÉ A FILESYSTEM");
 
-    //enviar_solicitud_fs();
+    enviar_solicitud_fs();
 
     // --------------------- Conexiones de clientes con el servidor ----------------------
     
@@ -72,31 +72,13 @@ void enviar_solicitud_fs(){
     }
 }
 
-void iniciar_memoria(){
-    log_info(memoria_log, "MEMORIA INICIALIZADA\n");
-    memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
-
-    contexto_ejecucion = dictionary_create();
-    lista_particiones = memoria_registro.particiones;
-
-    int size_lista_particiones = string_array_size(lista_particiones);
-    char* bitmap_espacio_reservado[size_lista_particiones];
-
-    for (int i = 0; i < size_lista_particiones; i++){
-        bitmap_espacio_reservado[i] = 0;
-    }
-    
-    bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
-
-    lista_pseudocodigos = list_create(); //Lo puse aca para iniciar todo junto con la memoria
-
-    iniciar_semaforos();
-}
-
 void iniciar_semaforos(){
     pthread_mutex_init(&kernel_operando, NULL);
     pthread_mutex_init(&contexto_ejecucion_procesos, NULL);
     pthread_mutex_init(&mutex_fd_filesystem, NULL);
+    pthread_mutex_init(&mutex_huecos_disponibles, NULL);
+    pthread_mutex_init(&mutex_procesos_activos, NULL);
+
     sem_init(&memoria_activo, 0, 0);
 }
 
@@ -245,7 +227,7 @@ bool crear_proceso(uint32_t pid, uint32_t size){
         char* key = string_itoa(pid);
         t_contexto_proceso* contexto_proceso = crear_contexto_proceso(pid, base_asignada, size);
         pthread_mutex_lock(&contexto_ejecucion_procesos);
-        dictionary_put(contexto_ejecucion, key, contexto_proceso);
+            dictionary_put(contexto_ejecucion, key, contexto_proceso);
         pthread_mutex_unlock(&contexto_ejecucion_procesos);
         free(key);
         memoria_asignada = true;
@@ -272,6 +254,7 @@ void* finalizar_proceso(){
     enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
     return NULL;
 }
+
 void* finalizar_hilo(){
     enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
     return NULL;
@@ -425,20 +408,20 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
 
     char* key = string_itoa(pid);
     pthread_mutex_lock(&contexto_ejecucion_procesos);
-    contexto_proceso = dictionary_get(contexto_ejecucion, key);
-    contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
+        contexto_proceso = dictionary_get(contexto_ejecucion, key);
+        contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
 
-    contexto_a_enviar->base = contexto_proceso->base;
-    contexto_a_enviar->limite = contexto_proceso->limite;
-    contexto_a_enviar->pc = contexto_hilo->pc;
-    contexto_a_enviar->ax = contexto_hilo->ax;
-    contexto_a_enviar->bx = contexto_hilo->bx;
-    contexto_a_enviar->cx = contexto_hilo->cx;
-    contexto_a_enviar->dx = contexto_hilo->dx;
-    contexto_a_enviar->ex = contexto_hilo->ex;
-    contexto_a_enviar->fx = contexto_hilo->fx;
-    contexto_a_enviar->gx = contexto_hilo->gx;
-    contexto_a_enviar->hx = contexto_hilo->hx;
+        contexto_a_enviar->base = contexto_proceso->base;
+        contexto_a_enviar->limite = contexto_proceso->limite;
+        contexto_a_enviar->pc = contexto_hilo->pc;
+        contexto_a_enviar->ax = contexto_hilo->ax;
+        contexto_a_enviar->bx = contexto_hilo->bx;
+        contexto_a_enviar->cx = contexto_hilo->cx;
+        contexto_a_enviar->dx = contexto_hilo->dx;
+        contexto_a_enviar->ex = contexto_hilo->ex;
+        contexto_a_enviar->fx = contexto_hilo->fx;
+        contexto_a_enviar->gx = contexto_hilo->gx;
+        contexto_a_enviar->hx = contexto_hilo->hx;
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
     free(key);
     return contexto_a_enviar;
@@ -474,7 +457,6 @@ t_contexto* recibir_contexto(t_buffer* buffer){
 }
 
 uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
-
     uint32_t valor_resultado;
     int size_particion = atoi(lista_particiones[0]);
 
@@ -489,9 +471,13 @@ uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
             valor_resultado = obtener_espacio_desocupado();
         }
     } else {
-        // DINAMICO
+        particion_dinamica(pid, size);
     }
     return valor_resultado;
+}
+
+void particion_dinamica(uint32_t pid, uint32_t size){
+    
 }
 
 uint32_t obtener_espacio_desocupado(){
@@ -618,3 +604,120 @@ void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, 
     dictionary_put(contexto_ejecucion, key, contexto_proceso);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
 }
+
+/*------------------------------------ WORKING ZONE ------------------------------------*/
+
+void iniciar_memoria(){
+    log_info(memoria_log, "MEMORIA INICIALIZADA\n");
+    memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
+
+    contexto_ejecucion = dictionary_create();
+    lista_particiones = memoria_registro.particiones;
+
+    int size_lista_particiones = string_array_size(lista_particiones);
+    char* bitmap_espacio_reservado[size_lista_particiones];
+
+    for (int i = 0; i < size_lista_particiones; i++){
+        bitmap_espacio_reservado[i] = 0;
+    }
+    
+    bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
+
+    // Para particiones dinamicas
+    lista_procesos_activos = dictionary_create();
+    lista_huecos_disponibles = list_create();
+
+    t_hueco* hueco_inicial = crear_hueco(0, memoria_registro.tam_memoria);
+    agregar_hueco(hueco_inicial);
+
+    iniciar_semaforos();
+}
+
+t_hueco* crear_hueco(uint32_t inicio, uint32_t size){
+    t_hueco* hueco_disponible = malloc(sizeof(t_hueco));
+
+    hueco_disponible->inicio = inicio;
+    hueco_disponible->size = size;
+
+    return hueco_disponible;
+}
+
+void agregar_hueco(t_hueco* hueco){
+    pthread_mutex_lock(&mutex_huecos_disponibles);
+        list_add(lista_huecos_disponibles, hueco);
+    pthread_mutex_unlock(&mutex_huecos_disponibles);
+}
+
+t_hueco* first_fit(){
+    pthread_mutex_lock(&mutex_huecos_disponibles);
+        void* _min_init_byte(void* a, void* b) {
+	        t_hueco* hueco_a = (t_hueco*) a;
+	        t_hueco* hueco_b = (t_hueco*) b;
+	        return hueco_a->inicio <= hueco_b->inicio ? hueco_a : hueco_b;
+	    }
+	    t_hueco* hueco_hallado = list_get_minimum(lista_huecos_disponibles, _min_init_byte);
+    pthread_mutex_unlock(&mutex_huecos_disponibles);
+    return hueco_hallado;
+}
+
+t_hueco* best_fit(uint32_t size){
+    pthread_mutex_lock(&mutex_huecos_disponibles);
+        void* _min_size_byte(void* a, void* b) {
+	        t_hueco* hueco_a = (t_hueco*) a;
+	        t_hueco* hueco_b = (t_hueco*) b;
+
+            if (hueco_a->size <= hueco_b->size)
+            {
+                if (hueco_a->size >= size)
+                {
+                    return hueco_a;
+                } else {
+                    return hueco_b;
+                }
+            } else {
+                if (hueco_b->size >= size)
+                {
+                    return hueco_b;
+                } else {
+                    return hueco_a;
+                }
+            }
+	    }
+	    t_hueco* hueco_hallado = list_get_minimum(lista_huecos_disponibles, _min_size_byte);
+    pthread_mutex_unlock(&mutex_huecos_disponibles);
+    return hueco_hallado;
+}
+
+t_hueco* worst_fit(){
+    pthread_mutex_lock(&mutex_huecos_disponibles);
+        void* _max_size_byte(void* a, void* b) {
+	        t_hueco* hueco_a = (t_hueco*) a;
+	        t_hueco* hueco_b = (t_hueco*) b;
+            return hueco_a->size >= hueco_b->size ? hueco_a : hueco_b;
+	    }
+	    t_hueco* hueco_hallado = list_get_maximum(lista_huecos_disponibles, _max_size_byte);
+    pthread_mutex_unlock(&mutex_huecos_disponibles);
+    return hueco_hallado;
+}
+
+t_hueco* obtener_hueco(uint32_t size){
+    t_hueco* hueco;
+
+    if (strcmp(memoria_registro.esquema, "FIRST"))
+    {
+        hueco = first_fit();
+    } else if (strcmp(memoria_registro.esquema, "BEST"))
+    {
+        hueco = best_fit(size);
+    } else if (strcmp(memoria_registro.esquema, "WORST"))
+    {
+        hueco = worst_fit();
+    } else {
+        log_error(memoria_log, "ERROR EN obtener_hueco");
+        abort();
+    }
+    
+    return hueco;
+}
+
+/*------------------------------------ WORKING ZONE ------------------------------------*/

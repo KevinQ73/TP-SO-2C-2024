@@ -13,6 +13,9 @@
 
     char** lista_particiones;
 
+    t_dictionary* lista_procesos_activos;
+    t_list* lista_huecos_disponibles;
+
     void* memoria;
 
     int fd_conexiones;
@@ -25,10 +28,13 @@
     pthread_t hiloMemoriaCpu;
     pthread_t hiloMemoriaKernel;
     pthread_t hilo_atender_kernel;
-    pthread_t mutex_fd_filesystem;
 
     pthread_mutex_t kernel_operando;
     pthread_mutex_t contexto_ejecucion_procesos;
+    pthread_mutex_t mutex_fd_filesystem;
+    pthread_mutex_t mutex_huecos_disponibles;
+    pthread_mutex_t mutex_procesos_activos;
+
     sem_t memoria_activo;
 
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
@@ -90,6 +96,20 @@
     void enviar_datos_memoria(void* buffer, uint32_t tamanio);
 
     void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, uint32_t tid);
+
+    /*--------------------------- PARTICIONES DINAMICAS --------------------------*/
+
+    t_hueco* crear_hueco(uint32_t inicio, uint32_t size);
+
+    void agregar_hueco(t_hueco* hueco);
+
+    t_hueco* first_fit();
+
+    t_hueco* best_fit(uint32_t size);
+
+    t_hueco* worst_fit();
+
+    t_hueco* obtener_hueco(uint32_t size);
 
     //void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
 

@@ -34,6 +34,18 @@
         char* pseudocodigo;
     } t_pseudocodigo;
 
+    typedef struct{
+        uint32_t pid;
+        uint32_t tid;
+        uint32_t inicio;
+        uint32_t size;
+    } t_proceso;
+
+    typedef struct{
+        uint32_t inicio;
+        uint32_t size;
+    } t_hueco;
+
     t_memoria levantar_datos_memoria(t_config* config);
 
     int crear_conexion_con_fs(t_log* memoria_log, char* ip, char* puerto);
