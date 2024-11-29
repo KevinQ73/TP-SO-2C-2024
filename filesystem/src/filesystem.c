@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[]) {
 
-    filesystem_log = iniciar_logger("./files/filesystem.log", "FILESYSTEM", 1, LOG_LEVEL_DEBUG);
+    filesystem_log = iniciar_logger("/files/filesystem.log", "FILESYSTEM", 1, LOG_LEVEL_DEBUG);
 
     filesystem_config = iniciar_config(argv[1]);
 
