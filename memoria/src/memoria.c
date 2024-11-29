@@ -323,8 +323,7 @@ void* atender_cpu(){
 
             usleep(memoria_registro.retardo_respuesta * 1000);
 
-            contexto = buscar_contexto(pid_tid_recibido.pid, pid_tid_recibido.tid);
-            actualizar_contexto_ejecucion(contexto, pid_tid_recibido.pid, pid_tid_recibido.tid);
+            actualizar_contexto_ejecucion(contexto_recibido, pid_tid_recibido.pid, pid_tid_recibido.tid);
             log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
             //escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
             enviar_mensaje("OK_CONTEXTO", fd_conexion_cpu, memoria_log);

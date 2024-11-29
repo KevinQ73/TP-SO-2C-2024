@@ -63,6 +63,7 @@ void iniciar_semaforos(){
     pthread_mutex_init(&mutex_lista_procesos_ready, NULL);
     pthread_mutex_init(&mutex_colas_multinivel_existentes, NULL);
     pthread_mutex_init(&mutex_io, NULL);
+    pthread_mutex_init(&mutex_interrupt, NULL);
 
     sem_init(&contador_procesos_en_new, 0, 0);
     sem_init(&kernel_activo, 0, 0);
@@ -256,7 +257,7 @@ void* planificador_corto_plazo(){
     while (1)
     {
         hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
-
+        hilo_desalojado = false;
         ejecutar_hilo(hilo_en_ejecucion);
     }
 }
@@ -267,7 +268,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
     if (strcmp(planificacion, "FIFO") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
-            hilo = list_get(cola_ready, 0);
+            hilo = list_remove(cola_ready, 0);
         pthread_mutex_unlock(&mutex_cola_ready);
         log_info(kernel_log, "## [FIFO] Se quitó el hilo (%d:%d) de la COLA READY", hilo->pid_padre, hilo->tid_asociado);
 
@@ -728,6 +729,7 @@ uint32_t mutex_value(t_list* lista_de_mutex, char* name){
     t_mutex* mutex = find_mutex_by_name(lista_de_mutex, name);
     return mutex->valor;
 }
+
 /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
 void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
@@ -755,7 +757,7 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
         pthread_detach(hilo_quantum);
     }
 
-    while (!termino_proceso)
+    while (!termino_proceso && !hilo_desalojado)
     {
         operacion_a_atender();
     }
@@ -764,6 +766,7 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
 t_hilo_planificacion* desalojar_hilo(){
     pthread_mutex_lock(&mutex_hilo_exec);
         t_hilo_planificacion* hilo = list_remove(lista_hilo_en_ejecucion, 0);
+        hilo_desalojado = true;
     pthread_mutex_unlock(&mutex_hilo_exec);
 
     return hilo;
@@ -832,7 +835,7 @@ char* avisar_creacion_hilo_memoria(int* pid, int* tid, char* path, int* priorida
     return response_memoria;
 }
 
-char* avisar_fin_proceso_memoria(uint32_t pid){
+char* avisar_fin_proceso_memoria(uint32_t* pid){
     t_paquete* paquete = crear_paquete(FINALIZAR_PROCESO);
     t_buffer* buffer = buffer_create(
         sizeof(int)
@@ -853,7 +856,7 @@ char* avisar_fin_proceso_memoria(uint32_t pid){
     return response_memoria;
 }
 
-char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid){
+char* avisar_fin_hilo_memoria(uint32_t* pid, uint32_t* tid){
     t_paquete* paquete = crear_paquete(FINALIZAR_HILO);
     t_buffer* buffer = buffer_create(
         2*sizeof(int)
@@ -892,16 +895,19 @@ void enviar_aviso_syscall(char* mensaje, cod_inst* codigo_instruccion){
     buffer_add_uint32(buffer, codigo_instruccion, kernel_log);
 
 	paquete->buffer = buffer;
-
-	enviar_paquete(paquete, fd_conexion_interrupt);
+    pthread_mutex_lock(&mutex_interrupt);
+	    enviar_paquete(paquete, fd_conexion_interrupt);
+    pthread_mutex_unlock(&mutex_interrupt);
 	eliminar_paquete(paquete);
 }
 
 /*--------------------------------- SYSCALLS --------------------------------*/
 
 void* operacion_a_atender(){
-    int operacion = recibir_operacion(fd_conexion_interrupt);
-    t_buffer* buffer = buffer_recieve(fd_conexion_interrupt);
+    pthread_mutex_lock(&mutex_interrupt);
+        int operacion = recibir_operacion(fd_conexion_interrupt);
+        t_buffer* buffer = buffer_recieve(fd_conexion_interrupt);
+    pthread_mutex_unlock(&mutex_interrupt);
     t_pid_tid pid_tid_recibido = recibir_pid_tid(buffer, kernel_log);
     
     switch (operacion)
@@ -962,6 +968,7 @@ void* operacion_a_atender(){
 
 void* syscall_process_create(t_buffer* buffer, t_pid_tid pid_tid){
     uint32_t largo_string = 0;
+    inst_cpu codigo = PROCESS_CREATE;
 
     uint32_t tam_proceso = buffer_read_uint32(buffer);
     uint32_t prioridad = buffer_read_uint32(buffer);
@@ -975,33 +982,25 @@ void* syscall_process_create(t_buffer* buffer, t_pid_tid pid_tid){
 
     create_process_state(pcb->pid);
     poner_en_new(pcb);
+    enviar_aviso_syscall("PROCESO INICIALIZADO", &codigo);
     log_info(kernel_log,"## PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
 }   
 
 void* syscall_process_exit(t_pid_tid pid_tid_recibido){
+    inst_cpu codigo = PROCESS_EXIT;
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: PROCESS_EXIT", pid_tid_recibido.pid, pid_tid_recibido.tid);
     
-    // Avisa a memoria
-    t_paquete* paquete = crear_paquete(FINALIZAR_PROCESO);
-    agregar_a_paquete(paquete, &pid_tid_recibido.pid, sizeof(uint32_t));
-    
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
-        int conexion_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
-        enviar_paquete(paquete, conexion_memoria);
-            log_debug(kernel_log, "## [KERNEL:MEMORIA] (%d:%d) Se envió aviso de PROCESS_EXIT\n", pid_tid_recibido.pid, pid_tid_recibido.tid);
-        eliminar_paquete(paquete);
+    char* respuesta_memoria = avisar_fin_proceso_memoria(&pid_tid_recibido.pid);
 
-        char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
-
-        if(strcmp(respuesta_memoria, "FINALIZACION_ACEPTADA") == 0){
-            finalizar_hilos_de_proceso(pid_tid_recibido.pid, pid_tid_recibido.tid);
-            log_info(kernel_log,"## [KERNEL:MEMORIA] Finalización del proceso PID: %d realizado satisfactoriamente en MEMORIA", pid_tid_recibido.pid);
-        } else {
-            log_error(kernel_log, "ERROR EN syscall_process_exit");
-            abort();
-        }
-        close(conexion_memoria);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
+    if (strcmp(respuesta_memoria, "FINALIZACION_ACEPTADA") == 0)
+    {
+        finalizar_hilos_de_proceso(pid_tid_recibido.pid, pid_tid_recibido.tid);
+        enviar_aviso_syscall("PROCESO FINALIZADO", &codigo);
+        log_info(kernel_log,"## [KERNEL:MEMORIA] Finalización del proceso PID: %d realizado satisfactoriamente en MEMORIA", pid_tid_recibido.pid);
+    } else {
+        log_error(kernel_log, "ERROR EN syscall_process_exit");
+        abort();
+    }
     log_info(kernel_log,"## Finaliza el proceso <%d>", pid_tid_recibido.pid);
 }
 
@@ -1025,12 +1024,14 @@ void* syscall_thread_create(t_buffer* buffer, t_pid_tid pid_tid){
         poner_en_ready(hilo_a_crear);
         enviar_aviso_syscall("HILO_CREADO", &codigo);
     } else {
-        enviar_aviso_syscall("HILO_NO_CREADO", &codigo);
         log_debug(kernel_log, "Rompimos algo con syscall_thread_create");
+        abort();
     }
 }
 
 void* syscall_thread_join(t_buffer* buffer, t_pid_tid pid_tid){
+    inst_cpu codigo = THREAD_JOIN;
+
     uint32_t hilo_bloqueante = buffer_read_uint32(buffer);
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: THREAD_JOIN - <TID: %d>", pid_tid.pid, pid_tid.tid, hilo_bloqueante);
 
@@ -1039,27 +1040,34 @@ void* syscall_thread_join(t_buffer* buffer, t_pid_tid pid_tid){
         t_hilo_planificacion* hilo = desalojar_hilo();
         add_thread_state_tid_blocked(hilo->pid_padre, hilo->tid_asociado, hilo_bloqueante);
         poner_en_block(hilo);
+        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
         log_info(kernel_log, "## (<%d>:<%d>) - Bloqueado por: <PTHREAD_JOIN>", pid_tid.pid, pid_tid.tid);
     } else {
+        enviar_aviso_syscall("HILO_NO_BLOQUEADO", &codigo);
         log_debug(kernel_log, "## El hilo no existe o ya finalizó, continuo ejecución");
     }
 }
 
 void* syscall_thread_exit(t_pid_tid pid_tid){
+    inst_cpu codigo = THREAD_EXIT;
+
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: THREAD_EXIT", pid_tid.pid, pid_tid.tid);
     
-    char* respuesta_memoria = avisar_fin_hilo_memoria(pid_tid.pid, pid_tid.tid);
+    char* respuesta_memoria = avisar_fin_hilo_memoria(&pid_tid.pid, &pid_tid.tid);
     
     if (strcmp(respuesta_memoria, "OK") == 0)
     {
         poner_en_exit(pid_tid.pid, pid_tid.tid);
-        log_info(kernel_log,"## (<%d>:<%d>) Finaliza el hilo", pid_tid.pid, pid_tid.tid);
+        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
     } else {
         log_error(kernel_log, "Rompimos algo con syscall_thread_exit");
+        abort();
     }
 }
 
 void* syscall_thread_cancel(t_buffer* buffer, t_pid_tid pid_tid){
+    inst_cpu codigo = THREAD_CANCEL;
+
     uint32_t hilo_a_finalizar = buffer_read_uint32(buffer);
 
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: THREAD_CANCEL - <TID: %d>", pid_tid.pid, pid_tid.tid, hilo_a_finalizar);
@@ -1068,18 +1076,27 @@ void* syscall_thread_cancel(t_buffer* buffer, t_pid_tid pid_tid){
     if (is_thread_exist(pid_tid.pid, hilo_a_finalizar))
     {
         poner_en_exit(pid_tid.pid, hilo_a_finalizar);
+        if (hilo_a_finalizar == pid_tid.tid)
+        {
+            enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+        } else {
+            enviar_aviso_syscall("HILO_CANCELADO", &codigo);
+        }
     } else {
+        enviar_aviso_syscall("HILO_NO_CANCELADO", &codigo);
         log_debug(kernel_log, "## El hilo no existe o ya finalizó, continuo ejecución");
     }
 }
 
 void* syscall_io(t_buffer* buffer, t_pid_tid pid_tid){
+    inst_cpu codigo = IO;
+
     uint32_t milisegundos_de_trabajo = buffer_read_uint32(buffer);
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: IO - <Milisegundos: %d>", pid_tid.pid, pid_tid.tid, milisegundos_de_trabajo);
 
     t_hilo_planificacion* hilo = desalojar_hilo();
     poner_en_block(hilo);
-
+    enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
     log_info(kernel_log, "## (<%d>:<%d>) - Bloqueado por: <IO>", pid_tid.pid, pid_tid.tid);
 
     hilo_args_io* args = malloc(sizeof(hilo_args_io));
@@ -1092,8 +1109,11 @@ void* syscall_io(t_buffer* buffer, t_pid_tid pid_tid){
 }
 
 void* syscall_mutex_create(t_buffer* buffer, t_pid_tid pid_tid){
+    inst_cpu codigo = MUTEX_CREATE;
+
     uint32_t length = 0;
     char* nombre_mutex = buffer_read_string(buffer, &length);
+    enviar_aviso_syscall("MUTEX_CREADO", &codigo);
 
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: MUTEX_CREATE - <Nombre: %s>", pid_tid.pid, pid_tid.tid, nombre_mutex);
 
@@ -1102,6 +1122,8 @@ void* syscall_mutex_create(t_buffer* buffer, t_pid_tid pid_tid){
 }
 
 void* syscall_mutex_lock(t_buffer* buffer, t_pid_tid pid_tid){
+    inst_cpu codigo = MUTEX_LOCK;
+
     uint32_t length = 0;
     char* nombre_mutex = buffer_read_string(buffer, &length);
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: MUTEX_LOCK - <Nombre: %s>", pid_tid.pid, pid_tid.tid, nombre_mutex);
@@ -1113,16 +1135,21 @@ void* syscall_mutex_lock(t_buffer* buffer, t_pid_tid pid_tid){
             block_thread_mutex(pid_tid.pid, pid_tid.tid, nombre_mutex);
             t_hilo_planificacion* hilo = desalojar_hilo();
             poner_en_block(hilo);
+            enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
             log_info(kernel_log, "## (<%d>:<%d>) - Bloqueado por: <MUTEX>", pid_tid.pid, pid_tid.tid);
         } else {
+            enviar_aviso_syscall("MUTEX_TOMADO", &codigo);
             lock_mutex_to_thread(pid_tid.pid, pid_tid.tid, nombre_mutex);
         }
     } else {
+        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
 }
 
 void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
+    inst_cpu codigo = MUTEX_UNLOCK;
+
     uint32_t length = 0;
     char* nombre_mutex = buffer_read_string(buffer, &length);
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: MUTEX_UNLOCK - <Nombre: %s>", pid_tid.pid, pid_tid.tid, nombre_mutex);
@@ -1134,16 +1161,21 @@ void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
             unlock_mutex_to_thread(pid_tid.pid, nombre_mutex);
             t_hilo_planificacion* hilo = remover_de_block(pid_tid.pid, pid_tid.tid);
             poner_en_ready(hilo);
+            enviar_aviso_syscall("HILO_DESBLOQUEADO", &codigo);
         } else {
             log_debug(kernel_log, "## El MUTEX no está asignado al hilo (%d,%d), continuo ejecución", pid_tid.pid, pid_tid.tid);
+            enviar_aviso_syscall("HILO_NO_DESBLOQUEADO", &codigo);
         }   
     } else {
+        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
     
 }
 
 void* syscall_dump_memory(t_pid_tid pid_tid){
+    inst_cpu codigo = DUMP_MEMORY;
+
     log_info(kernel_log,"(%d:%d) - Solicitó syscall: DUMP_MEMORY", pid_tid.pid, pid_tid.tid);
     
     t_paquete* paquete = crear_paquete(AVISO_DUMP_MEMORY);
@@ -1169,7 +1201,9 @@ void* syscall_dump_memory(t_pid_tid pid_tid){
     if(strcmp(respuesta_memoria, "OK") == 0){
         t_hilo_planificacion* hilo_a_desbloquear = remover_de_block(pid_tid.pid, pid_tid.tid);
         poner_en_ready(hilo_a_desbloquear);
+        enviar_aviso_syscall("DUMP_MEMORY", &codigo);
     }else{
+        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
 }
@@ -1227,7 +1261,9 @@ void iniciar_quantum(){
 
     if(!termino_proceso){
         t_paquete* paquete = crear_paquete(INTERRUPCION_QUANTUM);
-        enviar_paquete(paquete, fd_conexion_interrupt);
+        pthread_mutex_lock(&mutex_interrupt);
+            enviar_paquete(paquete, fd_conexion_interrupt);
+        pthread_mutex_unlock(&mutex_interrupt);
         eliminar_paquete(paquete);
     }
 }

@@ -34,6 +34,7 @@
     pthread_mutex_t mutex_colas_multinivel_existentes;
     pthread_mutex_t mutex_siguiente_id;
     pthread_mutex_t mutex_io;
+    pthread_mutex_t mutex_interrupt;
 
     sem_t contador_procesos_en_new;
     sem_t aviso_exit_proceso;
@@ -57,6 +58,7 @@
     char* puerto_cpu_interrupt;
 
     bool termino_proceso = false;
+    bool hilo_desalojado = false;
 
     t_list* procesos_creados;
     t_list* cola_ready;
@@ -217,9 +219,9 @@
 
     char* avisar_creacion_hilo_memoria(int* pid, int* tid, char* path, int* prioridad, t_log* kernel_log);
 
-    char* avisar_fin_proceso_memoria(uint32_t pid);
+    char* avisar_fin_proceso_memoria(uint32_t* pid);
 
-    char* avisar_fin_hilo_memoria(uint32_t pid, uint32_t tid);
+    char* avisar_fin_hilo_memoria(uint32_t* pid, uint32_t* tid);
 
     /*------------------------- FUNCIONES KERNEL - CPU --------------------------*/
 

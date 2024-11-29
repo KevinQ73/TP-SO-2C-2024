@@ -59,7 +59,7 @@
 
     void solicitar_contexto_ejecucion(t_contexto* registros_cpu, t_pid_tid pid_tid, int fd_memoria, t_log* log_cpu);
 
-    void recibir_aviso_syscall(int fd_conexion_kernel, t_log* log);
+    bool recibir_aviso_syscall(int fd_conexion_kernel, t_log* log);
 
     void enviar_direccion_fisica(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recibido, int socket_servidor, t_log* log);
 

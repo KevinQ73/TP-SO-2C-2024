@@ -65,6 +65,7 @@ void atender_puerto_dispatch(){
         case EJECUTAR_HILO:
             pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
             log_info(cpu_log, "## PID: <%d> - TID: <%d> Recibidos para empezar la ejecución", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            interrupt_is_called = false;
             ejecutar_hilo(pid_tid_recibido);
             break;
         
@@ -99,7 +100,8 @@ void atender_puerto_interrupt(){
             break;
 
         case AVISO_EXITO_SYSCALL:
-            recibir_aviso_syscall(fd_conexion_interrupt, cpu_log);
+            bool status_kernel = recibir_aviso_syscall(fd_conexion_interrupt, cpu_log);
+            interrupt_is_called = status_kernel;
             sem_post(&aviso_syscall);
             break;
 
@@ -156,7 +158,7 @@ void ejecutar_hilo(t_pid_tid pid_tid_recibido){
             free(instruccion);
         }
 
-    } while (!interrupt_is_called || !segmentation_fault);
+    } while (!interrupt_is_called && !segmentation_fault);
 }
 
 void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instruccion_parseada){
@@ -319,7 +321,10 @@ void execute_sub(t_contexto* registro_cpu, char* registro_destino, char* registr
 void execute_jnz(t_contexto* registro_cpu, char* registro, char* instruccion){
     int valor_int = get_register(registro_cpu, registro);
     if (valor_int != 0){
-        program_counter_jump(registro_cpu, instruccion, cpu_log);
+        int valor_instruccion = atoi(instruccion);
+        program_counter_jump(registro_cpu, valor_instruccion, cpu_log);
+    } else {
+        program_counter_update(registro_cpu, cpu_log);
     }
 }
 

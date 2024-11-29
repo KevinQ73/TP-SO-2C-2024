@@ -369,11 +369,12 @@ void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid pid_tid_recibi
     }
 }
 
-void recibir_aviso_syscall(int fd_conexion_kernel, t_log* log){
+bool recibir_aviso_syscall(int fd_conexion_kernel, t_log* log){
     t_buffer* buffer;
 	uint32_t length = 0;
     inst_cpu codigo_instruccion = 0;
 	char* mensaje_syscall;
+    bool interrupt_status;
 
 	buffer = buffer_recieve(fd_conexion_kernel);
 
@@ -382,15 +383,18 @@ void recibir_aviso_syscall(int fd_conexion_kernel, t_log* log){
 
     char* string_codigo_instruccion = obtener_string_codigo_instruccion(codigo_instruccion);
 
-    if (strcmp(string_codigo_instruccion, "ERROR_CODE") == 0)
+    if (strcmp(mensaje_syscall, "DESALOJO_EN_KERNEL") == 0)
     {
-        log_error(log, "## La Syscall devolvió el mensaje de estado de ejecución en KERNEL: %s", mensaje_syscall);
+        log_warning(log, "## La Syscall %s devolvió el mensaje de estado de ejecución en KERNEL: %s", string_codigo_instruccion, mensaje_syscall);
+        interrupt_status = true;
     } else {
         log_info(log, "## La Syscall %s devolvió el mensaje de estado de ejecución en KERNEL: %s", string_codigo_instruccion, mensaje_syscall);
+        interrupt_status = false;
     }
-
     free(mensaje_syscall);
 	buffer_destroy(buffer);
+
+    return interrupt_status;
 }
 
 void escribir_valor_en_memoria(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recibido, uint32_t valor_registro, int socket_servidor, t_log* log){
