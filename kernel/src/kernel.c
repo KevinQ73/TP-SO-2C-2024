@@ -275,7 +275,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
         hilo = thread_find_by_priority_schedule(lista_prioridades);
         pthread_mutex_unlock(&mutex_cola_ready);
 
-    } else if (strcmp(planificacion, "CMP") == 0)
+    } else if (strcmp(planificacion, "CMN") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
         hilo = thread_find_by_multilevel_queues_schedule(lista_colas_multinivel);
@@ -293,7 +293,7 @@ void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso){
     } else if(strcmp(kernel_registro.algoritmo_planificacion, "PRIORIDADES") == 0){
         list_add(lista_prioridades, hilo_del_proceso);
 
-    }else if(strcmp(kernel_registro.algoritmo_planificacion, "CMP") == 0){
+    }else if(strcmp(kernel_registro.algoritmo_planificacion, "CMN") == 0){
         log_error(kernel_log, "VOY A PLANIFICAR");
         queue_push_by_priority(hilo_del_proceso);
     }else{
@@ -319,7 +319,7 @@ void agregar_proceso_activo(t_pcb* pcb){
 t_hilo_planificacion* remover_de_ready(uint32_t pid, uint32_t tid, uint32_t prioridad){
     t_hilo_planificacion* hilo_a_eliminar;
     
-    if (strcmp(kernel_registro.algoritmo_planificacion, "CMP") == 0){
+    if (strcmp(kernel_registro.algoritmo_planificacion, "CMN") == 0){
         pthread_mutex_lock(&mutex_cola_ready);
             t_cola_prioridades* cola = queue_get_by_priority(lista_colas_multinivel, prioridad);
             hilo_a_eliminar = thread_remove_by_tid(cola->cola, pid, tid);
@@ -759,7 +759,7 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
         eliminar_paquete(paquete);
     pthread_mutex_unlock(&mutex_hilo_exec);
 
-    if(strcmp(kernel_registro.algoritmo_planificacion, "CMP") == 0){
+    if(strcmp(kernel_registro.algoritmo_planificacion, "CMN") == 0){
         pthread_create(&hilo_quantum, NULL, (void*) iniciar_quantum, NULL);
         pthread_detach(hilo_quantum);
     }
@@ -778,7 +778,7 @@ t_hilo_planificacion* desalojar_hilo(){
         }
             t_hilo_planificacion* hilo = list_remove(lista_hilo_en_ejecucion, 0);
             hilo_desalojado = true;
-            if ((strcmp(kernel_registro.algoritmo_planificacion, "CMP") == 0) && !hilo_desalojado_por_quantum)
+            if ((strcmp(kernel_registro.algoritmo_planificacion, "CMN") == 0) && !hilo_desalojado_por_quantum)
             {
                 pthread_cancel(hilo_quantum);
             }
