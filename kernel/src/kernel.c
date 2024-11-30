@@ -294,6 +294,7 @@ void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso){
         list_add(lista_prioridades, hilo_del_proceso);
 
     }else if(strcmp(kernel_registro.algoritmo_planificacion, "CMP") == 0){
+        log_error(kernel_log, "VOY A PLANIFICAR");
         queue_push_by_priority(hilo_del_proceso);
     }else{
         log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
@@ -406,14 +407,10 @@ t_hilo_planificacion* thread_find_by_maximum_priority(t_list* lista_prioridades)
 
 t_hilo_planificacion* thread_find_by_priority_schedule(t_list* lista_prioridades){
     t_hilo_planificacion* hilo = thread_find_by_maximum_priority(lista_prioridades);
-    bool removed = list_remove_element(lista_prioridades, hilo);
-    if (removed)
-    {
-        log_info(kernel_log, "## [PRIORIDADES] Se quitó el hilo (%d:%d) de la COLA READY CON PRIORIDAD %d", hilo->pid_padre, hilo->tid_asociado, hilo->prioridad);
-    } else {
-        log_debug(kernel_log, "## [PRIORIDADES] ERROR EN thread_find_by_priority_schedule");
-        abort();
-    }
+    t_hilo_planificacion* hilo_hallado = thread_remove_by_tid(lista_prioridades, hilo->pid_padre, hilo->tid_asociado);
+    
+    log_info(kernel_log, "## [PRIORIDADES] Se quitó el hilo (%d:%d) de la COLA READY CON PRIORIDAD %d", hilo_hallado->pid_padre, hilo_hallado->tid_asociado, hilo_hallado->prioridad);
+    return hilo_hallado;
 }
 
 t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_colas_multinivel){
@@ -767,7 +764,7 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
         pthread_detach(hilo_quantum);
     }
 
-    while (!termino_proceso && !hilo_desalojado)
+    while (!hilo_desalojado)
     {
         operacion_a_atender();
     }
@@ -775,8 +772,16 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
 
 t_hilo_planificacion* desalojar_hilo(){
     pthread_mutex_lock(&mutex_hilo_exec);
-        t_hilo_planificacion* hilo = list_remove(lista_hilo_en_ejecucion, 0);
-        hilo_desalojado = true;
+        if (list_is_empty(lista_hilo_en_ejecucion))
+        {
+            ejecutar_hilo(obtener_hilo_segun_algoritmo(kernel_registro.algoritmo_planificacion));
+        }
+            t_hilo_planificacion* hilo = list_remove(lista_hilo_en_ejecucion, 0);
+            hilo_desalojado = true;
+            if ((strcmp(kernel_registro.algoritmo_planificacion, "CMP") == 0) && !hilo_desalojado_por_quantum)
+            {
+                pthread_cancel(hilo_quantum);
+            }
     pthread_mutex_unlock(&mutex_hilo_exec);
 
     return hilo;
@@ -966,7 +971,6 @@ void* operacion_a_atender(){
         break;
     
     case FIN_INSTRUCCIONES:
-        termino_proceso = true;
         break;
 
     default:
@@ -1259,12 +1263,25 @@ void signal_handler(int sig) {
 void iniciar_quantum(){
     usleep(kernel_registro.quantum * 1000); 
 
-    if(!termino_proceso){
+    if(!hilo_desalojado){
+        char* mensaje = "FIN_QUANTUM";
+        int length = strlen(mensaje) + 1;
+        t_buffer* buffer = buffer_create(
+            length
+        );
         t_paquete* paquete = crear_paquete(INTERRUPCION_QUANTUM);
+
+        buffer_add_string(buffer, length, mensaje, kernel_log);
+        paquete->buffer = buffer;
+
         pthread_mutex_lock(&mutex_interrupt);
             enviar_paquete(paquete, fd_conexion_interrupt);
         pthread_mutex_unlock(&mutex_interrupt);
         eliminar_paquete(paquete);
+
+        hilo_desalojado_por_quantum = true;
+        t_hilo_planificacion* hilo_desalojado = desalojar_hilo();
+        poner_en_ready(hilo_desalojado);
     }
 }
 

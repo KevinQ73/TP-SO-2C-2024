@@ -68,6 +68,7 @@ void atender_puerto_dispatch(){
             pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
             log_info(cpu_log, "## PID: <%d> - TID: <%d> Recibidos para empezar la ejecución", pid_tid_recibido.pid, pid_tid_recibido.tid);
             interrupt_is_called = false;
+            quantum_is_called = false;
             ejecutar_hilo(pid_tid_recibido);
             break;
         
@@ -90,9 +91,18 @@ void atender_puerto_interrupt(){
         switch (op)
         {
         case INTERRUPCION_QUANTUM:
-            if (check_tid_interrupt(fd_conexion_interrupt)){
-                interrupt_results(&(pid_tid_recibido.tid), "INTERRUPCIÓN POR QUANTUM");
+            int length = 0; 
+
+            t_buffer* buffer = buffer_recieve(fd_conexion_interrupt);
+            char* mensaje = buffer_read_string(buffer, &length);
+
+            if (strcmp(mensaje, "FIN_QUANTUM") == 0)
+            {
+                log_warning(cpu_log, "## DESALOJO POR QUANTUM");
+                quantum_is_called = true;
             }
+            free(mensaje);
+	        buffer_destroy(buffer);
             break;
         
         case INTERRUPCION_USUARIO:
@@ -160,7 +170,7 @@ void ejecutar_hilo(t_pid_tid pid_tid_recibido){
             free(instruccion);
         }
 
-    } while (!interrupt_is_called && !segmentation_fault);
+    } while (!interrupt_is_called && !segmentation_fault && !quantum_is_called);
 }
 
 void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instruccion_parseada){
@@ -417,10 +427,10 @@ void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad
     buffer_add_uint32(buffer, &valor_prioridad, cpu_log);
     buffer_add_string(buffer, length, path, cpu_log);
 
+    program_counter_update(registro_cpu, cpu_log);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
     enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CREATE);
 
-    program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
 }
 
