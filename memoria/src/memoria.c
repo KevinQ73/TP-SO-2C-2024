@@ -212,6 +212,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
     case FINALIZAR_HILO:
         pid = buffer_read_uint32(buffer);
         tid = buffer_read_uint32(buffer);
+        finalizar_hilo(pid,tid);
     default:
         log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
         break;
@@ -250,18 +251,28 @@ void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path){
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
 }
 
-void* finalizar_proceso(){
-    enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
+void finalizar_proceso(uint32_t pid){
+    char* key = string_itoa(pid);
+    t_contexto_proceso* contexto_borrar = dictionary_get(contexto_ejecucion, key);
+    if(dictionary_remove(contexto_ejecucion, key)){
+        enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
+    }else{
+        enviar_mensaje("ERROR", fd_conexion_kernel, memoria_log);
+    }
+
     return NULL;
 }
 
-void* finalizar_hilo(){
-    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-    return NULL;
-}
-
-void* memory_dump(){
-    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+void finalizar_hilo(uint32_t pid,uint32_t tid){
+    char* key = string_itoa(pid);
+    pthread_mutex_lock(&contexto_ejecucion_procesos);
+    t_contexto_proceso* contexto_proceso_borrar = dictionary_get(contexto_ejecucion, key);
+    t_contexto_hilo* contexto_hilo = list_find(contexto_proceso_borrar->lista_hilos, tid);
+    if(list_remove(contexto_proceso_borrar->lista_hilos, tid)){
+        enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+    }else{
+        enviar_mensaje("ERROR", fd_conexion_kernel, memoria_log);
+    }
     return NULL;
 }
 

@@ -57,11 +57,9 @@
 
     void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path);
 
-    void* finalizar_proceso();
+    void finalizar_proceso(uint32_t pid);
 
-    void* finalizar_hilo();
-
-    void* memory_dump();
+    void finalizar_hilo(uint32_t pid,uint32_t tid);
 
     /*----------------------------- FUNCIONES DE CPU ----------------------------*/
 
