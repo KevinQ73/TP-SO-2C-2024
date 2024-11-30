@@ -2,9 +2,11 @@
 
 int main(int argc, char* argv[]) {
 
-    filesystem_log = iniciar_logger("./files/filesystem.log", "FILESYSTEM", 1, LOG_LEVEL_DEBUG);
-
-    filesystem_config = iniciar_config(argv[1]);
+    //filesystem_log = iniciar_logger("./files/filesystem.log", "FILESYSTEM", 1, LOG_LEVEL_DEBUG);
+	
+	filesystem_log = iniciar_logger("./files/filesystem_obligatorio.log", "FILESYSTEM", 1, LOG_LEVEL_INFO);
+    
+	filesystem_config = iniciar_config(argv[1]);
 
     filesystem_registro = levantar_datos(filesystem_config);
 
@@ -16,9 +18,6 @@ int main(int argc, char* argv[]) {
     log_debug(filesystem_log,"SOCKET LISTEN LISTO PARA RECIBIR CLIENTES");
 
     atender_memoria();
-	
-    //log_debug(filesystem_log, "Esperando MEMORIA...");
-    //fd_conexion_memoria = esperar_cliente(filesystem_log, "MEMORIA", fd_escucha_memoria);
 
     log_debug(filesystem_log, "TERMINANDO MEMORIA");
 }
