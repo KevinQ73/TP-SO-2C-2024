@@ -169,6 +169,8 @@
 
     bool exist_thread_blocked_by_tid(uint32_t pid, uint32_t tid_bloqueado);
 
+    t_thread_state* get_thread_blocked_by_tid(uint32_t pid, uint32_t tid_bloqueante);
+
     /*--------------------------- FUNCIONES DE MUTEX ----------------------------*/
 
     t_mutex* find_mutex_by_name(t_list* lista_de_mutex, char* name);

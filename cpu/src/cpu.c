@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    //cpu_log = iniciar_logger("./files/cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
+    cpu_log = iniciar_logger("./files/cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
     
-    cpu_log = iniciar_logger("./files/cpu_obligatorio.log", "CPU", 1, LOG_LEVEL_INFO);
+    //cpu_log = iniciar_logger("./files/cpu_obligatorio.log", "CPU", 1, LOG_LEVEL_INFO);
 
     cpu_config = iniciar_config("./files/cpu.config");
 
@@ -343,8 +343,8 @@ void execute_dump_memory(t_contexto* registro_cpu){
     buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, DUMP_MEMORY);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, DUMP_MEMORY);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -361,8 +361,8 @@ void execute_io(t_contexto* registro_cpu, char* tiempo){
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
     buffer_add_uint32(buffer, &valor_tiempo, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, IO);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, IO);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -383,8 +383,8 @@ void execute_process_create(t_contexto* registro_cpu, char* path, char* size_pro
     buffer_add_uint32(buffer, &valor_prioridad, cpu_log);
     buffer_add_string(buffer, length, path, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_CREATE);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_CREATE);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -398,10 +398,9 @@ void execute_process_exit(t_contexto* registro_cpu){
     buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_EXIT);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_EXIT);
 
-    program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
 }
 
@@ -418,8 +417,8 @@ void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad
     buffer_add_uint32(buffer, &valor_prioridad, cpu_log);
     buffer_add_string(buffer, length, path, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CREATE);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CREATE);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -436,8 +435,8 @@ void execute_thread_join(t_contexto* registro_cpu, char* tid_join){
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
     buffer_add_uint32(buffer, &valor_tid_join, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_JOIN);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_JOIN);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -454,8 +453,8 @@ void execute_thread_cancel(t_contexto* registro_cpu, char* tid_cancel){
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
     buffer_add_uint32(buffer, &valor_tid_cancel, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CANCEL);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CANCEL);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -472,8 +471,8 @@ void execute_mutex_create(t_contexto* registro_cpu, char* recurso){
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
     buffer_add_string(buffer, length, recurso, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_CREATE);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_CREATE);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -490,8 +489,8 @@ void execute_mutex_lock(t_contexto* registro_cpu, char* recurso){
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
     buffer_add_string(buffer, length, recurso, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_LOCK);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_LOCK);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -508,8 +507,8 @@ void execute_mutex_unlock(t_contexto* registro_cpu, char* recurso){
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
     buffer_add_string(buffer, length, recurso, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_UNLOCK);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_UNLOCK);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
@@ -523,9 +522,8 @@ void execute_thread_exit(t_contexto* registro_cpu){
     buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
     buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
 
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_EXIT);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_EXIT);
 
-    program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
 }

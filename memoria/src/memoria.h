@@ -39,8 +39,6 @@
 
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 
-    void enviar_solicitud_fs();
-
     void iniciar_memoria();
 
     void iniciar_semaforos();
@@ -57,9 +55,9 @@
 
     void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path);
 
-    void* finalizar_proceso();
+    void* finalizar_proceso(uint32_t pid);
 
-    void* finalizar_hilo();
+    void* finalizar_hilo(uint32_t pid, uint32_t tid);
 
     void* memory_dump();
 
@@ -75,19 +73,35 @@
 
     t_contexto* buscar_contexto(uint32_t pid, uint32_t tid);
 
+    t_contexto_proceso* buscar_contexto_proceso(uint32_t pid);
+
+    t_contexto_hilo* buscar_contexto_hilo(t_contexto_proceso* contexto_proceso, uint32_t tid);
+
     t_contexto* recibir_contexto(t_buffer* buffer);
 
-    uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema);
+    //t_contexto* remover_contexto_hilo(uint32_t pid, uint32_t tid);
+
+    int hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema);
 
     uint32_t obtener_espacio_desocupado();
+
+    t_contexto_hilo* thread_get_by_tid(t_list* lista_hilos, int tid);
+
+    t_contexto_hilo* thread_remove_by_tid(t_list* lista_hilos, int tid);
+
+    void process_remove_and_destroy_by_pid(int tid);
+
+    t_contexto_proceso* process_remove_by_pid(int pid);
+
+    void thread_context_destroy(t_contexto_hilo* contexto_hilo);
+
+    void process_context_destroy(t_contexto_proceso* contexto_proceso);
 
     /*-------------------------------- MISCELANEO -------------------------------*/
 
     void enviar_contexto_solicitado(t_contexto* contexto);
 
     void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura);
-
-    t_contexto_hilo* thread_get_by_tid(t_list* lista_hilos, int tid);
 
     char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter);
 
@@ -97,19 +111,35 @@
 
     void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, uint32_t tid);
 
+    int get_size_partition(uint32_t base);
+
     /*--------------------------- PARTICIONES DINAMICAS --------------------------*/
+
+    bool particion_dinamica(uint32_t pid, uint32_t size);
 
     t_hueco* crear_hueco(uint32_t inicio, uint32_t size);
 
     void agregar_hueco(t_hueco* hueco);
 
-    t_hueco* first_fit();
+    t_hueco* first_fit(uint32_t size);
 
     t_hueco* best_fit(uint32_t size);
 
-    t_hueco* worst_fit();
+    t_hueco* worst_fit(uint32_t size);
 
     t_hueco* obtener_hueco(uint32_t size);
+
+    void liberar_espacio_en_memoria(uint32_t pid);
+
+    void liberar_hueco_bitmap_fijas(uint32_t base);
+
+    void liberar_hueco_dinamico(t_contexto_proceso* proceso);
+
+    void consolidar_huecos(uint32_t inicio, uint32_t size);
+
+    bool byte_en_hueco(uint32_t byte);
+
+    t_hueco* remover_hueco_que_contiene_byte(uint32_t byte);
 
     //void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
 
