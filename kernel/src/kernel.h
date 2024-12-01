@@ -59,6 +59,7 @@
 
     bool termino_proceso = false;
     bool hilo_desalojado = false;
+    bool hilo_desalojado_por_quantum = false;
 
     t_list* procesos_creados;
     t_list* cola_ready;
@@ -168,6 +169,8 @@
     void remove_thread_state_tid_blocked(uint32_t pid, uint32_t tid_bloqueado);
 
     bool exist_thread_blocked_by_tid(uint32_t pid, uint32_t tid_bloqueado);
+
+    t_thread_state* get_thread_blocked_by_tid(uint32_t pid, uint32_t tid_bloqueante);
 
     /*--------------------------- FUNCIONES DE MUTEX ----------------------------*/
 

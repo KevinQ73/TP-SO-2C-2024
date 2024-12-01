@@ -4,7 +4,11 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
+    // memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
+
+    memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
+
+    //memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
 
     memoria_config = iniciar_config(argv[1]);
 
@@ -21,8 +25,6 @@ int main(int argc, char* argv[]) {
 
     conexion_filesystem = crear_conexion(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
     log_debug(memoria_log, "ME CONECTÉ A FILESYSTEM");
-
-    //enviar_solicitud_fs();
 
     // --------------------- Conexiones de clientes con el servidor ----------------------
     
@@ -45,9 +47,8 @@ int main(int argc, char* argv[]) {
 }
 
 /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
-
+/*
 void enviar_solicitud_fs(){
-
     for (int i = 0; i < 2; i++)
     {
         t_paquete* paquete = crear_paquete(DUMP_MEMORY);
@@ -70,6 +71,33 @@ void enviar_solicitud_fs(){
 
         eliminar_paquete(paquete);
     }
+}
+*/
+
+void iniciar_memoria(){
+    log_info(memoria_log, "MEMORIA INICIALIZADA\n");
+    memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
+
+    contexto_ejecucion = dictionary_create();
+    lista_particiones = memoria_registro.particiones;
+
+    int size_lista_particiones = string_array_size(lista_particiones);
+    char* bitmap_espacio_reservado[size_lista_particiones];
+
+    for (int i = 0; i < size_lista_particiones; i++){
+        bitmap_espacio_reservado[i] = 0;
+    }
+    
+    bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
+
+    // Para particiones dinamicas
+    lista_procesos_activos = dictionary_create();
+    lista_huecos_disponibles = list_create();
+
+    t_hueco* hueco_inicial = crear_hueco(0, memoria_registro.tam_memoria);
+    agregar_hueco(hueco_inicial);
+
+    iniciar_semaforos();
 }
 
 void iniciar_semaforos(){
@@ -137,12 +165,11 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         if (crear_proceso(pid, size_process))
         {
             enviar_mensaje("OK", fd_memoria, memoria_log);
-            log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Creado> - PID: <%d> - Tamaño: <%d>", pid, size_process);
+            log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Creado> - PID: <%d> - Tamaño: <%d>. Cerrando FD del socket.\n", pid, size_process);
         } else {
             enviar_mensaje("ERROR_CREAR_PROCESO", fd_memoria, memoria_log);
             log_error(memoria_log, "## [MEMORIA:KERNEL] Fallo en la creación del proceso");
         }
-        log_info(memoria_log, "## Solicitud PROCESS_CREATE de Kernel finalizada. Cerrando FD del socket.\n");
         close(fd_memoria);
         break;
 
@@ -155,10 +182,9 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         crear_hilo(pid, tid, prioridad, path);
 
         enviar_mensaje("OK", fd_memoria, memoria_log);
-        log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s", pid, tid, prioridad, path);
+        log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s. Cerrando FD del socket.\n", pid, tid, prioridad, path);
 
         free(path);
-        log_info(memoria_log, "## Solicitud THREAD_CREATE de Kernel finalizada. Cerrando FD del socket.\n");
         close(fd_memoria);
         break;
 
@@ -166,7 +192,19 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         pid = buffer_read_uint32(buffer);
 
         finalizar_proceso(pid);
-        log_info(memoria_log, "## Solicitud PROCESS_EXIT de Kernel finalizada. Cerrando FD del socket.\n");
+        enviar_mensaje("FINALIZACION_ACEPTADA", fd_memoria, memoria_log);
+        
+        close(fd_memoria);    
+        break;
+
+    case FINALIZAR_HILO:
+        pid = buffer_read_uint32(buffer);
+        tid = buffer_read_uint32(buffer);
+
+        finalizar_hilo(pid, tid);
+        enviar_mensaje("OK", fd_memoria, memoria_log);
+        
+        close(fd_memoria);
         break;
 
     case DUMP_MEMORY:
@@ -192,13 +230,13 @@ void* atender_solicitudes_kernel(void* fd_conexion){
 
         buffer_add_string(buffer, sizeof(nombre_archivo), nombre_archivo, memoria_log);
         buffer_add_uint32(buffer, size_process, memoria_log);
-         buffer_add_string(buffer, sizeof(contenido_proceso), contenido_proceso, memoria_log);
+        buffer_add_string(buffer, sizeof(contenido_proceso), contenido_proceso, memoria_log);
 
         archivo_fs->buffer = buffer;
 
         enviar_paquete(archivo_fs,memoria_registro.puerto_filesystem);
 
-        log_info(memoria_log, "## Memory Dump solicitado - (PID:TID) - (<%d>:<%d>)",pid,tid);
+        log_info(memoria_log, "## [MEMORIA:KERNEL] Memory Dump solicitado - (PID:TID) - (<%d>:<%d>)",pid,tid);
 
         char* response_fs = recibir_mensaje(fd_conexion, memoria_log);
         if(response_fs = "OK_FS"){
@@ -207,12 +245,9 @@ void* atender_solicitudes_kernel(void* fd_conexion){
 			enviar_mensaje("ERROR", fd_conexion_kernel, memoria_log);
 		}
         free(nombre_archivo);
+        close(fd_memoria);
         break;
 
-    case FINALIZAR_HILO:
-        pid = buffer_read_uint32(buffer);
-        tid = buffer_read_uint32(buffer);
-        finalizar_hilo(pid,tid);
     default:
         log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
         break;
@@ -222,9 +257,9 @@ void* atender_solicitudes_kernel(void* fd_conexion){
 bool crear_proceso(uint32_t pid, uint32_t size){
     bool memoria_asignada;
     
-    uint32_t base_asignada = hay_particion_disponible(pid, size, memoria_registro.esquema);
+    int base_asignada = hay_particion_disponible(pid, size, memoria_registro.esquema);
     
-    if (base_asignada){
+    if (base_asignada != -1){
         char* key = string_itoa(pid);
         t_contexto_proceso* contexto_proceso = crear_contexto_proceso(pid, base_asignada, size);
         pthread_mutex_lock(&contexto_ejecucion_procesos);
@@ -251,28 +286,19 @@ void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path){
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
 }
 
-void finalizar_proceso(uint32_t pid){
-    char* key = string_itoa(pid);
-    t_contexto_proceso* contexto_borrar = dictionary_get(contexto_ejecucion, key);
-    if(dictionary_remove(contexto_ejecucion, key)){
-        enviar_mensaje("FINALIZACION_ACEPTADA", fd_conexion_kernel, memoria_log);
-    }else{
-        enviar_mensaje("ERROR", fd_conexion_kernel, memoria_log);
-    }
+void* finalizar_proceso(uint32_t pid){
 
-    return NULL;
+    liberar_espacio_en_memoria(pid);
+    process_remove_and_destroy_by_pid(pid);
 }
 
-void finalizar_hilo(uint32_t pid,uint32_t tid){
-    char* key = string_itoa(pid);
-    pthread_mutex_lock(&contexto_ejecucion_procesos);
-    t_contexto_proceso* contexto_proceso_borrar = dictionary_get(contexto_ejecucion, key);
-    t_contexto_hilo* contexto_hilo = list_find(contexto_proceso_borrar->lista_hilos, tid);
-    if(list_remove(contexto_proceso_borrar->lista_hilos, tid)){
-        enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
-    }else{
-        enviar_mensaje("ERROR", fd_conexion_kernel, memoria_log);
-    }
+void* finalizar_hilo(uint32_t pid, uint32_t tid){
+    t_contexto_proceso* contexto_padre = buscar_contexto_proceso(pid);
+    t_contexto_hilo* hilo_a_finalizar = thread_remove_by_tid(contexto_padre->lista_hilos, tid);
+
+    thread_context_destroy(hilo_a_finalizar);
+
+    log_info(memoria_log, "## [MEMORIA:KERNEL] ## Hilo <Destruido> - (PID:TID) - (<%d>:<%d>). Cerrando FD del socket.\n", pid, tid);
     return NULL;
 }
 
@@ -438,6 +464,22 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
     return contexto_a_enviar;
 }
 
+t_contexto_proceso* buscar_contexto_proceso(uint32_t pid){
+    t_contexto_proceso* contexto_proceso;
+
+    char* key = string_itoa(pid);
+    contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    free(key);
+    return contexto_proceso;
+}
+
+t_contexto_hilo* buscar_contexto_hilo(t_contexto_proceso* contexto_proceso, uint32_t tid){
+    t_contexto_hilo* contexto_hilo;
+
+    contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
+    return contexto_hilo;
+}
+
 t_contexto* recibir_contexto(t_buffer* buffer){
     t_contexto* contexto = malloc(sizeof(t_contexto));
 
@@ -467,48 +509,58 @@ t_contexto* recibir_contexto(t_buffer* buffer){
     return contexto;
 }
 
-uint32_t hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
-    uint32_t valor_resultado;
-    int size_particion = atoi(lista_particiones[0]);
+/*t_contexto* remover_contexto_hilo(uint32_t pid, uint32_t tid){
+    t_contexto_proceso* contexto_proceso;
 
-    if (strcmp(esquema, "FIJAS") == 0)
-    {
-        if (obtener_espacio_desocupado() == OUT_OF_MEMORY)
-        {
-            valor_resultado = 0;
-        } if (size > size_particion){
-            valor_resultado = 0;
-        } else {
-            valor_resultado = obtener_espacio_desocupado();
-        }
-    } else {
-        particion_dinamica(pid, size);
-    }
-    return valor_resultado;
+    contexto_proceso = buscar_contexto_proceso(pid);
+
+}*/
+
+t_contexto_hilo* thread_get_by_tid(t_list* lista_hilos, int tid){
+    bool _list_contains(void* ptr) {
+	    t_contexto_hilo* hilo = (t_contexto_hilo*) ptr;
+	    return (tid == hilo->tid);
+	}
+	return list_find(lista_hilos, _list_contains);
 }
 
-void particion_dinamica(uint32_t pid, uint32_t size){
-    
+t_contexto_hilo* thread_remove_by_tid(t_list* lista_hilos, int tid){
+    pthread_mutex_lock(&contexto_ejecucion_procesos);
+    bool _list_contains(void* ptr) {
+	    t_contexto_hilo* hilo = (t_contexto_hilo*) ptr;
+	    return (tid == hilo->tid);
+	}
+    pthread_mutex_unlock(&contexto_ejecucion_procesos);
+	return list_remove_by_condition(lista_hilos, _list_contains);
 }
 
-uint32_t obtener_espacio_desocupado(){
-    int base_particion = -1;
+void process_remove_and_destroy_by_pid(int tid){
+    char* key = string_itoa(tid);
+    dictionary_remove_and_destroy(contexto_ejecucion, key, process_context_destroy);
 
-    uint32_t largo_bitmap = bitarray_get_max_bit(bitmap_particion_fija);
-    uint32_t i = 0;
-    while(i < largo_bitmap && (base_particion < 0)){
-        if(bitarray_test_bit(bitmap_particion_fija, i) == 0){
-            base_particion = i;
-            bitarray_set_bit(bitmap_particion_fija, i);
-        } else {
-            i++;
-        }
-    }
-    if (i == largo_bitmap){
-        return OUT_OF_MEMORY;
-    } else {
-        return base_particion;
-    }
+    free(key);
+}
+
+t_contexto_proceso* process_remove_by_pid(int pid){
+    char* key = string_itoa(pid);
+    t_contexto_proceso* contexto = dictionary_remove(contexto_ejecucion, key);
+
+    free(key);
+    return contexto;
+}
+
+void thread_context_destroy(t_contexto_hilo* contexto_hilo){
+    list_destroy_and_destroy_elements(contexto_hilo->lista_instrucciones, free);
+    free(contexto_hilo);
+
+    log_debug(memoria_log, "SE DESTRUYÓ EL CONTEXTO DEL HILO");
+}
+
+void process_context_destroy(t_contexto_proceso* contexto_proceso){
+    list_destroy_and_destroy_elements(contexto_proceso->lista_hilos, thread_context_destroy);
+    free(contexto_proceso);
+
+    log_debug(memoria_log, "SE DESTRUYÓ EL CONTEXTO DEL PROCESO");
 }
 
 /*-------------------------------- MISCELANEO -------------------------------*/
@@ -545,14 +597,6 @@ void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura){
     memcpy(datos_memoria, memoria + inicio_lectura, tamanio_lectura);
 
     return datos_memoria;
-}
-
-t_contexto_hilo* thread_get_by_tid(t_list* lista_hilos, int tid){
-    bool _list_contains(void* ptr) {
-	    t_contexto_hilo* hilo = (t_contexto_hilo*) ptr;
-	    return (tid == hilo->tid);
-	}
-	return list_find(lista_hilos, _list_contains);
 }
 
 char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
@@ -618,30 +662,99 @@ void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, 
 
 /*------------------------------------ WORKING ZONE ------------------------------------*/
 
-void iniciar_memoria(){
-    log_info(memoria_log, "MEMORIA INICIALIZADA\n");
-    memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
+int hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
+    uint32_t valor_resultado;
 
-    contexto_ejecucion = dictionary_create();
-    lista_particiones = memoria_registro.particiones;
-
-    int size_lista_particiones = string_array_size(lista_particiones);
-    char* bitmap_espacio_reservado[size_lista_particiones];
-
-    for (int i = 0; i < size_lista_particiones; i++){
-        bitmap_espacio_reservado[i] = 0;
+    uint32_t valor_espacio_desocupado = obtener_espacio_desocupado();
+    uint size_particion = atoi(lista_particiones[valor_espacio_desocupado]);
+    if (strcmp(esquema, "FIJAS") == 0)
+    {
+        if (valor_espacio_desocupado == OUT_OF_MEMORY)
+        {
+            valor_resultado = -1;
+        } if (size > size_particion){
+            valor_resultado = -1;
+        } else {
+            valor_resultado = valor_espacio_desocupado;
+        }
+    } else {
+        if (particion_dinamica(pid, size))
+        {
+            valor_resultado = pid;
+        } else {
+            valor_resultado = -1;
+        }
     }
+    return valor_resultado;
+}
+
+bool particion_dinamica(uint32_t pid, uint32_t size){
+    t_hueco* hueco = obtener_hueco(size);
+    bool asignacion_realizada;
+
+    if (hueco == NULL)
+    {
+        asignacion_realizada = false;
+    } else {
+        asignar_particion_dinamica(hueco, pid, size);
+        asignacion_realizada = true;
+    }
+    return asignacion_realizada;
+}
+
+void asignar_particion_dinamica(t_hueco* hueco, uint32_t pid, uint32_t size){
+    t_proceso* proceso = malloc(sizeof(t_proceso));
+
+    proceso->pid = pid;
+    proceso->base = pid + 1;
+    proceso->inicio = hueco->inicio;
+    proceso->size = size;
     
-    bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
+    agregar_proceso_activo(proceso);
 
-    // Para particiones dinamicas
-    lista_procesos_activos = dictionary_create();
-    lista_huecos_disponibles = list_create();
+    pthread_mutex_lock(&mutex_huecos_disponibles);
+        hueco->inicio = hueco->inicio + size;
+        hueco->size = hueco->inicio - size;
+    pthread_mutex_unlock(&mutex_huecos_disponibles);
 
-    t_hueco* hueco_inicial = crear_hueco(0, memoria_registro.tam_memoria);
-    agregar_hueco(hueco_inicial);
+}
 
-    iniciar_semaforos();
+void agregar_proceso_activo(t_proceso* proceso){
+    pthread_mutex_lock(&mutex_procesos_activos);
+        char* key = string_itoa(proceso->pid);
+        dictionary_put(lista_procesos_activos, key, proceso);
+    pthread_mutex_unlock(&mutex_procesos_activos);
+
+    free(key);
+}
+
+t_proceso* obtener_proceso_activo(uint32_t pid){
+    pthread_mutex_lock(&mutex_procesos_activos);
+        char* key = string_itoa(pid);
+        t_proceso* proceso = dictionary_remove(lista_procesos_activos, key);
+    pthread_mutex_unlock(&mutex_procesos_activos);
+
+    return proceso;
+}
+
+uint32_t obtener_espacio_desocupado(){
+    int base_particion = -1;
+
+    uint32_t largo_bitmap = bitarray_get_max_bit(bitmap_particion_fija);
+    uint32_t i = 0;
+    while(i < largo_bitmap && (base_particion < 0)){
+        if(bitarray_test_bit(bitmap_particion_fija, i) == 0){
+            base_particion = i;
+            bitarray_set_bit(bitmap_particion_fija, i);
+        } else {
+            i++;
+        }
+    }
+    if (i == largo_bitmap){
+        return OUT_OF_MEMORY;
+    } else {
+        return base_particion;
+    }
 }
 
 t_hueco* crear_hueco(uint32_t inicio, uint32_t size){
@@ -659,16 +772,14 @@ void agregar_hueco(t_hueco* hueco){
     pthread_mutex_unlock(&mutex_huecos_disponibles);
 }
 
-t_hueco* first_fit(){
+t_hueco* first_fit(uint32_t size){
     pthread_mutex_lock(&mutex_huecos_disponibles);
-        void* _min_init_byte(void* a, void* b) {
-	        t_hueco* hueco_a = (t_hueco*) a;
-	        t_hueco* hueco_b = (t_hueco*) b;
-	        return hueco_a->inicio <= hueco_b->inicio ? hueco_a : hueco_b;
+        bool _list_contains(void* ptr){
+            t_hueco* hueco = (t_hueco*) ptr;
+	        return (hueco->size >= size);
 	    }
-	    t_hueco* hueco_hallado = list_get_minimum(lista_huecos_disponibles, _min_init_byte);
+	    return list_find(lista_huecos_disponibles, _list_contains);
     pthread_mutex_unlock(&mutex_huecos_disponibles);
-    return hueco_hallado;
 }
 
 t_hueco* best_fit(uint32_t size){
@@ -695,11 +806,16 @@ t_hueco* best_fit(uint32_t size){
             }
 	    }
 	    t_hueco* hueco_hallado = list_get_minimum(lista_huecos_disponibles, _min_size_byte);
+
+        if (hueco_hallado->size < size)
+        {
+            hueco_hallado = NULL;
+        }
     pthread_mutex_unlock(&mutex_huecos_disponibles);
     return hueco_hallado;
 }
 
-t_hueco* worst_fit(){
+t_hueco* worst_fit(uint32_t size){
     pthread_mutex_lock(&mutex_huecos_disponibles);
         void* _max_size_byte(void* a, void* b) {
 	        t_hueco* hueco_a = (t_hueco*) a;
@@ -707,6 +823,11 @@ t_hueco* worst_fit(){
             return hueco_a->size >= hueco_b->size ? hueco_a : hueco_b;
 	    }
 	    t_hueco* hueco_hallado = list_get_maximum(lista_huecos_disponibles, _max_size_byte);
+
+        if (hueco_hallado->size < size)
+        {
+            hueco_hallado = NULL;
+        }
     pthread_mutex_unlock(&mutex_huecos_disponibles);
     return hueco_hallado;
 }
@@ -714,21 +835,88 @@ t_hueco* worst_fit(){
 t_hueco* obtener_hueco(uint32_t size){
     t_hueco* hueco;
 
-    if (strcmp(memoria_registro.esquema, "FIRST"))
+    if (strcmp(memoria_registro.algoritmo_busqueda, "FIRST") == 0)
     {
-        hueco = first_fit();
-    } else if (strcmp(memoria_registro.esquema, "BEST"))
+        hueco = first_fit(size);
+    } else if (strcmp(memoria_registro.algoritmo_busqueda, "BEST") == 0)
     {
         hueco = best_fit(size);
-    } else if (strcmp(memoria_registro.esquema, "WORST"))
+    } else if (strcmp(memoria_registro.algoritmo_busqueda, "WORST") == 0)
     {
-        hueco = worst_fit();
+        hueco = worst_fit(size);
     } else {
         log_error(memoria_log, "ERROR EN obtener_hueco");
         abort();
     }
     
     return hueco;
+}
+
+void liberar_espacio_en_memoria(uint32_t pid){
+    t_contexto_proceso* contexto_proceso = process_remove_by_pid(pid);
+    if (strcmp(memoria_registro.esquema, "FIJAS") == 0)
+    {
+        int size_particion = get_size_partition(contexto_proceso->base);
+        liberar_hueco_bitmap_fijas(contexto_proceso->base);
+        log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Destruido> - PID: <%d> -Tamaño: <%d>. Cerrando FD del socket.\n", pid, size_particion);
+    } else {
+        liberar_hueco_dinamico(contexto_proceso);
+    }
+}
+
+int get_size_partition(uint32_t base){
+    char* size = lista_particiones[base];
+
+    int size_int = atoi(size);
+
+    return size_int;
+}
+
+void liberar_hueco_bitmap_fijas(uint32_t base){
+    bitarray_clean_bit(bitmap_particion_fija, base);
+}
+
+void liberar_hueco_dinamico(t_contexto_proceso* proceso){
+    t_proceso* proceso_activo = obtener_proceso_activo(proceso->pid);
+
+    if (byte_en_hueco((proceso_activo->inicio - 1)) && byte_en_hueco((proceso_activo->inicio + proceso_activo->size + 1)))
+    {
+        consolidar_huecos(proceso_activo->inicio, proceso_activo->size);
+    } else {
+        t_hueco* hueco = crear_hueco(proceso_activo->inicio, proceso_activo->size);
+        agregar_hueco(hueco);
+    }
+
+    process_context_destroy(proceso);
+}
+
+void consolidar_huecos(uint32_t inicio, uint32_t size){
+    t_hueco* hueco_izquierda = remover_hueco_que_contiene_byte(inicio -1);
+    t_hueco* hueco_derecha = remover_hueco_que_contiene_byte(inicio + size + 1);
+
+    t_hueco* hueco_consolidado = crear_hueco(hueco_izquierda->inicio, (hueco_derecha->inicio + hueco_derecha->size));
+    agregar_hueco(hueco_consolidado);
+}
+
+bool byte_en_hueco(uint32_t byte){
+    bool _list_contains(void* ptr){
+        t_hueco* hueco = (t_hueco*) ptr;
+	    return (hueco->inicio < byte < (hueco->inicio + hueco->size));
+	}
+	return list_any_satisfy(lista_huecos_disponibles, _list_contains);
+}
+
+t_hueco* remover_hueco_que_contiene_byte(uint32_t byte){
+    bool _list_contains(void* ptr){
+        t_hueco* hueco = (t_hueco*) ptr;
+	    return (hueco->inicio < byte < (hueco->inicio + hueco->size));
+	}
+	return list_remove_by_condition(lista_huecos_disponibles, _list_contains);
+}
+
+void* memory_dump(){
+    enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+    return NULL;
 }
 
 /*------------------------------------ WORKING ZONE ------------------------------------*/

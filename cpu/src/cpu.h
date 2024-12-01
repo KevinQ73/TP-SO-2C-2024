@@ -26,6 +26,7 @@
     bool flag_disconect_interrupt = true;
     bool interrupt_is_called = false;
     bool segmentation_fault = false;
+    bool quantum_is_called = false;
     
     /*--------------------- Atender conexiones a la CPU ---------------------*/
 
