@@ -1,0 +1,8 @@
+# pack-refs with: peeled fully-peeled sorted 
+df6f833d07f986a0b0ece89ce9cd5ed1b8fa8e73 refs/remotes/origin/main
+f7aab5c65425e20d48dd5623a7ed0ef267bebbaa refs/tags/checkpoint-1
+^e9f510d0109eaec9960616b1d3bb3268cf25dc69
+01f5cec104ed268f429056e2803bc094b4581d47 refs/tags/checkpoint-2
+^f3cf7fe627ba1234ed203de827dcea7b22758c41
+3bb113354437fc76abfa962e06641caa499bcdf5 refs/tags/checkpoint-3
+^40de6aaa5002106ecdb9c23ff5e7e2478e4dd77c
