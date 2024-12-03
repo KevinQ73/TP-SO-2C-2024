@@ -1,0 +1,305 @@
+==00:00:00:00.000 24755== Memcheck, a memory error detector
+==00:00:00:00.000 24755== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==00:00:00:00.000 24755== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==00:00:00:00.000 24755== Command: ./bin/kernel PLANI_PROC 32 ./files/prueba_planificacion.config
+==00:00:00:00.000 24755== Parent PID: 3358
+==00:00:00:00.000 24755== 
+==00:00:01:23.471 24755== 
+==00:00:01:23.471 24755== HEAP SUMMARY:
+==00:00:01:23.471 24755==     in use at exit: 566 bytes in 52 blocks
+==00:00:01:23.471 24755==   total heap usage: 1,114 allocs, 1,062 frees, 44,517 bytes allocated
+==00:00:01:23.471 24755== 
+==00:00:01:23.483 24755== 2 bytes in 1 blocks are definitely lost in loss record 1 of 25
+==00:00:01:23.483 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.483 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.483 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.483 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.483 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.483 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.483 24755==    by 0x10CCB3: create_process_state (kernel.c:545)
+==00:00:01:23.483 24755==    by 0x10B2ED: iniciar_primer_proceso (kernel.c:87)
+==00:00:01:23.483 24755==    by 0x10B02F: main (kernel.c:32)
+==00:00:01:23.483 24755== 
+==00:00:01:23.483 24755== 2 bytes in 1 blocks are definitely lost in loss record 2 of 25
+==00:00:01:23.483 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.483 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.483 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.483 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.483 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.483 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.483 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.483 24755==    by 0x10CD57: create_thread_state (kernel.c:560)
+==00:00:01:23.483 24755==    by 0x10B3AD: iniciar_primer_proceso (kernel.c:95)
+==00:00:01:23.483 24755==    by 0x10B02F: main (kernel.c:32)
+==00:00:01:23.483 24755== 
+==00:00:01:23.483 24755== 2 bytes in 1 blocks are definitely lost in loss record 3 of 25
+==00:00:01:23.483 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.483 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.483 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.483 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.483 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.483 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.483 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.483 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.483 24755==    by 0x10CF4C: change_thread_state (kernel.c:593)
+==00:00:01:23.483 24755==    by 0x10BD5B: poner_en_ready (kernel.c:308)
+==00:00:01:23.483 24755==    by 0x10B3B9: iniciar_primer_proceso (kernel.c:96)
+==00:00:01:23.483 24755==    by 0x10B02F: main (kernel.c:32)
+==00:00:01:23.483 24755== 
+==00:00:01:23.483 24755== 2 bytes in 1 blocks are definitely lost in loss record 4 of 25
+==00:00:01:23.483 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.483 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.483 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.483 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.483 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.483 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.483 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.483 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.483 24755==    by 0x10CFCA: add_thread_state_tid_blocked (kernel.c:601)
+==00:00:01:23.483 24755==    by 0x10E771: syscall_thread_join (kernel.c:1079)
+==00:00:01:23.483 24755==    by 0x10E251: operacion_a_atender (kernel.c:966)
+==00:00:01:23.483 24755==    by 0x10DACC: ejecutar_hilo (kernel.c:787)
+==00:00:01:23.483 24755== 
+==00:00:01:23.483 24755== 2 bytes in 1 blocks are definitely lost in loss record 5 of 25
+==00:00:01:23.483 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.483 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.483 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.483 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10CF4C: change_thread_state (kernel.c:593)
+==00:00:01:23.484 24755==    by 0x10BE80: poner_en_block (kernel.c:327)
+==00:00:01:23.484 24755==    by 0x10E77D: syscall_thread_join (kernel.c:1080)
+==00:00:01:23.484 24755==    by 0x10E251: operacion_a_atender (kernel.c:966)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 2 bytes in 1 blocks are definitely lost in loss record 6 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10D238: get_thread_blocked_by_tid (kernel.c:627)
+==00:00:01:23.484 24755==    by 0x10C81F: liberar_hilos_bloqueados_por_tid (kernel.c:482)
+==00:00:01:23.484 24755==    by 0x10B954: poner_en_exit (kernel.c:217)
+==00:00:01:23.484 24755==    by 0x10E857: syscall_thread_exit (kernel.c:1094)
+==00:00:01:23.484 24755==    by 0x10E27A: operacion_a_atender (kernel.c:974)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 2 bytes in 1 blocks are definitely lost in loss record 7 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10CF4C: change_thread_state (kernel.c:593)
+==00:00:01:23.484 24755==    by 0x10C83D: liberar_hilos_bloqueados_por_tid (kernel.c:484)
+==00:00:01:23.484 24755==    by 0x10B954: poner_en_exit (kernel.c:217)
+==00:00:01:23.484 24755==    by 0x10E857: syscall_thread_exit (kernel.c:1094)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 2 bytes in 1 blocks are definitely lost in loss record 8 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10D056: remove_thread_state_tid_blocked (kernel.c:610)
+==00:00:01:23.484 24755==    by 0x10C852: liberar_hilos_bloqueados_por_tid (kernel.c:485)
+==00:00:01:23.484 24755==    by 0x10B954: poner_en_exit (kernel.c:217)
+==00:00:01:23.484 24755==    by 0x10E857: syscall_thread_exit (kernel.c:1094)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 2 bytes in 1 blocks are definitely lost in loss record 9 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10CF4C: change_thread_state (kernel.c:593)
+==00:00:01:23.484 24755==    by 0x10BD5B: poner_en_ready (kernel.c:308)
+==00:00:01:23.484 24755==    by 0x10C877: liberar_hilos_bloqueados_por_tid (kernel.c:487)
+==00:00:01:23.484 24755==    by 0x10B954: poner_en_exit (kernel.c:217)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 2 bytes in 1 blocks are definitely lost in loss record 10 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10B86E: poner_en_exit (kernel.c:191)
+==00:00:01:23.484 24755==    by 0x10BA4A: finalizar_hilos_de_proceso (kernel.c:238)
+==00:00:01:23.484 24755==    by 0x10E497: syscall_process_exit (kernel.c:1028)
+==00:00:01:23.484 24755==    by 0x10E221: operacion_a_atender (kernel.c:958)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 2 bytes in 1 blocks are definitely lost in loss record 11 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10CF4C: change_thread_state (kernel.c:593)
+==00:00:01:23.484 24755==    by 0x10B90F: poner_en_exit (kernel.c:212)
+==00:00:01:23.484 24755==    by 0x10BA4A: finalizar_hilos_de_proceso (kernel.c:238)
+==00:00:01:23.484 24755==    by 0x10E497: syscall_process_exit (kernel.c:1028)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 2 bytes in 1 blocks are definitely lost in loss record 12 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10D14E: exist_thread_blocked_by_tid (kernel.c:617)
+==00:00:01:23.484 24755==    by 0x10C805: liberar_hilos_bloqueados_por_tid (kernel.c:480)
+==00:00:01:23.484 24755==    by 0x10B954: poner_en_exit (kernel.c:217)
+==00:00:01:23.484 24755==    by 0x10BA4A: finalizar_hilos_de_proceso (kernel.c:238)
+==00:00:01:23.484 24755==    by 0x10E497: syscall_process_exit (kernel.c:1028)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 8 bytes in 4 blocks are definitely lost in loss record 13 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CD57: create_thread_state (kernel.c:560)
+==00:00:01:23.484 24755==    by 0x10E66D: syscall_thread_create (kernel.c:1060)
+==00:00:01:23.484 24755==    by 0x10E239: operacion_a_atender (kernel.c:962)
+==00:00:01:23.484 24755==    by 0x10DACC: ejecutar_hilo (kernel.c:787)
+==00:00:01:23.484 24755==    by 0x10BAC2: planificador_corto_plazo (kernel.c:254)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 8 bytes in 4 blocks are definitely lost in loss record 14 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10CF4C: change_thread_state (kernel.c:593)
+==00:00:01:23.484 24755==    by 0x10BD5B: poner_en_ready (kernel.c:308)
+==00:00:01:23.484 24755==    by 0x10E679: syscall_thread_create (kernel.c:1061)
+==00:00:01:23.484 24755==    by 0x10E239: operacion_a_atender (kernel.c:962)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 8 bytes in 4 blocks are definitely lost in loss record 15 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10B86E: poner_en_exit (kernel.c:191)
+==00:00:01:23.484 24755==    by 0x10E857: syscall_thread_exit (kernel.c:1094)
+==00:00:01:23.484 24755==    by 0x10E27A: operacion_a_atender (kernel.c:974)
+==00:00:01:23.484 24755==    by 0x10DACC: ejecutar_hilo (kernel.c:787)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 8 bytes in 4 blocks are definitely lost in loss record 16 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10CF4C: change_thread_state (kernel.c:593)
+==00:00:01:23.484 24755==    by 0x10B90F: poner_en_exit (kernel.c:212)
+==00:00:01:23.484 24755==    by 0x10E857: syscall_thread_exit (kernel.c:1094)
+==00:00:01:23.484 24755==    by 0x10E27A: operacion_a_atender (kernel.c:974)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 10 bytes in 5 blocks are definitely lost in loss record 17 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10D14E: exist_thread_blocked_by_tid (kernel.c:617)
+==00:00:01:23.484 24755==    by 0x10C805: liberar_hilos_bloqueados_por_tid (kernel.c:480)
+==00:00:01:23.484 24755==    by 0x10B954: poner_en_exit (kernel.c:217)
+==00:00:01:23.484 24755==    by 0x10E857: syscall_thread_exit (kernel.c:1094)
+==00:00:01:23.484 24755==    by 0x10E27A: operacion_a_atender (kernel.c:974)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 12 bytes in 6 blocks are definitely lost in loss record 18 of 25
+==00:00:01:23.484 24755==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x486E64B: string_append (string.c:47)
+==00:00:01:23.484 24755==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==00:00:01:23.484 24755==    by 0x486E83F: string_from_vformat (string.c:74)
+==00:00:01:23.484 24755==    by 0x486E7D0: string_from_format (string.c:67)
+==00:00:01:23.484 24755==    by 0x486E881: string_itoa (string.c:79)
+==00:00:01:23.484 24755==    by 0x10CDBA: get_list_thread_state (kernel.c:568)
+==00:00:01:23.484 24755==    by 0x10CE1B: get_thread_state (kernel.c:576)
+==00:00:01:23.484 24755==    by 0x10CF4C: change_thread_state (kernel.c:593)
+==00:00:01:23.484 24755==    by 0x10D9A4: ejecutar_hilo (kernel.c:762)
+==00:00:01:23.484 24755==    by 0x10BAC2: planificador_corto_plazo (kernel.c:254)
+==00:00:01:23.484 24755==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 16 bytes in 1 blocks are definitely lost in loss record 21 of 25
+==00:00:01:23.484 24755==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x10CD11: create_thread_state (kernel.c:552)
+==00:00:01:23.484 24755==    by 0x10B3AD: iniciar_primer_proceso (kernel.c:95)
+==00:00:01:23.484 24755==    by 0x10B02F: main (kernel.c:32)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 56 bytes in 4 blocks are definitely lost in loss record 23 of 25
+==00:00:01:23.484 24755==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x10FA30: buffer_read_string (serializacion.c:100)
+==00:00:01:23.484 24755==    by 0x10E5B4: syscall_thread_create (kernel.c:1049)
+==00:00:01:23.484 24755==    by 0x10E239: operacion_a_atender (kernel.c:962)
+==00:00:01:23.484 24755==    by 0x10DACC: ejecutar_hilo (kernel.c:787)
+==00:00:01:23.484 24755==    by 0x10BAC2: planificador_corto_plazo (kernel.c:254)
+==00:00:01:23.484 24755==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==00:00:01:23.484 24755==    by 0x499AA03: clone (clone.S:100)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 64 bytes in 4 blocks are definitely lost in loss record 24 of 25
+==00:00:01:23.484 24755==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x10CD11: create_thread_state (kernel.c:552)
+==00:00:01:23.484 24755==    by 0x10E66D: syscall_thread_create (kernel.c:1060)
+==00:00:01:23.484 24755==    by 0x10E239: operacion_a_atender (kernel.c:962)
+==00:00:01:23.484 24755==    by 0x10DACC: ejecutar_hilo (kernel.c:787)
+==00:00:01:23.484 24755==    by 0x10BAC2: planificador_corto_plazo (kernel.c:254)
+==00:00:01:23.484 24755==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==00:00:01:23.484 24755==    by 0x499AA03: clone (clone.S:100)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== 272 bytes in 1 blocks are possibly lost in loss record 25 of 25
+==00:00:01:23.484 24755==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==00:00:01:23.484 24755==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==00:00:01:23.484 24755==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==00:00:01:23.484 24755==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==00:00:01:23.484 24755==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==00:00:01:23.484 24755==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==00:00:01:23.484 24755==    by 0x10B4C4: iniciar_planificacion (kernel.c:115)
+==00:00:01:23.484 24755==    by 0x10B039: main (kernel.c:33)
+==00:00:01:23.484 24755== 
+==00:00:01:23.484 24755== LEAK SUMMARY:
+==00:00:01:23.485 24755==    definitely lost: 214 bytes in 48 blocks
+==00:00:01:23.485 24755==    indirectly lost: 0 bytes in 0 blocks
+==00:00:01:23.485 24755==      possibly lost: 272 bytes in 1 blocks
+==00:00:01:23.485 24755==    still reachable: 80 bytes in 3 blocks
+==00:00:01:23.485 24755==         suppressed: 0 bytes in 0 blocks
+==00:00:01:23.485 24755== Reachable blocks (those to which a pointer was found) are not shown.
+==00:00:01:23.485 24755== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==00:00:01:23.485 24755== 
+==00:00:01:23.485 24755== For lists of detected and suppressed errors, rerun with: -s
+==00:00:01:23.485 24755== ERROR SUMMARY: 22 errors from 22 contexts (suppressed: 0 from 0)

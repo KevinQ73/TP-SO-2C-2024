@@ -92,7 +92,7 @@ void iniciar_primer_proceso(char* path, char* size){
         if (strcmp(respuesta_creacion_hilo, "OK") == 0)
         {
             t_hilo_planificacion* hilo = create_hilo_planificacion(primer_proceso, primer_hilo);
-            create_thread_state(primer_proceso->pid, primer_hilo->tid, READY_STATE);
+            create_thread_state(primer_proceso->pid, primer_hilo->tid, 0);
             poner_en_ready(hilo);
             log_info(kernel_log, "## (<%d>:<%d>) Se crea el Hilo - Estado: READY", hilo->pid_padre, hilo->tid_asociado);
             agregar_proceso_activo(primer_proceso);
@@ -100,10 +100,12 @@ void iniciar_primer_proceso(char* path, char* size){
             log_error(kernel_log, "ERROR AL INICIAR PRIMER HILO");
             abort();
         }
+        free(respuesta_creacion_hilo);
     } else {
         log_error(kernel_log, "ERROR AL INICIAR PRIMER PROCESO");
         abort();
     }
+    free(response_memoria);
 }
 
 void iniciar_planificacion(){
@@ -139,11 +141,12 @@ void* inicializar_pcb_en_espera(){
             if (strcmp(respuesta_memoria_hilo, "OK"))
             {
                 t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_main);
-                create_thread_state(pcb->pid, tcb_main->tid, READY_STATE);
+                create_thread_state(pcb->pid, tcb_main->tid, tcb_main->prioridad);
                 poner_en_ready(hilo);
             } else {
                 log_debug(kernel_log, "NO SE PUDO INICIALIZAR HILO EN MEMORIA");
             }
+            free(respuesta_memoria_hilo);
         } else {
             reintentar_inicializar_pcb_en_espera(pcb);
         }
@@ -163,15 +166,17 @@ void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
             if (strcmp(respuesta_memoria_hilo, "OK"))
             {
                 t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_asociado);
-                create_thread_state(pcb->pid, tcb_asociado->tid, READY_STATE);
+                create_thread_state(pcb->pid, tcb_asociado->tid, tcb_asociado->prioridad);
                 poner_en_ready(hilo);
             } else {
                 log_debug(kernel_log, "NO SE PUDO REINTENTAR INICIALIZAR HILO EN MEMORIA");
             }
+            free(respuesta_memoria_hilo);
         } else {
             sem_wait(&aviso_exit_proceso);
             reintentar_inicializar_pcb_en_espera(pcb);
         }
+    free(respuesta_memoria);
 }
 
 void poner_en_new(t_pcb* pcb){
@@ -267,7 +272,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
             if (!hilo) {
                 log_warning(kernel_log, "No hay hilos en la cola ready");
             } else {
-                log_info(kernel_log, "## [FIFO] Se quitó el hilo (%d:%d) de la COLA READY", hilo->pid_padre, hilo->tid_asociado);
+                log_info(kernel_log, "## [FIFO](%d:%d) Se seleccionó para ejecutar y pasa al estado EXECUTE", hilo->pid_padre, hilo->tid_asociado);
             }
         pthread_mutex_unlock(&mutex_cola_ready);
 
@@ -280,7 +285,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
             if (!hilo) {
                 log_warning(kernel_log, "No hay hilos en la cola ready");
             } else {
-                log_info(kernel_log, "## [PRIORIDADES] Se quitó el hilo (%d:%d) de la COLA READY", hilo->pid_padre, hilo->tid_asociado);
+                log_info(kernel_log, "## [PRIORIDADES](%d:%d) Se seleccionó para ejecutar y pasa al estado EXECUTE", hilo->pid_padre, hilo->tid_asociado);
             }
         pthread_mutex_unlock(&mutex_cola_ready);
 
@@ -440,7 +445,7 @@ t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_co
                 log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d VACÍA", cola_hallada->prioridad);
             } else {
                 hilo_a_ejecutar = list_remove(cola_hallada->cola, 0);
-                log_info(kernel_log, "## [COLAS MULTINIVEL] Se quitó el hilo (%d:%d) de la COLA CON PRIORIDAD %d", hilo_a_ejecutar->pid_padre, hilo_a_ejecutar->tid_asociado, cola_hallada->prioridad);
+                log_info(kernel_log, "## [COLAS MULTINIVEL](%d:%d) - Prioridad %d Se seleccionó para ejecutar y pasa al estado EXECUTE", hilo_a_ejecutar->pid_padre, hilo_a_ejecutar->tid_asociado, cola_hallada->prioridad);
                 i = maximum_priority_multilevel_queues_schedule(lista_colas_multinivel) +1;
             }
         } else {
@@ -880,6 +885,8 @@ char* avisar_fin_proceso_memoria(uint32_t* pid){
     pthread_mutex_lock(&mutex_uso_fd_memoria);
         int socket_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, socket_memoria);
+        eliminar_paquete(paquete);
+
         char* response_memoria = recibir_mensaje(socket_memoria, kernel_log);
         log_debug(kernel_log, "STRING RECIBIDO avisar_fin_proceso_memoria: %s", response_memoria);
         close(socket_memoria);
@@ -986,14 +993,13 @@ void* operacion_a_atender(){
     case IO:
         syscall_io(buffer, pid_tid_recibido);
         break;
-    
-    case FIN_INSTRUCCIONES:
-        break;
 
     default:
         log_warning(kernel_log, "## Error en la OP enviada desde CPU");
         break;
     }
+
+    buffer_destroy(buffer);
 }
 
 void* syscall_process_create(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1014,8 +1020,6 @@ void* syscall_process_create(t_buffer* buffer, t_pid_tid pid_tid){
     poner_en_new(pcb);
     enviar_aviso_syscall("PROCESO INICIALIZADO", &codigo);
     log_info(kernel_log,"## PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
-
-    buffer_destroy(buffer);
 }   
 
 void* syscall_process_exit(t_pid_tid pid_tid_recibido){
@@ -1033,6 +1037,8 @@ void* syscall_process_exit(t_pid_tid pid_tid_recibido){
         abort();
     }
     log_info(kernel_log,"## Finaliza el proceso <%d>", pid_tid_recibido.pid);
+
+    free(respuesta_memoria);
 }
 
 void* syscall_thread_create(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1051,14 +1057,14 @@ void* syscall_thread_create(t_buffer* buffer, t_pid_tid pid_tid){
     if (strcmp(respuesta_creacion_hilo, "OK") == 0)
     {
         t_hilo_planificacion* hilo_a_crear = create_hilo_planificacion(pcb_padre, tcb);
-        create_thread_state(pcb_padre->pid, tcb->tid, READY_STATE);
+        create_thread_state(pcb_padre->pid, tcb->tid, prioridad_hilo);
         poner_en_ready(hilo_a_crear);
         enviar_aviso_syscall("HILO_CREADO", &codigo);
     } else {
         log_debug(kernel_log, "Rompimos algo con syscall_thread_create");
         abort();
     }
-    buffer_destroy(buffer);
+    free(respuesta_creacion_hilo);
 }
 
 void* syscall_thread_join(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1078,7 +1084,6 @@ void* syscall_thread_join(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("HILO_NO_BLOQUEADO", &codigo);
         log_debug(kernel_log, "## El hilo no existe o ya finalizó, continuo ejecución");
     }
-    buffer_destroy(buffer);
 }
 
 void* syscall_thread_exit(t_pid_tid pid_tid){
@@ -1111,7 +1116,6 @@ void* syscall_thread_cancel(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("HILO_NO_CANCELADO", &codigo);
         log_debug(kernel_log, "## El hilo no existe o ya finalizó, continuo ejecución");
     }
-    buffer_destroy(buffer);
 }
 
 void* syscall_io(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1132,8 +1136,6 @@ void* syscall_io(t_buffer* buffer, t_pid_tid pid_tid){
 
     pthread_create(&hilo_io, NULL, ejecutar_io, args);
     pthread_detach(hilo_io);
-
-    buffer_destroy(buffer);
 }
 
 void* syscall_mutex_create(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1147,8 +1149,6 @@ void* syscall_mutex_create(t_buffer* buffer, t_pid_tid pid_tid){
 
     t_mutex* mutexCreado = create_mutex(nombre_mutex);
     add_mutex_to_process(mutexCreado, pid_tid.pid);
-
-    buffer_destroy(buffer);
 }
 
 void* syscall_mutex_lock(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1175,8 +1175,6 @@ void* syscall_mutex_lock(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
-
-    buffer_destroy(buffer);
 }
 
 void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1202,7 +1200,6 @@ void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
-    buffer_destroy(buffer);
 }
 
 void* syscall_dump_memory(t_pid_tid pid_tid){
@@ -1261,6 +1258,14 @@ void process_mutex_destroy(t_mutex* mutex){
     free(mutex);
 }
 
+void destroy_process_state(){
+    dictionary_destroy_and_destroy_elements(thread_states, destroy_thread_state);
+}
+
+void destroy_thread_state(t_list* lista_estados){
+    list_destroy(lista_estados);
+}
+
 /*------------------------- FINALIZACIÓN DEL MODULO -------------------------*/
 
 void finalizar_modulo(){
@@ -1268,6 +1273,26 @@ void finalizar_modulo(){
     eliminar_config(kernel_config);
     eliminar_listas();
     eliminar_colas();
+    destroy_process_state();
+    finalizar_semaforos();
+}
+
+void finalizar_semaforos(){
+    pthread_mutex_destroy(&mutex_cola_new);
+    pthread_mutex_destroy(&mutex_cola_ready);
+    pthread_mutex_destroy(&mutex_cola_block);
+    pthread_mutex_destroy(&mutex_hilo_exec);
+    pthread_mutex_destroy(&mutex_uso_fd_memoria);
+    pthread_mutex_destroy(&mutex_uso_estado_hilos);
+    pthread_mutex_destroy(&mutex_lista_procesos_ready);
+    pthread_mutex_destroy(&mutex_colas_multinivel_existentes);
+    pthread_mutex_destroy(&mutex_siguiente_id);
+    pthread_mutex_destroy(&mutex_io);
+    pthread_mutex_destroy(&mutex_interrupt);
+
+    sem_destroy(&contador_procesos_en_new);
+    sem_destroy(&aviso_exit_proceso);
+    sem_destroy(&kernel_activo);
 }
 
 void eliminar_listas(){

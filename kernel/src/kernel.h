@@ -265,6 +265,10 @@
 
     void process_mutex_destroy(t_mutex* mutex);
 
+    void destroy_process_state();
+
+    void destroy_thread_state(t_list* lista_estados);
+
     /*------------------------- FINALIZACIÓN DEL MODULO -------------------------*/
 
     void finalizar_modulo();

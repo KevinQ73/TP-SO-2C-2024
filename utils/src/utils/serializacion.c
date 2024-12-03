@@ -223,7 +223,7 @@ t_paquete* crear_paquete(cod_inst instruccion){
 
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 	paquete->codigo_operacion = instruccion;
-	paquete->buffer = malloc(sizeof(t_buffer));
+	paquete->buffer = NULL;
 	return paquete;
 }
 
