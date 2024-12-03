@@ -1,0 +1,605 @@
+==108080== Memcheck, a memory error detector
+==108080== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==108080== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==108080== Command: ./bin/kernel PLANI_PROC 32 ./files/prueba_planificacion.config
+==108080== Parent PID: 84072
+==108080== 
+==108080== 
+==108080== HEAP SUMMARY:
+==108080==     in use at exit: 1,819 bytes in 112 blocks
+==108080==   total heap usage: 1,143 allocs, 1,031 frees, 44,685 bytes allocated
+==108080== 
+==108080== 2 bytes in 1 blocks are still reachable in loss record 1 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x491D58E: strdup (strdup.c:42)
+==108080==    by 0x486B731: dictionary_put (dictionary.c:73)
+==108080==    by 0x10CC44: create_process_state (kernel.c:542)
+==108080==    by 0x10B28D: iniciar_primer_proceso (kernel.c:87)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 2 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CC17: create_process_state (kernel.c:540)
+==108080==    by 0x10B28D: iniciar_primer_proceso (kernel.c:87)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 3 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CCBB: create_thread_state (kernel.c:555)
+==108080==    by 0x10B34D: iniciar_primer_proceso (kernel.c:95)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 4 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CEB0: change_thread_state (kernel.c:588)
+==108080==    by 0x10BCBF: poner_en_ready (kernel.c:303)
+==108080==    by 0x10B359: iniciar_primer_proceso (kernel.c:96)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 5 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CF2E: add_thread_state_tid_blocked (kernel.c:596)
+==108080==    by 0x10E6C1: syscall_thread_join (kernel.c:1073)
+==108080==    by 0x10E1A9: operacion_a_atender (kernel.c:959)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 6 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CEB0: change_thread_state (kernel.c:588)
+==108080==    by 0x10BDE4: poner_en_block (kernel.c:322)
+==108080==    by 0x10E6CD: syscall_thread_join (kernel.c:1074)
+==108080==    by 0x10E1A9: operacion_a_atender (kernel.c:959)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 7 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10D19C: get_thread_blocked_by_tid (kernel.c:622)
+==108080==    by 0x10C783: liberar_hilos_bloqueados_por_tid (kernel.c:477)
+==108080==    by 0x10B8B8: poner_en_exit (kernel.c:212)
+==108080==    by 0x10E7B3: syscall_thread_exit (kernel.c:1089)
+==108080==    by 0x10E1D2: operacion_a_atender (kernel.c:967)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 8 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CEB0: change_thread_state (kernel.c:588)
+==108080==    by 0x10C7A1: liberar_hilos_bloqueados_por_tid (kernel.c:479)
+==108080==    by 0x10B8B8: poner_en_exit (kernel.c:212)
+==108080==    by 0x10E7B3: syscall_thread_exit (kernel.c:1089)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 9 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CFBA: remove_thread_state_tid_blocked (kernel.c:605)
+==108080==    by 0x10C7B6: liberar_hilos_bloqueados_por_tid (kernel.c:480)
+==108080==    by 0x10B8B8: poner_en_exit (kernel.c:212)
+==108080==    by 0x10E7B3: syscall_thread_exit (kernel.c:1089)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 10 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CEB0: change_thread_state (kernel.c:588)
+==108080==    by 0x10BCBF: poner_en_ready (kernel.c:303)
+==108080==    by 0x10C7DB: liberar_hilos_bloqueados_por_tid (kernel.c:482)
+==108080==    by 0x10B8B8: poner_en_exit (kernel.c:212)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 11 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10B7D2: poner_en_exit (kernel.c:186)
+==108080==    by 0x10B9AE: finalizar_hilos_de_proceso (kernel.c:233)
+==108080==    by 0x10E3F1: syscall_process_exit (kernel.c:1024)
+==108080==    by 0x10E179: operacion_a_atender (kernel.c:951)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 12 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CEB0: change_thread_state (kernel.c:588)
+==108080==    by 0x10B873: poner_en_exit (kernel.c:207)
+==108080==    by 0x10B9AE: finalizar_hilos_de_proceso (kernel.c:233)
+==108080==    by 0x10E3F1: syscall_process_exit (kernel.c:1024)
+==108080== 
+==108080== 2 bytes in 1 blocks are definitely lost in loss record 13 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10D0B2: exist_thread_blocked_by_tid (kernel.c:612)
+==108080==    by 0x10C769: liberar_hilos_bloqueados_por_tid (kernel.c:475)
+==108080==    by 0x10B8B8: poner_en_exit (kernel.c:212)
+==108080==    by 0x10B9AE: finalizar_hilos_de_proceso (kernel.c:233)
+==108080==    by 0x10E3F1: syscall_process_exit (kernel.c:1024)
+==108080== 
+==108080== 4 bytes in 1 blocks are indirectly lost in loss record 14 of 54
+==108080==    at 0x48487A9: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F68E: buffer_add (serializacion.c:53)
+==108080==    by 0x10F781: buffer_add_uint32 (serializacion.c:76)
+==108080==    by 0x10DE3B: avisar_fin_proceso_memoria (kernel.c:876)
+==108080==    by 0x10E3FD: syscall_process_exit (kernel.c:1025)
+==108080==    by 0x10E179: operacion_a_atender (kernel.c:951)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 4 bytes in 1 blocks are definitely lost in loss record 15 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F888: buffer_read_string (serializacion.c:100)
+==108080==    by 0x10FE23: recibir_mensaje (serializacion.c:351)
+==108080==    by 0x10DC5B: avisar_creacion_proceso_memoria (kernel.c:835)
+==108080==    by 0x10B25B: iniciar_primer_proceso (kernel.c:83)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 4 bytes in 1 blocks are definitely lost in loss record 16 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F888: buffer_read_string (serializacion.c:100)
+==108080==    by 0x10FE23: recibir_mensaje (serializacion.c:351)
+==108080==    by 0x10DDB3: avisar_creacion_hilo_memoria (kernel.c:862)
+==108080==    by 0x10B2F4: iniciar_primer_proceso (kernel.c:90)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 8 bytes in 4 blocks are definitely lost in loss record 17 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CCBB: create_thread_state (kernel.c:555)
+==108080==    by 0x10E5BD: syscall_thread_create (kernel.c:1054)
+==108080==    by 0x10E191: operacion_a_atender (kernel.c:955)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080== 
+==108080== 8 bytes in 4 blocks are definitely lost in loss record 18 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CEB0: change_thread_state (kernel.c:588)
+==108080==    by 0x10BCBF: poner_en_ready (kernel.c:303)
+==108080==    by 0x10E5C9: syscall_thread_create (kernel.c:1055)
+==108080==    by 0x10E191: operacion_a_atender (kernel.c:955)
+==108080== 
+==108080== 8 bytes in 4 blocks are definitely lost in loss record 19 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10B7D2: poner_en_exit (kernel.c:186)
+==108080==    by 0x10E7B3: syscall_thread_exit (kernel.c:1089)
+==108080==    by 0x10E1D2: operacion_a_atender (kernel.c:967)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080== 
+==108080== 8 bytes in 4 blocks are definitely lost in loss record 20 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CEB0: change_thread_state (kernel.c:588)
+==108080==    by 0x10B873: poner_en_exit (kernel.c:207)
+==108080==    by 0x10E7B3: syscall_thread_exit (kernel.c:1089)
+==108080==    by 0x10E1D2: operacion_a_atender (kernel.c:967)
+==108080== 
+==108080== 10 bytes in 5 blocks are definitely lost in loss record 21 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10D0B2: exist_thread_blocked_by_tid (kernel.c:612)
+==108080==    by 0x10C769: liberar_hilos_bloqueados_por_tid (kernel.c:475)
+==108080==    by 0x10B8B8: poner_en_exit (kernel.c:212)
+==108080==    by 0x10E7B3: syscall_thread_exit (kernel.c:1089)
+==108080==    by 0x10E1D2: operacion_a_atender (kernel.c:967)
+==108080== 
+==108080== 12 bytes in 6 blocks are definitely lost in loss record 22 of 54
+==108080==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486E64B: string_append (string.c:47)
+==108080==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==108080==    by 0x486E83F: string_from_vformat (string.c:74)
+==108080==    by 0x486E7D0: string_from_format (string.c:67)
+==108080==    by 0x486E881: string_itoa (string.c:79)
+==108080==    by 0x10CD1E: get_list_thread_state (kernel.c:563)
+==108080==    by 0x10CD7F: get_thread_state (kernel.c:571)
+==108080==    by 0x10CEB0: change_thread_state (kernel.c:588)
+==108080==    by 0x10D908: ejecutar_hilo (kernel.c:757)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080== 
+==108080== 16 bytes in 1 blocks are still reachable in loss record 23 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486C2AE: list_create (list.c:34)
+==108080==    by 0x10ABB2: create_pcb (utils-kernel.c:31)
+==108080==    by 0x10B234: iniciar_primer_proceso (kernel.c:82)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 16 bytes in 1 blocks are still reachable in loss record 24 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486C2AE: list_create (list.c:34)
+==108080==    by 0x10ABC4: create_pcb (utils-kernel.c:32)
+==108080==    by 0x10B234: iniciar_primer_proceso (kernel.c:82)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 16 bytes in 1 blocks are still reachable in loss record 25 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486C2AE: list_create (list.c:34)
+==108080==    by 0x10CC09: create_process_state (kernel.c:538)
+==108080==    by 0x10B28D: iniciar_primer_proceso (kernel.c:87)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 16 bytes in 1 blocks are still reachable in loss record 26 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10CC75: create_thread_state (kernel.c:547)
+==108080==    by 0x10B34D: iniciar_primer_proceso (kernel.c:95)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 16 bytes in 1 blocks are still reachable in loss record 27 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486D44D: list_create_element (list.c:346)
+==108080==    by 0x486D5AF: list_add_element (list.c:382)
+==108080==    by 0x486C319: list_add (list.c:42)
+==108080==    by 0x10CCD2: create_thread_state (kernel.c:556)
+==108080==    by 0x10B34D: iniciar_primer_proceso (kernel.c:95)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 16 bytes in 1 blocks are indirectly lost in loss record 28 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F5AF: buffer_create (serializacion.c:24)
+==108080==    by 0x10DE1D: avisar_fin_proceso_memoria (kernel.c:872)
+==108080==    by 0x10E3FD: syscall_process_exit (kernel.c:1025)
+==108080==    by 0x10E179: operacion_a_atender (kernel.c:951)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 16 bytes in 1 blocks are definitely lost in loss record 29 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10DBB2: avisar_creacion_proceso_memoria (kernel.c:820)
+==108080==    by 0x10B25B: iniciar_primer_proceso (kernel.c:83)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 16 bytes in 1 blocks are definitely lost in loss record 30 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10DCD9: avisar_creacion_hilo_memoria (kernel.c:845)
+==108080==    by 0x10B2F4: iniciar_primer_proceso (kernel.c:90)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 16 bytes in 1 blocks are definitely lost in loss record 31 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10E02B: enviar_aviso_syscall (kernel.c:919)
+==108080==    by 0x10E6E3: syscall_thread_join (kernel.c:1075)
+==108080==    by 0x10E1A9: operacion_a_atender (kernel.c:959)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 16 bytes in 1 blocks are definitely lost in loss record 32 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10E02B: enviar_aviso_syscall (kernel.c:919)
+==108080==    by 0x10E71C: syscall_thread_join (kernel.c:1078)
+==108080==    by 0x10E1A9: operacion_a_atender (kernel.c:959)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 16 bytes in 1 blocks are definitely lost in loss record 33 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10DF01: avisar_fin_hilo_memoria (kernel.c:892)
+==108080==    by 0x10B886: poner_en_exit (kernel.c:209)
+==108080==    by 0x10B9AE: finalizar_hilos_de_proceso (kernel.c:233)
+==108080==    by 0x10E3F1: syscall_process_exit (kernel.c:1024)
+==108080==    by 0x10E179: operacion_a_atender (kernel.c:951)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 16 bytes in 1 blocks are definitely lost in loss record 34 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10DE0F: avisar_fin_proceso_memoria (kernel.c:871)
+==108080==    by 0x10E3FD: syscall_process_exit (kernel.c:1025)
+==108080==    by 0x10E179: operacion_a_atender (kernel.c:951)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 16 bytes in 1 blocks are definitely lost in loss record 35 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10E02B: enviar_aviso_syscall (kernel.c:919)
+==108080==    by 0x10E431: syscall_process_exit (kernel.c:1029)
+==108080==    by 0x10E179: operacion_a_atender (kernel.c:951)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 16 bytes in 4 blocks are definitely lost in loss record 36 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F888: buffer_read_string (serializacion.c:100)
+==108080==    by 0x10FE23: recibir_mensaje (serializacion.c:351)
+==108080==    by 0x10DDB3: avisar_creacion_hilo_memoria (kernel.c:862)
+==108080==    by 0x10E56E: syscall_thread_create (kernel.c:1049)
+==108080==    by 0x10E191: operacion_a_atender (kernel.c:955)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 23 bytes in 1 blocks are definitely lost in loss record 37 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F888: buffer_read_string (serializacion.c:100)
+==108080==    by 0x10FE23: recibir_mensaje (serializacion.c:351)
+==108080==    by 0x10DE9E: avisar_fin_proceso_memoria (kernel.c:883)
+==108080==    by 0x10E3FD: syscall_process_exit (kernel.c:1025)
+==108080==    by 0x10E179: operacion_a_atender (kernel.c:951)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 24 bytes in 1 blocks are still reachable in loss record 38 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486B5E5: dictionary_create (dictionary.c:38)
+==108080==    by 0x10AF89: main (kernel.c:28)
+==108080== 
+==108080== 32 bytes in 1 blocks are still reachable in loss record 39 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486BE4C: dictionary_create_element (dictionary.c:249)
+==108080==    by 0x486B745: dictionary_put (dictionary.c:73)
+==108080==    by 0x10CC44: create_process_state (kernel.c:542)
+==108080==    by 0x10B28D: iniciar_primer_proceso (kernel.c:87)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 36 (16 direct, 20 indirect) bytes in 1 blocks are definitely lost in loss record 40 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F967: crear_paquete (serializacion.c:224)
+==108080==    by 0x10DE0F: avisar_fin_proceso_memoria (kernel.c:871)
+==108080==    by 0x10E3FD: syscall_process_exit (kernel.c:1025)
+==108080==    by 0x10E179: operacion_a_atender (kernel.c:951)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 40 bytes in 5 blocks are indirectly lost in loss record 41 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F91E: buffer_recieve (serializacion.c:118)
+==108080==    by 0x10E0F6: operacion_a_atender (kernel.c:940)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 48 bytes in 1 blocks are still reachable in loss record 42 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10AB66: create_pcb (utils-kernel.c:24)
+==108080==    by 0x10B234: iniciar_primer_proceso (kernel.c:82)
+==108080==    by 0x10AFCF: main (kernel.c:32)
+==108080== 
+==108080== 56 bytes in 4 blocks are definitely lost in loss record 43 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F888: buffer_read_string (serializacion.c:100)
+==108080==    by 0x10E502: syscall_thread_create (kernel.c:1043)
+==108080==    by 0x10E191: operacion_a_atender (kernel.c:955)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 64 bytes in 4 blocks are still reachable in loss record 44 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10CC75: create_thread_state (kernel.c:547)
+==108080==    by 0x10E5BD: syscall_thread_create (kernel.c:1054)
+==108080==    by 0x10E191: operacion_a_atender (kernel.c:955)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 64 bytes in 4 blocks are still reachable in loss record 45 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486D44D: list_create_element (list.c:346)
+==108080==    by 0x486D5AF: list_add_element (list.c:382)
+==108080==    by 0x486C319: list_add (list.c:42)
+==108080==    by 0x10CCD2: create_thread_state (kernel.c:556)
+==108080==    by 0x10E5BD: syscall_thread_create (kernel.c:1054)
+==108080==    by 0x10E191: operacion_a_atender (kernel.c:955)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 64 bytes in 4 blocks are definitely lost in loss record 46 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10DCD9: avisar_creacion_hilo_memoria (kernel.c:845)
+==108080==    by 0x10E56E: syscall_thread_create (kernel.c:1049)
+==108080==    by 0x10E191: operacion_a_atender (kernel.c:955)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 64 bytes in 4 blocks are definitely lost in loss record 47 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10E02B: enviar_aviso_syscall (kernel.c:919)
+==108080==    by 0x10E5DF: syscall_thread_create (kernel.c:1056)
+==108080==    by 0x10E191: operacion_a_atender (kernel.c:955)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 64 bytes in 4 blocks are definitely lost in loss record 48 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10DF01: avisar_fin_hilo_memoria (kernel.c:892)
+==108080==    by 0x10B886: poner_en_exit (kernel.c:209)
+==108080==    by 0x10E7B3: syscall_thread_exit (kernel.c:1089)
+==108080==    by 0x10E1D2: operacion_a_atender (kernel.c:967)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 64 bytes in 4 blocks are definitely lost in loss record 49 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10E02B: enviar_aviso_syscall (kernel.c:919)
+==108080==    by 0x10E7C9: syscall_thread_exit (kernel.c:1090)
+==108080==    by 0x10E1D2: operacion_a_atender (kernel.c:967)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 96 bytes in 6 blocks are definitely lost in loss record 50 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F97E: crear_paquete (serializacion.c:226)
+==108080==    by 0x10D912: ejecutar_hilo (kernel.c:759)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 120 (80 direct, 40 indirect) bytes in 5 blocks are definitely lost in loss record 51 of 54
+==108080==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x10F5AF: buffer_create (serializacion.c:24)
+==108080==    by 0x10F8D6: buffer_recieve (serializacion.c:113)
+==108080==    by 0x10E0F6: operacion_a_atender (kernel.c:940)
+==108080==    by 0x10DA30: ejecutar_hilo (kernel.c:782)
+==108080==    by 0x10BA26: planificador_corto_plazo (kernel.c:249)
+==108080==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==108080==    by 0x499AA03: clone (clone.S:100)
+==108080== 
+==108080== 160 bytes in 1 blocks are still reachable in loss record 52 of 54
+==108080==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x486B60A: dictionary_create (dictionary.c:40)
+==108080==    by 0x10AF89: main (kernel.c:28)
+==108080== 
+==108080== 272 bytes in 1 blocks are possibly lost in loss record 53 of 54
+==108080==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==108080==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==108080==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==108080==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==108080==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==108080==    by 0x10B41A: iniciar_planificacion (kernel.c:110)
+==108080==    by 0x10AFD9: main (kernel.c:33)
+==108080== 
+==108080== 272 bytes in 1 blocks are possibly lost in loss record 54 of 54
+==108080==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==108080==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==108080==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==108080==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==108080==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==108080==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==108080==    by 0x10B44C: iniciar_planificacion (kernel.c:113)
+==108080==    by 0x10AFD9: main (kernel.c:33)
+==108080== 
+==108080== LEAK SUMMARY:
+==108080==    definitely lost: 741 bytes in 85 blocks
+==108080==    indirectly lost: 60 bytes in 7 blocks
+==108080==      possibly lost: 544 bytes in 2 blocks
+==108080==    still reachable: 474 bytes in 18 blocks
+==108080==         suppressed: 0 bytes in 0 blocks
+==108080== 
+==108080== For lists of detected and suppressed errors, rerun with: -s
+==108080== ERROR SUMMARY: 39 errors from 39 contexts (suppressed: 0 from 0)

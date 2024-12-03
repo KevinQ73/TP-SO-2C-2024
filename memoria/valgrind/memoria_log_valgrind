@@ -1,0 +1,262 @@
+==107924== Memcheck, a memory error detector
+==107924== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==107924== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==107924== Command: ./bin/memoria ./files/prueba_planificacion.config
+==107924== Parent PID: 84053
+==107924== 
+==107924== Thread 4:
+==107924== Conditional jump or move depends on uninitialised value(s)
+==107924==    at 0x10CEBA: obtener_espacio_desocupado (memoria.c:744)
+==107924==    by 0x10CC2F: hay_particion_disponible (memoria.c:666)
+==107924==    by 0x10B7DA: crear_proceso (memoria.c:258)
+==107924==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924==  Uninitialised value was created by a stack allocation
+==107924==    at 0x49060F3: __futex_abstimed_wait_common64 (futex-internal.c:57)
+==107924==    by 0x49060F3: __futex_abstimed_wait_common (futex-internal.c:87)
+==107924==    by 0x49060F3: __futex_abstimed_wait_cancelable64 (futex-internal.c:139)
+==107924== 
+==107924== Thread 2:
+==107924== Invalid read of size 8
+==107924==    at 0x10C82C: buscar_instruccion (memoria.c:603)
+==107924==    by 0x10BBDB: atender_cpu (memoria.c:359)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924==  Address 0x10 is not stack'd, malloc'd or (recently) free'd
+==107924== 
+==107924== 
+==107924== Process terminating with default action of signal 11 (SIGSEGV)
+==107924==  Access not within mapped region at address 0x10
+==107924==    at 0x10C82C: buscar_instruccion (memoria.c:603)
+==107924==    by 0x10BBDB: atender_cpu (memoria.c:359)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924==  If you believe this happened as a result of a stack
+==107924==  overflow in your program's main thread (unlikely but
+==107924==  possible), you can try to increase the size of the
+==107924==  main thread stack using the --main-stacksize= flag.
+==107924==  The main thread stack size used in this run was 8388608.
+==107924== 
+==107924== HEAP SUMMARY:
+==107924==     in use at exit: 16,329 bytes in 538 blocks
+==107924==   total heap usage: 4,839 allocs, 4,301 frees, 198,517 bytes allocated
+==107924== 
+==107924== Thread 1:
+==107924== 10 bytes in 5 blocks are definitely lost in loss record 10 of 67
+==107924==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x486E64B: string_append (string.c:47)
+==107924==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==107924==    by 0x486E83F: string_from_vformat (string.c:74)
+==107924==    by 0x486E7D0: string_from_format (string.c:67)
+==107924==    by 0x486E881: string_itoa (string.c:79)
+==107924==    by 0x10B89C: crear_hilo (memoria.c:276)
+==107924==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 12 bytes in 12 blocks are definitely lost in loss record 12 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x491D58E: strdup (strdup.c:42)
+==107924==    by 0x486E5FD: string_duplicate (string.c:43)
+==107924==    by 0x486E719: string_new (string.c:60)
+==107924==    by 0x10B2EA: atender_solicitudes_kernel (memoria.c:151)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 16 bytes in 1 blocks are definitely lost in loss record 19 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10DDC8: crear_paquete (serializacion.c:226)
+==107924==    by 0x10E17D: enviar_mensaje (serializacion.c:320)
+==107924==    by 0x10B3A6: atender_solicitudes_kernel (memoria.c:165)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 16 bytes in 1 blocks are definitely lost in loss record 20 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10DDC8: crear_paquete (serializacion.c:226)
+==107924==    by 0x10E17D: enviar_mensaje (serializacion.c:320)
+==107924==    by 0x10B504: atender_solicitudes_kernel (memoria.c:193)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 22 bytes in 11 blocks are definitely lost in loss record 23 of 67
+==107924==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x486E64B: string_append (string.c:47)
+==107924==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==107924==    by 0x486E83F: string_from_vformat (string.c:74)
+==107924==    by 0x486E7D0: string_from_format (string.c:67)
+==107924==    by 0x486E881: string_itoa (string.c:79)
+==107924==    by 0x10C942: actualizar_contexto_ejecucion (memoria.c:629)
+==107924==    by 0x10BB34: atender_cpu (memoria.c:344)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 40 (24 direct, 16 indirect) bytes in 1 blocks are definitely lost in loss record 32 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10BDF8: crear_contexto_proceso (memoria.c:410)
+==107924==    by 0x10B803: crear_proceso (memoria.c:262)
+==107924==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 65 bytes in 65 blocks are definitely lost in loss record 36 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x491D58E: strdup (strdup.c:42)
+==107924==    by 0x486E5FD: string_duplicate (string.c:43)
+==107924==    by 0x486E719: string_new (string.c:60)
+==107924==    by 0x10C847: buscar_instruccion (memoria.c:604)
+==107924==    by 0x10BBDB: atender_cpu (memoria.c:359)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 80 bytes in 5 blocks are definitely lost in loss record 38 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10DDC8: crear_paquete (serializacion.c:226)
+==107924==    by 0x10E17D: enviar_mensaje (serializacion.c:320)
+==107924==    by 0x10B487: atender_solicitudes_kernel (memoria.c:182)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 80 bytes in 5 blocks are definitely lost in loss record 39 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10DDC8: crear_paquete (serializacion.c:226)
+==107924==    by 0x10E17D: enviar_mensaje (serializacion.c:320)
+==107924==    by 0x10B55B: atender_solicitudes_kernel (memoria.c:203)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 96 bytes in 6 blocks are definitely lost in loss record 40 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10DDC8: crear_paquete (serializacion.c:226)
+==107924==    by 0x10C61A: enviar_contexto_solicitado (memoria.c:567)
+==107924==    by 0x10BAC9: atender_cpu (memoria.c:332)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 130 bytes in 65 blocks are definitely lost in loss record 42 of 67
+==107924==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x486E64B: string_append (string.c:47)
+==107924==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==107924==    by 0x486E83F: string_from_vformat (string.c:74)
+==107924==    by 0x486E7D0: string_from_format (string.c:67)
+==107924==    by 0x486E881: string_itoa (string.c:79)
+==107924==    by 0x10C806: buscar_instruccion (memoria.c:601)
+==107924==    by 0x10BBDB: atender_cpu (memoria.c:359)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 144 (96 direct, 48 indirect) bytes in 6 blocks are definitely lost in loss record 43 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10D9F9: buffer_create (serializacion.c:24)
+==107924==    by 0x10DD20: buffer_recieve (serializacion.c:113)
+==107924==    by 0x10BA54: atender_cpu (memoria.c:324)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 176 bytes in 11 blocks are definitely lost in loss record 48 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10DDC8: crear_paquete (serializacion.c:226)
+==107924==    by 0x10E17D: enviar_mensaje (serializacion.c:320)
+==107924==    by 0x10BB73: atender_cpu (memoria.c:347)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 188 bytes in 5 blocks are definitely lost in loss record 49 of 67
+==107924==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x486E64B: string_append (string.c:47)
+==107924==    by 0x10D85A: leer_instrucciones (files.c:42)
+==107924==    by 0x10BE72: crear_contexto_hilo (memoria.c:423)
+==107924==    by 0x10B8DC: crear_hilo (memoria.c:279)
+==107924==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 220 bytes in 5 blocks are definitely lost in loss record 51 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10BF12: buscar_contexto (memoria.c:440)
+==107924==    by 0x10BAB9: atender_cpu (memoria.c:331)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 272 bytes in 1 blocks are possibly lost in loss record 52 of 67
+==107924==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==107924==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==107924==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==107924==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==107924==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==107924==    by 0x10B158: atender_solicitudes (memoria.c:112)
+==107924==    by 0x10AE5F: main (memoria.c:32)
+==107924== 
+==107924== 272 bytes in 1 blocks are possibly lost in loss record 53 of 67
+==107924==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==107924==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==107924==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==107924==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==107924==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==107924==    by 0x10B18A: atender_solicitudes (memoria.c:115)
+==107924==    by 0x10AE5F: main (memoria.c:32)
+==107924== 
+==107924== 272 bytes in 1 blocks are possibly lost in loss record 54 of 67
+==107924==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==107924==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==107924==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==107924==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==107924==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==107924==    by 0x10B287: atender_kernel (memoria.c:140)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 387 (192 direct, 195 indirect) bytes in 12 blocks are definitely lost in loss record 56 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10D9F9: buffer_create (serializacion.c:24)
+==107924==    by 0x10DD20: buffer_recieve (serializacion.c:113)
+==107924==    by 0x10B305: atender_solicitudes_kernel (memoria.c:155)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 440 bytes in 10 blocks are definitely lost in loss record 57 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10C0B5: recibir_contexto (memoria.c:482)
+==107924==    by 0x10BB09: atender_cpu (memoria.c:340)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 748 (176 direct, 572 indirect) bytes in 11 blocks are definitely lost in loss record 60 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10D9F9: buffer_create (serializacion.c:24)
+==107924==    by 0x10DD20: buffer_recieve (serializacion.c:113)
+==107924==    by 0x10BADB: atender_cpu (memoria.c:336)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 1,040 bytes in 65 blocks are definitely lost in loss record 64 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10DDC8: crear_paquete (serializacion.c:226)
+==107924==    by 0x10E17D: enviar_mensaje (serializacion.c:320)
+==107924==    by 0x10BC22: atender_cpu (memoria.c:361)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== 1,820 (1,040 direct, 780 indirect) bytes in 65 blocks are definitely lost in loss record 66 of 67
+==107924==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==107924==    by 0x10D9F9: buffer_create (serializacion.c:24)
+==107924==    by 0x10DD20: buffer_recieve (serializacion.c:113)
+==107924==    by 0x10BB85: atender_cpu (memoria.c:351)
+==107924==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==107924==    by 0x499AA03: clone (clone.S:100)
+==107924== 
+==107924== LEAK SUMMARY:
+==107924==    definitely lost: 4,119 bytes in 367 blocks
+==107924==    indirectly lost: 1,611 bytes in 95 blocks
+==107924==      possibly lost: 816 bytes in 3 blocks
+==107924==    still reachable: 9,783 bytes in 73 blocks
+==107924==         suppressed: 0 bytes in 0 blocks
+==107924== Reachable blocks (those to which a pointer was found) are not shown.
+==107924== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==107924== 
+==107924== For lists of detected and suppressed errors, rerun with: -s
+==107924== ERROR SUMMARY: 25 errors from 25 contexts (suppressed: 0 from 0)

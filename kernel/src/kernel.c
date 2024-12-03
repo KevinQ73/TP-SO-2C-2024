@@ -206,16 +206,6 @@ void poner_en_exit(uint32_t pid, uint32_t tid){
     }
     change_thread_state(pid, tid, EXIT_STATE);
 
-    t_paquete* paquete = crear_paquete(FINALIZAR_HILO);
-    t_buffer* buffer = buffer_create(
-        sizeof(int)*2
-    );
-
-    buffer_add_uint32(buffer, &pid, kernel_log);
-    buffer_add_uint32(buffer, &tid, kernel_log);
-
-    paquete->buffer = buffer;
-
     char* response_memoria = avisar_fin_hilo_memoria(&pid, &tid);
     log_debug(kernel_log, "STRING RECIBIDO poner_en_exit: %s", response_memoria);
 
@@ -840,6 +830,8 @@ char* avisar_creacion_proceso_memoria(int* pid, int* size_process, t_log* kernel
     pthread_mutex_lock(&mutex_uso_fd_memoria);
         int socket_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, socket_memoria);
+        eliminar_paquete(paquete);
+
         char* response_memoria = recibir_mensaje(socket_memoria, kernel_log);
         log_debug(kernel_log, "STRING RECIBIDO avisar_creacion_proceso_memoria: %s", response_memoria);
         close(socket_memoria);
@@ -865,6 +857,8 @@ char* avisar_creacion_hilo_memoria(int* pid, int* tid, char* path, int* priorida
     pthread_mutex_lock(&mutex_uso_fd_memoria);
         int socket_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, socket_memoria);
+        eliminar_paquete(paquete);
+
         char* response_memoria = recibir_mensaje(socket_memoria, kernel_log);
         log_debug(kernel_log, "STRING RECIBIDO avisar_creacion_hilo_memoria: %s", response_memoria);
         close(socket_memoria);
@@ -900,8 +894,8 @@ char* avisar_fin_hilo_memoria(uint32_t* pid, uint32_t* tid){
         2*sizeof(int)
     );
 
-    buffer_add_uint32(buffer, (uint32_t*)pid, kernel_log);
-    buffer_add_uint32(buffer, (uint32_t*)tid, kernel_log);
+    buffer_add_uint32(buffer, pid, kernel_log);
+    buffer_add_uint32(buffer, tid, kernel_log);
 
     paquete->buffer = buffer;
 
@@ -1020,6 +1014,8 @@ void* syscall_process_create(t_buffer* buffer, t_pid_tid pid_tid){
     poner_en_new(pcb);
     enviar_aviso_syscall("PROCESO INICIALIZADO", &codigo);
     log_info(kernel_log,"## PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
+
+    buffer_destroy(buffer);
 }   
 
 void* syscall_process_exit(t_pid_tid pid_tid_recibido){
@@ -1062,6 +1058,7 @@ void* syscall_thread_create(t_buffer* buffer, t_pid_tid pid_tid){
         log_debug(kernel_log, "Rompimos algo con syscall_thread_create");
         abort();
     }
+    buffer_destroy(buffer);
 }
 
 void* syscall_thread_join(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1081,6 +1078,7 @@ void* syscall_thread_join(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("HILO_NO_BLOQUEADO", &codigo);
         log_debug(kernel_log, "## El hilo no existe o ya finalizó, continuo ejecución");
     }
+    buffer_destroy(buffer);
 }
 
 void* syscall_thread_exit(t_pid_tid pid_tid){
@@ -1113,6 +1111,7 @@ void* syscall_thread_cancel(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("HILO_NO_CANCELADO", &codigo);
         log_debug(kernel_log, "## El hilo no existe o ya finalizó, continuo ejecución");
     }
+    buffer_destroy(buffer);
 }
 
 void* syscall_io(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1133,6 +1132,8 @@ void* syscall_io(t_buffer* buffer, t_pid_tid pid_tid){
 
     pthread_create(&hilo_io, NULL, ejecutar_io, args);
     pthread_detach(hilo_io);
+
+    buffer_destroy(buffer);
 }
 
 void* syscall_mutex_create(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1146,6 +1147,8 @@ void* syscall_mutex_create(t_buffer* buffer, t_pid_tid pid_tid){
 
     t_mutex* mutexCreado = create_mutex(nombre_mutex);
     add_mutex_to_process(mutexCreado, pid_tid.pid);
+
+    buffer_destroy(buffer);
 }
 
 void* syscall_mutex_lock(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1172,6 +1175,8 @@ void* syscall_mutex_lock(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
+
+    buffer_destroy(buffer);
 }
 
 void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1197,7 +1202,7 @@ void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
-    
+    buffer_destroy(buffer);
 }
 
 void* syscall_dump_memory(t_pid_tid pid_tid){
@@ -1219,6 +1224,8 @@ void* syscall_dump_memory(t_pid_tid pid_tid){
     pthread_mutex_lock(&mutex_uso_fd_memoria);
         int conexion_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, conexion_memoria);
+        eliminar_paquete(paquete);
+        
         log_debug(kernel_log, "SE ENVIO AVISO DE DUMP_MEMORY");
         char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
         log_debug(kernel_log, "RESPUESTA DE MEMORIA POR MEMORY DUMP: %s", respuesta_memoria);
