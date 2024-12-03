@@ -546,6 +546,8 @@ void create_process_state(uint32_t pid){
     pthread_mutex_lock(&mutex_uso_estado_hilos);
         dictionary_put(thread_states, key, estados_hilos);
     pthread_mutex_unlock(&mutex_uso_estado_hilos);
+
+    free(key);
 }
 
 void create_thread_state(uint32_t pid, uint32_t tid, uint32_t prioridad){
@@ -568,7 +570,8 @@ t_list* get_list_thread_state(uint32_t pid){
     char* key = string_itoa(pid);
     t_list* lista_estados_hilos = dictionary_get(thread_states, key);
     log_debug(kernel_log, "## Se obtuvo la lista de estados de hilos del PID: %d", pid);
-    
+    free(key);
+
     return lista_estados_hilos;
 }
 
@@ -1064,6 +1067,7 @@ void* syscall_thread_create(t_buffer* buffer, t_pid_tid pid_tid){
         log_debug(kernel_log, "Rompimos algo con syscall_thread_create");
         abort();
     }
+    free(path);
     free(respuesta_creacion_hilo);
 }
 
@@ -1263,7 +1267,7 @@ void destroy_process_state(){
 }
 
 void destroy_thread_state(t_list* lista_estados){
-    list_destroy(lista_estados);
+    list_destroy_and_destroy_elements(lista_estados, free);
 }
 
 /*------------------------- FINALIZACIÓN DEL MODULO -------------------------*/
