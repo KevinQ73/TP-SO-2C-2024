@@ -36,10 +36,9 @@ int main(int argc, char* argv[]) {
 
     // --------------------- Finalizacion del modulo----------------------
 
-    log_debug(kernel_log, "TERMINANDO KERNEL");
-    eliminar_logger(kernel_log);
-    eliminar_listas();
-    eliminar_colas();
+    log_warning(kernel_log, "TERMINANDO KERNEL");
+    finalizar_modulo();
+
     //LIBERAR COLAS Y ELEMENTOS QUE CONTIENE
 }
 
@@ -74,7 +73,6 @@ void iniciar_semaforos(){
 
 void iniciar_colas(){
     cola_new = queue_create();
-    cola_exit = queue_create();
 }
 
 void iniciar_primer_proceso(char* path, char* size){
@@ -250,8 +248,9 @@ void finalizar_hilos_de_proceso(uint32_t pid, uint32_t tid){
 
 void* planificador_corto_plazo(){
     char* planificacion = kernel_registro.algoritmo_planificacion;
-    hilo_en_ejecucion = malloc(sizeof(t_hilo_planificacion));
-    while (1)
+    hilo_en_ejecucion = NULL;
+    bool finalizar_corto_plazo = false;
+    while (hilo_en_ejecucion || !finalizar_corto_plazo)
     {
         hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
         if (hilo_en_ejecucion)
@@ -260,9 +259,10 @@ void* planificador_corto_plazo(){
             ejecutar_hilo(hilo_en_ejecucion);
         } else {
             log_info(kernel_log, "No hay más hilos para planificar, cierro modulo KERNEL");
-            sem_post(&kernel_activo);
+            finalizar_corto_plazo = true;
         }
     }
+    sem_post(&kernel_activo);
 }
 
 t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
@@ -1256,15 +1256,24 @@ void process_mutex_destroy(t_mutex* mutex){
 
 /*------------------------- FINALIZACIÓN DEL MODULO -------------------------*/
 
+void finalizar_modulo(){
+    eliminar_logger(kernel_log);
+    eliminar_config(kernel_config);
+    eliminar_listas();
+    eliminar_colas();
+}
+
 void eliminar_listas(){
-    /*list_clean_and_destroy_elements(hilo_exec,hilo_destroy);
-    list_clean_and_destroy_elements(procesos_creados,pcb_destroy);
-    list_clean_and_destroy_elements(hilos_block,hilo_destroy);*/
+    list_destroy(procesos_creados);
+    list_destroy(cola_ready);
+    list_destroy(lista_t_hilos_bloqueados);
+    list_destroy(lista_colas_multinivel);
+    list_destroy(lista_prioridades);
+    list_destroy(lista_hilo_en_ejecucion);
 }
 
 void eliminar_colas(){
-    queue_destroy_and_destroy_elements(cola_new,t_hilo_planificacion_destroy);
-    queue_destroy_and_destroy_elements(cola_exit,t_hilo_planificacion_destroy);
+    queue_destroy_and_destroy_elements(cola_new, pcb_destroy);
 }
 
 /*------------------------------- MISCELANEO --------------------------------*/

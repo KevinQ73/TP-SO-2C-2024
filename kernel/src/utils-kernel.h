@@ -53,4 +53,6 @@
 
     uint32_t siguiente_tid(int siguiente_tid);
 
+    void multilevel_queue_destroy(t_cola_prioridades* cola);
+
 #endif /* UTILS_KERNEL_H_ */

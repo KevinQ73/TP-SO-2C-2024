@@ -98,3 +98,8 @@ uint32_t siguiente_tid(int siguiente_tid){
     int tid = 0 + siguiente_tid;
     return tid;
 }
+
+void multilevel_queue_destroy(t_cola_prioridades* cola){
+    list_destroy_and_destroy_elements(cola->cola, free);
+    free(cola);
+}

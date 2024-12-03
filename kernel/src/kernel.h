@@ -41,7 +41,6 @@
     sem_t kernel_activo;
 
     t_queue* cola_new;
-    t_queue* cola_exit;
 
     int conexion_cpu;
     int conexion_memoria;
@@ -267,6 +266,8 @@
     void process_mutex_destroy(t_mutex* mutex);
 
     /*------------------------- FINALIZACIÓN DEL MODULO -------------------------*/
+
+    void finalizar_modulo();
 
     void eliminar_listas();
 
