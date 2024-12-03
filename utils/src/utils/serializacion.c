@@ -21,7 +21,7 @@ char* nombres_registros[11] = {
 /*--------------------------- TADs de Buffer ----------------------------*/
 
 t_buffer* buffer_create(uint32_t size){
-	t_buffer* buffer = malloc(size);
+	t_buffer* buffer = malloc(sizeof(t_buffer));
 	buffer->size = size;
 	buffer->offset = 0;
 	buffer->stream = NULL;
@@ -38,13 +38,29 @@ uint32_t buffer_size(t_buffer* buffer){
 }
 
 void buffer_add(t_buffer* buffer, void* data, uint32_t size){
+    if (!buffer) {
+        perror("Error: El buffer es NULL\n");
+        abort();
+    }
+
+    if (!data) {
+        perror("Error: Los datos son NULL\n");
+        abort();
+    }
+
     // Redimensionamos el buffer
-    buffer->size = buffer->offset + size;  // Incrementamos el tamaño del buffer
-    buffer->stream = realloc(buffer->stream, buffer->size);  // Redimensionamos el stream
-    
+    uint32_t new_size = buffer->offset + size;
+    void* new_stream = realloc(buffer->stream, new_size);
+    if (!new_stream) {
+        perror("Error al redimensionar el buffer");
+        abort();
+    }
+    buffer->stream = new_stream;
+    buffer->size = new_size;
+
     // Copiamos los datos en la posición actual del buffer
-    memcpy(buffer->stream + buffer->offset, data, size);
-    
+    memcpy((uint8_t*)buffer->stream + buffer->offset, data, size);
+
     // Avanzamos el offset
     buffer->offset += size;
 }

@@ -254,31 +254,55 @@ void* planificador_corto_plazo(){
     while (1)
     {
         hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
-        hilo_desalojado = false;
-        ejecutar_hilo(hilo_en_ejecucion);
+        if (hilo_en_ejecucion)
+        {
+            hilo_desalojado = false;
+            ejecutar_hilo(hilo_en_ejecucion);
+        } else {
+            log_info(kernel_log, "No hay más hilos para planificar, cierro modulo KERNEL");
+            sem_post(&kernel_activo);
+        }
     }
 }
 
 t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
-    t_hilo_planificacion* hilo;
+    t_hilo_planificacion* hilo = NULL;
 
     if (strcmp(planificacion, "FIFO") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
-            hilo = list_remove(cola_ready, 0);
+            if (list_size(cola_ready) > 0) {
+                hilo = list_remove(cola_ready, 0);
+            }
+            if (!hilo) {
+                log_warning(kernel_log, "No hay hilos en la cola ready");
+            } else {
+                log_info(kernel_log, "## [FIFO] Se quitó el hilo (%d:%d) de la COLA READY", hilo->pid_padre, hilo->tid_asociado);
+            }
         pthread_mutex_unlock(&mutex_cola_ready);
-        log_info(kernel_log, "## [FIFO] Se quitó el hilo (%d:%d) de la COLA READY", hilo->pid_padre, hilo->tid_asociado);
 
     } else if (strcmp(planificacion, "PRIORIDADES") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
-        hilo = thread_find_by_priority_schedule(lista_prioridades);
+            if (list_size(lista_prioridades) > 0) {
+                hilo = thread_find_by_priority_schedule(lista_prioridades);
+            }
+            if (!hilo) {
+                log_warning(kernel_log, "No hay hilos en la cola ready");
+            } else {
+                log_info(kernel_log, "## [PRIORIDADES] Se quitó el hilo (%d:%d) de la COLA READY", hilo->pid_padre, hilo->tid_asociado);
+            }
         pthread_mutex_unlock(&mutex_cola_ready);
 
     } else if (strcmp(planificacion, "CMN") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
-        hilo = thread_find_by_multilevel_queues_schedule(lista_colas_multinivel);
+            if (list_size(lista_prioridades) > 0){
+                hilo = thread_find_by_multilevel_queues_schedule(lista_colas_multinivel);
+            }
+            if (!hilo) {
+                log_warning(kernel_log, "No hay hilos en la cola ready");
+            }
         pthread_mutex_unlock(&mutex_cola_ready);
     }
     return hilo;
@@ -409,7 +433,6 @@ t_hilo_planificacion* thread_find_by_priority_schedule(t_list* lista_prioridades
     t_hilo_planificacion* hilo = thread_find_by_maximum_priority(lista_prioridades);
     t_hilo_planificacion* hilo_hallado = thread_remove_by_tid(lista_prioridades, hilo->pid_padre, hilo->tid_asociado);
     
-    log_info(kernel_log, "## [PRIORIDADES] Se quitó el hilo (%d:%d) de la COLA READY CON PRIORIDAD %d", hilo_hallado->pid_padre, hilo_hallado->tid_asociado, hilo_hallado->prioridad);
     return hilo_hallado;
 }
 

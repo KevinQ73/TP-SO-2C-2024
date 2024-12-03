@@ -1,0 +1,1320 @@
+==84680== Memcheck, a memory error detector
+==84680== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==84680== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==84680== Command: ./bin/memoria ./files/prueba_planificacion.config
+==84680== Parent PID: 84053
+==84680== 
+==84680== Thread 4:
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x10CE9A: obtener_espacio_desocupado (memoria.c:746)
+==84680==    by 0x10CC0F: hay_particion_disponible (memoria.c:668)
+==84680==    by 0x10B7BA: crear_proceso (memoria.c:260)
+==84680==    by 0x10B367: atender_solicitudes_kernel (memoria.c:165)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Uninitialised value was created by a stack allocation
+==84680==    at 0x49060F3: __futex_abstimed_wait_common64 (futex-internal.c:57)
+==84680==    by 0x49060F3: __futex_abstimed_wait_common (futex-internal.c:87)
+==84680==    by 0x49060F3: __futex_abstimed_wait_cancelable64 (futex-internal.c:139)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10D9E6: buffer_create (serializacion.c:25)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e0 is 0 bytes inside a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10D9EC: buffer_create (serializacion.c:26)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10D9F7: buffer_create (serializacion.c:27)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DA63: buffer_add (serializacion.c:42)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10DA6F: buffer_add (serializacion.c:42)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e0 is 0 bytes inside a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DA7D: buffer_add (serializacion.c:43)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10DA90: buffer_add (serializacion.c:43)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DA9B: buffer_add (serializacion.c:46)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DAA3: buffer_add (serializacion.c:46)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DABE: buffer_add (serializacion.c:49)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10DACA: buffer_add (serializacion.c:49)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DA63: buffer_add (serializacion.c:42)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10DA6F: buffer_add (serializacion.c:42)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e0 is 0 bytes inside a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DA7D: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10DA90: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DA9B: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DAA3: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DABE: buffer_add (serializacion.c:49)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10DACA: buffer_add (serializacion.c:49)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e4 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DEAA: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FFB7: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FE8B: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FEF3: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FF6F: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF90: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF93: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FF9D: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Syscall param sendto(len) contains uninitialised byte(s)
+==84680==    at 0x499C8FE: __libc_send (send.c:28)
+==84680==    by 0x499C8FE: send (send.c:23)
+==84680==    by 0x10DF31: enviar_paquete (serializacion.c:244)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Syscall param socketcall.sendto(msg) points to uninitialised byte(s)
+==84680==    at 0x499C8FE: __libc_send (send.c:28)
+==84680==    by 0x499C8FE: send (send.c:23)
+==84680==    by 0x10DF31: enviar_paquete (serializacion.c:244)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae2d7 is 7 bytes inside a block of size 15 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DE47: serializar_paquete (serializacion.c:226)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10E042: eliminar_paquete (serializacion.c:271)
+==84680==    by 0x10E175: enviar_mensaje (serializacion.c:315)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aae1e8 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Thread 5:
+==84680== Invalid write of size 4
+==84680==    at 0x10D9E6: buffer_create (serializacion.c:25)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b00 is 0 bytes inside a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10D9EC: buffer_create (serializacion.c:26)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b04 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10D9F7: buffer_create (serializacion.c:27)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b08 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DA63: buffer_add (serializacion.c:42)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b04 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10DA6F: buffer_add (serializacion.c:42)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b00 is 0 bytes inside a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DA7D: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b08 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10DA90: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b08 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DA9B: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b08 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DAA3: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b04 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DABE: buffer_add (serializacion.c:49)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b04 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10DACA: buffer_add (serializacion.c:49)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b04 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DEAA: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b08 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Syscall param sendto(len) contains uninitialised byte(s)
+==84680==    at 0x499C8FE: __libc_send (send.c:28)
+==84680==    by 0x499C8FE: send (send.c:23)
+==84680==    by 0x10DF31: enviar_paquete (serializacion.c:244)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Syscall param socketcall.sendto(msg) points to uninitialised byte(s)
+==84680==    at 0x499C8FE: __libc_send (send.c:28)
+==84680==    by 0x499C8FE: send (send.c:23)
+==84680==    by 0x10DF31: enviar_paquete (serializacion.c:244)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1bf7 is 7 bytes inside a block of size 15 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DE47: serializar_paquete (serializacion.c:226)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10E042: eliminar_paquete (serializacion.c:271)
+==84680==    by 0x10E175: enviar_mensaje (serializacion.c:315)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab1b08 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Thread 2:
+==84680== Invalid write of size 8
+==84680==    at 0x10D9F7: buffer_create (serializacion.c:27)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab3a18 is 8 bytes inside a block of size 9 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484DC80: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DA8B: buffer_add (serializacion.c:43)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FE1C: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DAB9: buffer_add (serializacion.c:46)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF63: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DAB9: buffer_add (serializacion.c:46)
+==84680==    by 0x10DB52: buffer_add_uint32 (serializacion.c:60)
+==84680==    by 0x10DB9C: buffer_add_string (serializacion.c:66)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10DA90: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab3a18 is 8 bytes inside a block of size 9 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FE1C: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DAB9: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FE29: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DAB9: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FFB7: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DAB9: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF63: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DAB9: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF93: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DAB9: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FE1C: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FE29: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF0D: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF10: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484FF1B: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF60: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Use of uninitialised value of size 8
+==84680==    at 0x484FF63: memcpy@GLIBC_2.2.5 (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DEC8: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10D9F7: buffer_create (serializacion.c:27)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10BB53: atender_cpu (memoria.c:349)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab94f8 is 8 bytes inside a block of size 12 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10BB53: atender_cpu (memoria.c:349)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10DA90: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BB53: atender_cpu (memoria.c:349)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4ab94f8 is 8 bytes inside a block of size 12 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10BB53: atender_cpu (memoria.c:349)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484DC80: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DA8B: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Thread 4:
+==84680== Invalid write of size 4
+==84680==    at 0x10D9E6: buffer_create (serializacion.c:25)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec180 is 0 bytes inside a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10D9EC: buffer_create (serializacion.c:26)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec184 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10D9F7: buffer_create (serializacion.c:27)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec188 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DA63: buffer_add (serializacion.c:42)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec184 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10DA6F: buffer_add (serializacion.c:42)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec180 is 0 bytes inside a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DA7D: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec188 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 8
+==84680==    at 0x10DA90: buffer_add (serializacion.c:43)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec188 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DA9B: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec188 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DAA3: buffer_add (serializacion.c:46)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec184 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 4
+==84680==    at 0x10DABE: buffer_add (serializacion.c:49)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec184 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid write of size 4
+==84680==    at 0x10DACA: buffer_add (serializacion.c:49)
+==84680==    by 0x10DBB2: buffer_add_string (serializacion.c:69)
+==84680==    by 0x10E12D: enviar_mensaje (serializacion.c:309)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec184 is 1 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10DEAA: serializar_paquete (serializacion.c:233)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec188 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Syscall param sendto(len) contains uninitialised byte(s)
+==84680==    at 0x499C8FE: __libc_send (send.c:28)
+==84680==    by 0x499C8FE: send (send.c:23)
+==84680==    by 0x10DF31: enviar_paquete (serializacion.c:244)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Syscall param socketcall.sendto(msg) points to uninitialised byte(s)
+==84680==    at 0x499C8FE: __libc_send (send.c:28)
+==84680==    by 0x499C8FE: send (send.c:23)
+==84680==    by 0x10DF31: enviar_paquete (serializacion.c:244)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec277 is 7 bytes inside a block of size 15 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DE47: serializar_paquete (serializacion.c:226)
+==84680==    by 0x10DF14: enviar_paquete (serializacion.c:242)
+==84680==    by 0x10E169: enviar_mensaje (serializacion.c:314)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10E042: eliminar_paquete (serializacion.c:271)
+==84680==    by 0x10E175: enviar_mensaje (serializacion.c:315)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x4aec188 is 5 bytes after a block of size 3 alloc'd
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10E112: enviar_mensaje (serializacion.c:308)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Thread 2:
+==84680== Conditional jump or move depends on uninitialised value(s)
+==84680==    at 0x484B235: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10E04D: eliminar_paquete (serializacion.c:271)
+==84680==    by 0x10E175: enviar_mensaje (serializacion.c:315)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== Invalid read of size 8
+==84680==    at 0x10C80C: buscar_instruccion (memoria.c:605)
+==84680==    by 0x10BBBB: atender_cpu (memoria.c:361)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  Address 0x10 is not stack'd, malloc'd or (recently) free'd
+==84680== 
+==84680== 
+==84680== Process terminating with default action of signal 11 (SIGSEGV)
+==84680==  Access not within mapped region at address 0x10
+==84680==    at 0x10C80C: buscar_instruccion (memoria.c:605)
+==84680==    by 0x10BBBB: atender_cpu (memoria.c:361)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680==  If you believe this happened as a result of a stack
+==84680==  overflow in your program's main thread (unlikely but
+==84680==  possible), you can try to increase the size of the
+==84680==  main thread stack using the --main-stacksize= flag.
+==84680==  The main thread stack size used in this run was 8388608.
+==84680== 
+==84680== HEAP SUMMARY:
+==84680==     in use at exit: 16,601 bytes in 539 blocks
+==84680==   total heap usage: 4,840 allocs, 4,301 frees, 196,403 bytes allocated
+==84680== 
+==84680== Thread 1:
+==84680== 10 bytes in 5 blocks are definitely lost in loss record 10 of 67
+==84680==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x486E64B: string_append (string.c:47)
+==84680==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==84680==    by 0x486E83F: string_from_vformat (string.c:74)
+==84680==    by 0x486E7D0: string_from_format (string.c:67)
+==84680==    by 0x486E881: string_itoa (string.c:79)
+==84680==    by 0x10B87C: crear_hilo (memoria.c:278)
+==84680==    by 0x10B44C: atender_solicitudes_kernel (memoria.c:182)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 12 bytes in 12 blocks are definitely lost in loss record 12 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x491D58E: strdup (strdup.c:42)
+==84680==    by 0x486E5FD: string_duplicate (string.c:43)
+==84680==    by 0x486E719: string_new (string.c:60)
+==84680==    by 0x10B2CA: atender_solicitudes_kernel (memoria.c:153)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 16 bytes in 1 blocks are definitely lost in loss record 19 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DD4F: crear_paquete (serializacion.c:210)
+==84680==    by 0x10E104: enviar_mensaje (serializacion.c:304)
+==84680==    by 0x10B386: atender_solicitudes_kernel (memoria.c:167)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 16 bytes in 1 blocks are definitely lost in loss record 20 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DD4F: crear_paquete (serializacion.c:210)
+==84680==    by 0x10E104: enviar_mensaje (serializacion.c:304)
+==84680==    by 0x10B4E4: atender_solicitudes_kernel (memoria.c:195)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 22 bytes in 11 blocks are definitely lost in loss record 23 of 67
+==84680==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x486E64B: string_append (string.c:47)
+==84680==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==84680==    by 0x486E83F: string_from_vformat (string.c:74)
+==84680==    by 0x486E7D0: string_from_format (string.c:67)
+==84680==    by 0x486E881: string_itoa (string.c:79)
+==84680==    by 0x10C922: actualizar_contexto_ejecucion (memoria.c:631)
+==84680==    by 0x10BB14: atender_cpu (memoria.c:346)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 40 (24 direct, 16 indirect) bytes in 1 blocks are definitely lost in loss record 32 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10BDD8: crear_contexto_proceso (memoria.c:412)
+==84680==    by 0x10B7E3: crear_proceso (memoria.c:264)
+==84680==    by 0x10B367: atender_solicitudes_kernel (memoria.c:165)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 65 bytes in 65 blocks are definitely lost in loss record 36 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x491D58E: strdup (strdup.c:42)
+==84680==    by 0x486E5FD: string_duplicate (string.c:43)
+==84680==    by 0x486E719: string_new (string.c:60)
+==84680==    by 0x10C827: buscar_instruccion (memoria.c:606)
+==84680==    by 0x10BBBB: atender_cpu (memoria.c:361)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 80 bytes in 5 blocks are definitely lost in loss record 38 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DD4F: crear_paquete (serializacion.c:210)
+==84680==    by 0x10E104: enviar_mensaje (serializacion.c:304)
+==84680==    by 0x10B467: atender_solicitudes_kernel (memoria.c:184)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 80 bytes in 5 blocks are definitely lost in loss record 39 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DD4F: crear_paquete (serializacion.c:210)
+==84680==    by 0x10E104: enviar_mensaje (serializacion.c:304)
+==84680==    by 0x10B53B: atender_solicitudes_kernel (memoria.c:205)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 96 bytes in 6 blocks are definitely lost in loss record 40 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DD4F: crear_paquete (serializacion.c:210)
+==84680==    by 0x10C5FA: enviar_contexto_solicitado (memoria.c:569)
+==84680==    by 0x10BAA9: atender_cpu (memoria.c:334)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 130 bytes in 65 blocks are definitely lost in loss record 42 of 67
+==84680==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x486E64B: string_append (string.c:47)
+==84680==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==84680==    by 0x486E83F: string_from_vformat (string.c:74)
+==84680==    by 0x486E7D0: string_from_format (string.c:67)
+==84680==    by 0x486E881: string_itoa (string.c:79)
+==84680==    by 0x10C7E6: buscar_instruccion (memoria.c:603)
+==84680==    by 0x10BBBB: atender_cpu (memoria.c:361)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 144 (96 direct, 48 indirect) bytes in 6 blocks are definitely lost in loss record 43 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10DCA7: buffer_recieve (serializacion.c:97)
+==84680==    by 0x10BA34: atender_cpu (memoria.c:326)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 176 bytes in 11 blocks are definitely lost in loss record 48 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DD4F: crear_paquete (serializacion.c:210)
+==84680==    by 0x10E104: enviar_mensaje (serializacion.c:304)
+==84680==    by 0x10BB53: atender_cpu (memoria.c:349)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 188 bytes in 5 blocks are definitely lost in loss record 49 of 67
+==84680==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x486E64B: string_append (string.c:47)
+==84680==    by 0x10D83A: leer_instrucciones (files.c:42)
+==84680==    by 0x10BE52: crear_contexto_hilo (memoria.c:425)
+==84680==    by 0x10B8BC: crear_hilo (memoria.c:281)
+==84680==    by 0x10B44C: atender_solicitudes_kernel (memoria.c:182)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 220 bytes in 5 blocks are definitely lost in loss record 51 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10BEF2: buscar_contexto (memoria.c:442)
+==84680==    by 0x10BA99: atender_cpu (memoria.c:333)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 272 bytes in 1 blocks are possibly lost in loss record 52 of 67
+==84680==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==84680==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==84680==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==84680==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==84680==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==84680==    by 0x10B138: atender_solicitudes (memoria.c:114)
+==84680==    by 0x10AE3F: main (memoria.c:34)
+==84680== 
+==84680== 272 bytes in 1 blocks are possibly lost in loss record 53 of 67
+==84680==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==84680==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==84680==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==84680==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==84680==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==84680==    by 0x10B16A: atender_solicitudes (memoria.c:117)
+==84680==    by 0x10AE3F: main (memoria.c:34)
+==84680== 
+==84680== 387 (192 direct, 195 indirect) bytes in 12 blocks are definitely lost in loss record 55 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10DCA7: buffer_recieve (serializacion.c:97)
+==84680==    by 0x10B2E5: atender_solicitudes_kernel (memoria.c:157)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 440 bytes in 10 blocks are definitely lost in loss record 56 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10C095: recibir_contexto (memoria.c:484)
+==84680==    by 0x10BAE9: atender_cpu (memoria.c:342)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 544 bytes in 2 blocks are possibly lost in loss record 58 of 67
+==84680==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==84680==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==84680==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==84680==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==84680==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==84680==    by 0x10B267: atender_kernel (memoria.c:142)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 748 (176 direct, 572 indirect) bytes in 11 blocks are definitely lost in loss record 60 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10DCA7: buffer_recieve (serializacion.c:97)
+==84680==    by 0x10BABB: atender_cpu (memoria.c:338)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 1,040 bytes in 65 blocks are definitely lost in loss record 64 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10DD4F: crear_paquete (serializacion.c:210)
+==84680==    by 0x10E104: enviar_mensaje (serializacion.c:304)
+==84680==    by 0x10BC02: atender_cpu (memoria.c:363)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== 1,820 (1,040 direct, 780 indirect) bytes in 65 blocks are definitely lost in loss record 66 of 67
+==84680==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==84680==    by 0x10D9DA: buffer_create (serializacion.c:24)
+==84680==    by 0x10DCA7: buffer_recieve (serializacion.c:97)
+==84680==    by 0x10BB65: atender_cpu (memoria.c:353)
+==84680==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==84680==    by 0x499AA03: clone (clone.S:100)
+==84680== 
+==84680== LEAK SUMMARY:
+==84680==    definitely lost: 4,119 bytes in 367 blocks
+==84680==    indirectly lost: 1,611 bytes in 95 blocks
+==84680==      possibly lost: 1,088 bytes in 4 blocks
+==84680==    still reachable: 9,783 bytes in 73 blocks
+==84680==         suppressed: 0 bytes in 0 blocks
+==84680== Reachable blocks (those to which a pointer was found) are not shown.
+==84680== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==84680== 
+==84680== For lists of detected and suppressed errors, rerun with: -s
+==84680== ERROR SUMMARY: 2108 errors from 106 contexts (suppressed: 0 from 0)
