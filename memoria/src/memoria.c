@@ -45,32 +45,6 @@ int main(int argc, char* argv[]) {
 }
 
 /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
-/*
-void enviar_solicitud_fs(){
-    for (int i = 0; i < 2; i++)
-    {
-        t_paquete* paquete = crear_paquete(DUMP_MEMORY);
-        t_buffer* buffer = buffer_create(
-            sizeof(uint32_t)*3
-        );
-
-        buffer_add_uint32(buffer, &i, memoria_log);
-        buffer_add_uint32(buffer, &i, memoria_log);
-        buffer_add_uint32(buffer, &i, memoria_log);
-
-        paquete->buffer = buffer;
-        pthread_mutex_lock(&mutex_fd_filesystem);
-            int fd_conexion = crear_conexion_con_fs(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
-            enviar_paquete(paquete, fd_conexion);
-            char* response_fs = recibir_mensaje(fd_conexion, memoria_log);
-            log_debug(memoria_log, "STRING RECIBIDO enviar_solicitud_fs: %s", response_fs);
-            close(fd_conexion);
-        pthread_mutex_unlock(&mutex_fd_filesystem);
-
-        eliminar_paquete(paquete);
-    }
-}
-*/
 
 void iniciar_memoria(){
     log_info(memoria_log, "MEMORIA INICIALIZADA\n");
@@ -205,38 +179,31 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         close(fd_memoria);
         break;
 
-    case DUMP_MEMORY:
+    case AVISO_DUMP_MEMORY:
         pid = buffer_read_uint32(buffer);
         tid = buffer_read_uint32(buffer);
-        size_process = buffer_read_uint32(buffer);
 
         char* timestamp = temporal_get_string_time("%H:%M:%S:%MS");
         char* nombre_archivo = string_new();
 
-        char* nombre_pid = string_itoa(pid);
-        char* nombre_tid = string_itoa(tid);
-        char* nombre_size = string_itoa(size_process);
-
         t_contexto *contexto = buscar_contexto(pid, tid);
         void * contenido_proceso = leer_de_memoria(contexto->limite, contexto->base);
-
-        string_append_with_format(&nombre_archivo, "%<",nombre_pid,"%>","%<", nombre_tid,"%>","%<", timestamp,">",".dmp");
+        string_append_with_format(&nombre_archivo, "<%s><%s><%s>.dmp",string_itoa(pid), string_itoa(tid), timestamp);
 
         t_paquete *archivo_fs = crear_paquete(DUMP_MEMORY);
-        
-        t_buffer* buffer = buffer_create(sizeof(nombre_archivo)+sizeof(uint32_t)+sizeof(contenido_proceso));
 
-        buffer_add_string(buffer, sizeof(nombre_archivo), nombre_archivo, memoria_log);
-        buffer_add_uint32(buffer, size_process, memoria_log);
-        buffer_add_string(buffer, sizeof(contenido_proceso), contenido_proceso, memoria_log);
+        t_buffer* buffer = buffer_create(strlen(nombre_archivo)+2*sizeof(uint32_t)+strlen(contenido_proceso));
+
+        buffer_add_string(buffer, strlen(nombre_archivo), nombre_archivo, memoria_log);
+        buffer_add_string(buffer, strlen(contenido_proceso), contenido_proceso, memoria_log);
 
         archivo_fs->buffer = buffer;
 
-        enviar_paquete(archivo_fs,memoria_registro.puerto_filesystem);
+        enviar_paquete(archivo_fs,conexion_filesystem);
 
         log_info(memoria_log, "## [MEMORIA:KERNEL] Memory Dump solicitado - (PID:TID) - (<%d>:<%d>)",pid,tid);
 
-        char* response_fs = recibir_mensaje(fd_conexion, memoria_log);
+        char* response_fs = recibir_mensaje(conexion_filesystem, memoria_log);
         if(response_fs = "OK_FS"){
 			enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
 		}else {
@@ -318,10 +285,10 @@ void* atender_cpu(){
         t_contexto* contexto;
 
         int op = recibir_operacion(fd_conexion_cpu);
+        buffer = buffer_recieve(fd_conexion_cpu);
 
         switch (op){
         case SOLICITAR_CONTEXTO_EJECUCION: //Aca me solicita el contexto de un pid_tid, hay que ver que enum usamos
-            buffer = buffer_recieve(fd_conexion_cpu);
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
             
@@ -333,7 +300,6 @@ void* atender_cpu(){
             break;
 
         case ACTUALIZAR_CONTEXTO_EJECUCION: //Aca me pide actualizar el contexto de un pid_tid, hay que ver que enum usamos
-        	buffer = buffer_recieve(fd_conexion_cpu);
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
 
@@ -343,13 +309,11 @@ void* atender_cpu(){
 
             actualizar_contexto_ejecucion(contexto_recibido, pid_tid_recibido.pid, pid_tid_recibido.tid);
             log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            //escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
+            escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
             enviar_mensaje("OK_CONTEXTO", fd_conexion_cpu, memoria_log);
             break;
             
         case PETICION_INSTRUCCION:
-        	buffer = buffer_recieve(fd_conexion_cpu);
-
         	pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
         	uint32_t programCounter = buffer_read_uint32(buffer);
@@ -362,7 +326,6 @@ void* atender_cpu(){
         	break;
 
         case WRITE_MEM:
-            buffer = buffer_recieve(fd_conexion_cpu);
             pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
 
@@ -370,20 +333,22 @@ void* atender_cpu(){
             desplazamiento = buffer_read_uint32(buffer);
             valor_a_escribir = buffer_read_uint32(buffer);
 
+            direccion_fisica = base + desplazamiento;
+
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_info(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
-
-            //escribir_en_memoria(&dato, 4, direccion_fisica);
+            escribir_en_memoria(&valor_a_escribir, 4, direccion_fisica);
             enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
             break;
             
         case READ_MEM:
-            buffer = buffer_recieve(fd_conexion_cpu);
             pid_tid_recibido.pid = buffer_read_uint32(buffer);
         	pid_tid_recibido.tid = buffer_read_uint32(buffer);
 
             base = buffer_read_uint32(buffer);
             desplazamiento = buffer_read_uint32(buffer);
+
+            direccion_fisica = base + desplazamiento;
 
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_info(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
@@ -507,13 +472,6 @@ t_contexto* recibir_contexto(t_buffer* buffer){
     return contexto;
 }
 
-/*t_contexto* remover_contexto_hilo(uint32_t pid, uint32_t tid){
-    t_contexto_proceso* contexto_proceso;
-
-    contexto_proceso = buscar_contexto_proceso(pid);
-
-}*/
-
 t_contexto_hilo* thread_get_by_tid(t_list* lista_hilos, int tid){
     bool _list_contains(void* ptr) {
 	    t_contexto_hilo* hilo = (t_contexto_hilo*) ptr;
@@ -592,9 +550,13 @@ void enviar_contexto_solicitado(t_contexto* contexto){
 void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura){
     void* datos_memoria = malloc(tamanio_lectura);
 
-    memcpy(datos_memoria, memoria + inicio_lectura, tamanio_lectura);
+    memcpy(datos_memoria, memoria + inicio_lectura, tamanio_lectura*sizeof(char));
 
     return datos_memoria;
+}
+
+void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura){
+    memcpy(memoria + inicio_escritura, buffer_escritura, tamanio_buffer*sizeof(char));
 }
 
 char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){

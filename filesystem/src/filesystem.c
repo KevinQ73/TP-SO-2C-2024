@@ -75,26 +75,26 @@ void* atender_solicitudes(void* fd_conexion){
 
     int operacion_memoria = recibir_operacion(fd_memoria);
 
-    if(operacion_memoria == DUMP_MEMORY){
-        log_info(filesystem_log, "MEMORY DUMP LEIDO");
-		t_paquete *recibido = recibir_paquete(fd_memoria);
-		buffer = buffer_recieve(fd_memoria);
-
-		uint32_t tamanio_buffer=buffer_read_uint32(buffer);
+	buffer = buffer_recieve(fd_memoria);
+	switch(operacion_memoria){
+		case DUMP_MEMORY:
+			log_info(filesystem_log, "MEMORY DUMP LEIDO");
+			uint32_t tamanio_buffer;
+			uint32_t tamanio;
 	
-		char* nombre = buffer_read_string(buffer,tamanio_buffer);
-		uint32_t tamanio = buffer_read_uint32(buffer);
-		void* contenido = buffer_read_string(buffer,tamanio_buffer);
+			char* nombre = buffer_read_string(buffer, &tamanio_buffer);
+			void* contenido = buffer_read_string(buffer,&tamanio);
 
-		if(dump_memory(nombre, tamanio, contenido)){
-			enviar_mensaje("OK_FS", fd_memoria, filesystem_log);
-		}else {
-			enviar_mensaje("ERROR", fd_memoria, filesystem_log);
-		}
-    } else {
-        log_error(filesystem_log, "OPERACIÓN ERRONEA");
-        abort();
-    }
+			if(dump_memory(nombre, tamanio, contenido) == EXIT_SUCCESS){
+				enviar_mensaje("OK_FS", fd_memoria, filesystem_log);
+			}else {
+				enviar_mensaje("ERROR", fd_memoria, filesystem_log);
+			}
+		break;
+		default:
+			log_debug(filesystem_log, "## [FILESYSTEM:MEMORIA] OPERACIÓN DE MEMORIA ERRONEA");
+        break;
+	}
 }
 
 //Funciones del dump_memory
@@ -104,17 +104,18 @@ int dump_memory(char* nombre_archivo, int tamanio, void* contenido){
 	u_int32_t* puntero_bloques = buscar_bloques_bitmap(bloques_totales);
 
 	if(puntero_bloques == NULL || ((filesystem_registro.block_size/sizeof(u_int32_t)) < cantidad_bloques(tamanio))){
-		printf("No hay espacio suficiente para almacenar los bloques de datos\n");
-        //Aca debo enviar mensaje a Memoria de que no se puede hacer DUMP MEMORY
+		log_debug(filesystem_log, "No hay espacio suficiente para almacenar los bloques de datos\n");
+		return EXIT_FAILURE;
 	}else{
 		asignar_bloques_bitmap(puntero_bloques, bloques_totales);
-		log_debug(filesystem_log, "## Bloque asignado: <%i> - Archivo: <%s> - Bloques Libres: <%i>\n", puntero_bloques[0], nombre_archivo, bloques_libres);
+		log_info(filesystem_log, "## Bloque asignado: <%i> - Archivo: <%s> - Bloques Libres: <%i>\n", puntero_bloques[0], nombre_archivo, bloques_libres);
 		escribir_datos_bloque(nombre_archivo, puntero_bloques, bloques_totales, contenido);
 		crear_metadata(nombre_archivo, puntero_bloques[0], tamanio);
-		log_debug(filesystem_log, "## Archivo Creado: <%s> - Tamaño: <%i>\n", nombre_archivo, tamanio);
-		log_debug(filesystem_log, "## Fin de solicitud - Archivo: <%s>\n", nombre_archivo);
+		log_info(filesystem_log, "## Archivo Creado: %s - Tamaño: <%i>\n", nombre_archivo, tamanio);
+		log_info(filesystem_log, "## Fin de solicitud - Archivo: %s\n", nombre_archivo);
 
 		free(puntero_bloques);
+		return EXIT_SUCCESS;
 	}
 }
 
@@ -166,14 +167,14 @@ int escribir_datos_bloque(char* nombre_archivo, u_int32_t* puntero_bloque, int b
 		posicion += sizeof(u_int32_t);
 	}
 
-	log_debug(filesystem_log, "## Acceso Bloque - Archivo: <%s> - Tipo Bloque: <INDICE> - Bloque File System <%i>\n", nombre_archivo, puntero_bloque[0]);
+	log_info(filesystem_log, "## Acceso Bloque - Archivo: %s - Tipo Bloque: <INDICE> - Bloque File System <%i>\n", nombre_archivo, puntero_bloque[0]);
 	usleep(filesystem_registro.retardo_acceso_bloque * 1000);
 
 	//Escribir bloque de datos
 	for(int i=1;i<bloques_totales;i++){
 		memcpy(buffer_bloques + inicio_bloque(puntero_bloque[i]), contenido + size, filesystem_registro.block_size);
 
-		log_debug(filesystem_log, "## Acceso Bloque - Archivo: <%s> - Tipo Bloque: <DATOS> - Bloque File System <%i>\n", nombre_archivo, puntero_bloque[i]);
+		log_info(filesystem_log, "## Acceso Bloque - Archivo: %s - Tipo Bloque: <DATOS> - Bloque File System <%i>\n", nombre_archivo, puntero_bloque[i]);
 		usleep(filesystem_registro.retardo_acceso_bloque * 1000);
 		size += filesystem_registro.block_size;
 	}
@@ -196,7 +197,7 @@ void crear_bitmap(int file_descriptor, int size){
         close(file_descriptor);
         abort();
     }
-
+	bloques_libres = 0;
     memset(puntero_bitmap, 0, size);
 
     buffer_bitmap = bitarray_create_with_mode(puntero_bitmap, size, LSB_FIRST);
@@ -206,29 +207,18 @@ void crear_bitmap(int file_descriptor, int size){
         close(file_descriptor);
         abort();
     }
+
+	for(int i=0;i<buffer_bitmap->size;i++){
+		bitarray_clean_bit(buffer_bitmap, i);
+		bloques_libres++;
+	}
+
     if (msync(puntero_bitmap, buffer_bitmap->size, MS_SYNC) == -1) {
         log_error(filesystem_log, "Error en la sincronización con msync()\n");
     }
 
     close(file_descriptor);
 
-    // Aca pruebo hacer asignaciones, aunque esto aca no tendria que estar
-    //for (int i = 0; i < 8; i++) {
-        //assignBlock(i);
-    //}
-
-
-	//struct stat buf;
-
-	/*fstat(file_descriptor, &buf);
-	puntero_bitmap = mmap(NULL, buf.st_size, PROT_READ|PROT_WRITE, MAP_SHARED, file_descriptor, 0);
-	buffer_bitmap = bitarray_create_with_mode(puntero_bitmap, buf.st_size, LSB_FIRST);
-	bloques_libres = 0; //Para limpiar los bloques de bitmap
-
-	for(int i=0; i < bitarray_get_max_bit(buffer_bitmap) ;i++){
-		bitarray_clean_bit(buffer_bitmap, i);
-		bloques_libres++;
-	}*/
 }
 
 void abrir_bitmap(int file_descriptor){
@@ -273,18 +263,15 @@ int asignar_bloques_bitmap(u_int32_t* puntero_bloques, int longitud){
 //Archivos de metadata
 
 int crear_metadata(char* ruta, int bloque_indexado, int tamanio_archivo){
-	char* ruta_archivo = "./mount_dir/files/";
+	printf("RUTA(%s)\n", ruta);
+
+	char* ruta_archivo = string_duplicate(filesystem_registro.path_mount_dir);
+	string_append(&ruta_archivo, "/files/");
 	string_append(&ruta_archivo, ruta);
-	
-	/*
-	char* ruta_archivo = ruta_absoluta("files/");
-	ruta_archivo = realloc(ruta_archivo, strlen(ruta_archivo) + strlen(ruta) + 1);
-	strcat(ruta_archivo, ruta);
-	*/
 
 	int fd_metadata = open(ruta_archivo, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 
-	//log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BLOQUES.DAT> - Tamaño: <%d>", size_bloques);
+	log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BLOQUES.DAT> - Tamaño: <%d>", tamanio_archivo);
 
 	char* bloque_string = malloc(50*sizeof(char));
 	char* tamanio_string = malloc(50*sizeof(char));

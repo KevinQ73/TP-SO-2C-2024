@@ -141,6 +141,6 @@
 
     t_hueco* remover_hueco_que_contiene_byte(uint32_t byte);
 
-    //void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
+    void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
 
 #endif /* MEMORIA_SRC_MEMORIA_H_ */
