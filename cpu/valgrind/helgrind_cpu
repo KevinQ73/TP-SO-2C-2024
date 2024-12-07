@@ -1,0 +1,774 @@
+==334749== Helgrind, a thread error detector
+==334749== Copyright (C) 2007-2017, and GNU GPL'd, by OpenWorks LLP et al.
+==334749== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==334749== Command: ./bin/cpu ./files/prueba_planificacion.config
+==334749== Parent PID: 321450
+==334749== 
+
+==334749== ---Thread-Announcement------------------------------------------
+==334749== 
+==334749== Thread #3 was created
+==334749==    at 0x49A19F3: clone (clone.S:76)
+==334749==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==334749==    by 0x49106D8: create_thread (pthread_create.c:295)
+==334749==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==334749==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x10BCA4: main (cpu.c:43)
+==334749== 
+==334749== ---Thread-Announcement------------------------------------------
+==334749== 
+==334749== Thread #2 was created
+==334749==    at 0x49A19F3: clone (clone.S:76)
+==334749==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==334749==    by 0x49106D8: create_thread (pthread_create.c:295)
+==334749==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==334749==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x10BC72: main (cpu.c:39)
+==334749== 
+==334749== ---Thread-Announcement------------------------------------------
+==334749== 
+==334749== Thread #1 is the program's root thread
+==334749== 
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during write of size 1 at 0x4AA8EB0 by thread #3
+==334749== Locks held: none
+==334749==    at 0x4859796: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F114C: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F114C: __vfprintf_internal (vfprintf-internal.c:1263)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x10E43D: buffer_recieve (serializacion.c:117)
+==334749==    by 0x10C144: atender_puerto_interrupt (cpu.c:172)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x48750B8: log_debug (log.c:89)
+==334749==    by 0x10EA23: enviar_pid_tid (serializacion.c:368)
+==334749==  Address 0x4aa8eb0 is 0 bytes inside a block of size 1,024 alloc'd
+==334749==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==334749==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==334749==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==334749==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==334749==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x487518F: log_info (log.c:91)
+==334749==    by 0x10EF70: iniciar_servidor (servidor.c:42)
+==334749==    by 0x10BB3E: main (cpu.c:17)
+==334749==  Block was alloc'd by thread #1
+==334749== 
+
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during write of size 1 at 0x4AA8EB1 by thread #3
+==334749== Locks held: none
+==334749==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F1CA8: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F1CA8: __vfprintf_internal (vfprintf-internal.c:1516)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x10E43D: buffer_recieve (serializacion.c:117)
+==334749==    by 0x10C144: atender_puerto_interrupt (cpu.c:172)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x48750B8: log_debug (log.c:89)
+==334749==    by 0x10EA23: enviar_pid_tid (serializacion.c:368)
+==334749==  Address 0x4aa8eb1 is 1 bytes inside a block of size 1,024 alloc'd
+==334749==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==334749==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==334749==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==334749==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==334749==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x487518F: log_info (log.c:91)
+==334749==    by 0x10EF70: iniciar_servidor (servidor.c:42)
+==334749==    by 0x10BB3E: main (cpu.c:17)
+==334749==  Block was alloc'd by thread #1
+==334749== 
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during write of size 1 at 0x4AAA0F6 by thread #3
+==334749== Locks held: none
+==334749==    at 0x4859796: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48FBA9C: fputs (iofputs.c:38)
+==334749==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==334749==    by 0x48754D9: _log_write_in_level (log.c:138)
+==334749==    by 0x4875266: log_warning (log.c:93)
+==334749==    by 0x10C197: atender_puerto_interrupt (cpu.c:177)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x4859796: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48FBA9C: fputs (iofputs.c:38)
+==334749==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==334749==    by 0x48754D9: _log_write_in_level (log.c:138)
+==334749==    by 0x48750B8: log_debug (log.c:89)
+==334749==    by 0x10ABD3: recibir_contexto_memoria (utils-cpu.c:101)
+==334749==    by 0x10AC74: solicitar_contexto_ejecucion (utils-cpu.c:115)
+==334749==  Address 0x4aaa0f6 is 86 bytes inside a block of size 4,096 alloc'd
+==334749==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==334749==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==334749==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==334749==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==334749==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48FBA9C: fputs (iofputs.c:38)
+==334749==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==334749==    by 0x48754D9: _log_write_in_level (log.c:138)
+==334749==    by 0x487518F: log_info (log.c:91)
+==334749==    by 0x10EF70: iniciar_servidor (servidor.c:42)
+==334749==    by 0x10BB3E: main (cpu.c:17)
+==334749==  Block was alloc'd by thread #1
+==334749== 
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during write of size 1 at 0x4AA8EB2 by thread #3
+==334749== Locks held: none
+==334749==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x4875266: log_warning (log.c:93)
+==334749==    by 0x10C197: atender_puerto_interrupt (cpu.c:177)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x48750B8: log_debug (log.c:89)
+==334749==    by 0x10EA23: enviar_pid_tid (serializacion.c:368)
+==334749==  Address 0x4aa8eb2 is 2 bytes inside a block of size 1,024 alloc'd
+==334749==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==334749==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==334749==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==334749==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==334749==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x487518F: log_info (log.c:91)
+==334749==    by 0x10EF70: iniciar_servidor (servidor.c:42)
+==334749==    by 0x10BB3E: main (cpu.c:17)
+==334749==  Block was alloc'd by thread #1
+==334749== 
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749==  Lock at 0x114180 was first observed
+==334749==    at 0x4854BFE: pthread_mutex_init (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x10BD21: iniciar_semaforos (cpu.c:60)
+==334749==    by 0x10BC4F: main (cpu.c:37)
+==334749==  Location 0x114180 is 0 bytes inside global var "mutex_quantum"
+==334749==  declared at cpu.h:24
+==334749== 
+==334749== Possible data race during write of size 1 at 0x1141E2 by thread #3
+==334749== Locks held: 1, at address 0x114180
+==334749==    at 0x10BFB1: true_quantum (cpu.c:125)
+==334749==    by 0x10C1A1: atender_puerto_interrupt (cpu.c:178)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous read of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x10BFFD: false_quantum (cpu.c:136)
+==334749==    by 0x10BDE5: atender_puerto_dispatch (cpu.c:77)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749==  Location 0x1141e2 is 0 bytes inside global var "quantum_is_called"
+==334749==  declared at cpu.h:32
+==334749== 
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during write of size 1 at 0x4AA8F19 by thread #3
+==334749== Locks held: none
+==334749==    at 0x4859796: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x4875266: log_warning (log.c:93)
+==334749==    by 0x10DDB7: recibir_aviso_syscall (cpu.c:756)
+==334749==    by 0x10C1D2: atender_puerto_interrupt (cpu.c:185)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x4859796: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x487518F: log_info (log.c:91)
+==334749==    by 0x10C736: execute (cpu.c:296)
+==334749==  Address 0x4aa8f19 is 105 bytes inside a block of size 1,024 alloc'd
+==334749==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==334749==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==334749==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==334749==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==334749==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==334749==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==334749==    by 0x48DC79E: printf (printf.c:33)
+==334749==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==334749==    by 0x4875527: _log_write_in_level (log.c:146)
+==334749==    by 0x487518F: log_info (log.c:91)
+==334749==    by 0x10EF70: iniciar_servidor (servidor.c:42)
+==334749==    by 0x10BB3E: main (cpu.c:17)
+==334749==  Block was alloc'd by thread #1
+==334749== 
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during write of size 1 at 0x1141E4 by thread #3
+==334749== Locks held: none
+==334749==    at 0x10C1D3: atender_puerto_interrupt (cpu.c:185)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous read of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x10C9CA: execute_set (cpu.c:347)
+==334749==    by 0x10C3B2: execute (cpu.c:247)
+==334749==    by 0x10C2C8: ejecutar_hilo (cpu.c:233)
+==334749==    by 0x10BE1E: atender_puerto_dispatch (cpu.c:80)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749==  Location 0x1141e4 is 0 bytes inside global var "recibo_kernel_ok"
+==334749==  declared at cpu.h:35
+==334749== 
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749==  Lock at 0x114180 was first observed
+==334749==    at 0x4854BFE: pthread_mutex_init (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x10BD21: iniciar_semaforos (cpu.c:60)
+==334749==    by 0x10BC4F: main (cpu.c:37)
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==334749==  Location 0x114180 is 0 bytes inside global var "mutex_quantum"
+==334749==  declared at cpu.h:24
+==334749== 
+==334749== Possible data race during write of size 1 at 0x1141E2 by thread #2
+==334749== Locks held: 1, at address 0x114180
+==334749==    at 0x10BFE7: false_quantum (cpu.c:133)
+==334749==    by 0x10BDE5: atender_puerto_dispatch (cpu.c:77)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous read of size 1 by thread #3
+==334749== Locks held: none
+==334749==    at 0x10BFC7: true_quantum (cpu.c:128)
+==334749==    by 0x10C1A1: atender_puerto_interrupt (cpu.c:178)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749==  Location 0x1141e2 is 0 bytes inside global var "quantum_is_called"
+==334749==  declared at cpu.h:32
+==334749== 
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during write of size 1 at 0x1141E0 by thread #3
+==334749== Locks held: none
+==334749==    at 0x10DD91: recibir_aviso_syscall (cpu.c:753)
+==334749==    by 0x10C1D2: atender_puerto_interrupt (cpu.c:185)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x10BDE6: atender_puerto_dispatch (cpu.c:78)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749==  Location 0x1141e0 is 0 bytes inside global var "desalojo_kernel"
+==334749==  declared at cpu.h:30
+==334749== 
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during write of size 1 at 0x4AAA0A0 by thread #3
+==334749== Locks held: none
+==334749==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48FBA9C: fputs (iofputs.c:38)
+==334749==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==334749==    by 0x48754D9: _log_write_in_level (log.c:138)
+==334749==    by 0x4875266: log_warning (log.c:93)
+==334749==    by 0x10DDB7: recibir_aviso_syscall (cpu.c:756)
+==334749==    by 0x10C1D2: atender_puerto_interrupt (cpu.c:185)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #2
+==334749== Locks held: none
+==334749==    at 0x4859796: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==334749==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48FBA9C: fputs (iofputs.c:38)
+==334749==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==334749==    by 0x48754D9: _log_write_in_level (log.c:138)
+==334749==    by 0x48750B8: log_debug (log.c:89)
+==334749==    by 0x10EA23: enviar_pid_tid (serializacion.c:368)
+==334749==    by 0x10AC5F: solicitar_contexto_ejecucion (utils-cpu.c:113)
+==334749==  Address 0x4aaa0a0 is 0 bytes inside a block of size 4,096 alloc'd
+==334749==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==334749==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==334749==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==334749==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==334749==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==334749==    by 0x48FBA9C: fputs (iofputs.c:38)
+==334749==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==334749==    by 0x48754D9: _log_write_in_level (log.c:138)
+==334749==    by 0x487518F: log_info (log.c:91)
+==334749==    by 0x10EF70: iniciar_servidor (servidor.c:42)
+==334749==    by 0x10BB3E: main (cpu.c:17)
+==334749==  Block was alloc'd by thread #1
+==334749== 
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--334749-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during read of size 1 at 0x1141E4 by thread #2
+==334749== Locks held: none
+==334749==    at 0x10CF1E: execute_jnz (cpu.c:448)
+==334749==    by 0x10C5AD: execute (cpu.c:272)
+==334749==    by 0x10C2C8: ejecutar_hilo (cpu.c:233)
+==334749==    by 0x10BE1E: atender_puerto_dispatch (cpu.c:80)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #3
+==334749== Locks held: none
+==334749==    at 0x10C1D3: atender_puerto_interrupt (cpu.c:185)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749==  Location 0x1141e4 is 0 bytes inside global var "recibo_kernel_ok"
+==334749==  declared at cpu.h:35
+==334749== 
+==334749== ----------------------------------------------------------------
+==334749== 
+==334749== Possible data race during read of size 1 at 0x1141E0 by thread #2
+==334749== Locks held: none
+==334749==    at 0x10BEE4: check_interrupt (cpu.c:102)
+==334749==    by 0x10CF32: execute_jnz (cpu.c:450)
+==334749==    by 0x10C5AD: execute (cpu.c:272)
+==334749==    by 0x10C2C8: ejecutar_hilo (cpu.c:233)
+==334749==    by 0x10BE1E: atender_puerto_dispatch (cpu.c:80)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749== 
+==334749== This conflicts with a previous write of size 1 by thread #3
+==334749== Locks held: none
+==334749==    at 0x10DD91: recibir_aviso_syscall (cpu.c:753)
+==334749==    by 0x10C1D2: atender_puerto_interrupt (cpu.c:185)
+==334749==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==334749==    by 0x49A1A03: clone (clone.S:100)
+==334749==  Location 0x1141e0 is 0 bytes inside global var "desalojo_kernel"
+==334749==  declared at cpu.h:30
+==334749== 
+==334749== 
+==334749== Process terminating with default action of signal 2 (SIGINT)
+==334749==    at 0x490D117: __futex_abstimed_wait_common64 (futex-internal.c:57)
+==334749==    by 0x490D117: __futex_abstimed_wait_common (futex-internal.c:87)
+==334749==    by 0x490D117: __futex_abstimed_wait_cancelable64 (futex-internal.c:139)
+==334749==    by 0x4912623: __pthread_clockjoin_ex (pthread_join_common.c:105)
+==334749==    by 0x48508F5: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==334749==    by 0x10BCB8: main (cpu.c:44)
+==334749== 
+==334749== Use --history-level=approx or =none to gain increased speed, at
+==334749== the cost of reduced accuracy of conflicting-access information
+==334749== For lists of detected and suppressed errors, rerun with: -s
+==334749== ERROR SUMMARY: 13298 errors from 12 contexts (suppressed: 5705 from 84)

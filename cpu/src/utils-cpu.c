@@ -30,7 +30,7 @@ t_direccion_fisica mmu(uint32_t base, uint32_t limite, uint32_t direccion_logica
     return dir_fis;
 }
 
-void enviar_direccion_fisica(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recibido, int socket_servidor, t_log* log){
+void enviar_direccion_fisica(t_direccion_fisica dir_fis, t_pid_tid* pid_tid_recibido, int socket_servidor, t_log* log){
     t_buffer* buffer;
 	
 	t_paquete* paquete = crear_paquete(READ_MEM);
@@ -38,10 +38,10 @@ void enviar_direccion_fisica(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recib
 		(sizeof(uint32_t)*4)
 		);
 
-    buffer_add_uint32(buffer, &(pid_tid_recibido.pid), log);
-    log_debug(log, "[ENVIAR_DIRECCION_FISICA] PID A ENVIAR: %d", pid_tid_recibido.pid);
-    buffer_add_uint32(buffer, &(pid_tid_recibido.tid), log);
-    log_debug(log, "[ENVIAR_DIRECCION_FISICA] TID A ENVIAR: %d", pid_tid_recibido.tid);
+    buffer_add_uint32(buffer, &(pid_tid_recibido->pid), log);
+    log_debug(log, "[ENVIAR_DIRECCION_FISICA] PID A ENVIAR: %d", pid_tid_recibido->pid);
+    buffer_add_uint32(buffer, &(pid_tid_recibido->tid), log);
+    log_debug(log, "[ENVIAR_DIRECCION_FISICA] TID A ENVIAR: %d", pid_tid_recibido->tid);
 	buffer_add_uint32(buffer, &dir_fis.base, log);
 	log_debug(log, "[ENVIAR_DIRECCION_FISICA] BASE A ENVIAR: %d", dir_fis.base);
     buffer_add_uint32(buffer, &dir_fis.desplazamiento, log);
@@ -72,10 +72,14 @@ uint32_t recibir_valor_memoria(t_contexto* registros_cpu, char* registro, int so
     buffer_destroy(buffer);
 }
 
-t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
+t_pid_tid* recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
+    t_pid_tid* pid_tid = malloc(sizeof(t_pid_tid));
+
     t_buffer* buffer = buffer_recieve(socket_kernel);
-    t_pid_tid pid_tid = recibir_pid_tid(buffer, cpu_log);
     
+    pid_tid->pid = buffer_read_uint32(buffer);
+    pid_tid->tid = buffer_read_uint32(buffer);
+
     return pid_tid;
 }
 
@@ -84,6 +88,7 @@ void enviar_paquete_kernel(t_buffer* buffer, int socket_memoria, cod_inst codigo
     paquete->buffer = buffer;
 
     enviar_paquete(paquete, socket_memoria);
+    eliminar_paquete(paquete);
 }
 
 void recibir_contexto_memoria(t_contexto* registros_cpu, int fd_memoria, t_log* cpu_log){
@@ -104,12 +109,12 @@ void recibir_contexto_memoria(t_contexto* registros_cpu, int fd_memoria, t_log* 
     buffer_destroy(buffer);
 }
 
-void solicitar_contexto_ejecucion(t_contexto* registros_cpu, t_pid_tid pid_tid, int fd_memoria, t_log* log_cpu){    
-    enviar_pid_tid(&(pid_tid.pid), &(pid_tid.tid), fd_memoria, log_cpu);
+void solicitar_contexto_ejecucion(t_contexto* registros_cpu, t_pid_tid* pid_tid, int fd_memoria, t_log* log_cpu){    
+    enviar_pid_tid(&(pid_tid->pid), &(pid_tid->tid), fd_memoria, log_cpu);
 
     recibir_contexto_memoria(registros_cpu, fd_memoria, log_cpu);
 
-    log_info(log_cpu, "## TID: <%d> - Solicito Contexto Ejecución", pid_tid.tid);
+    log_info(log_cpu, "## TID: <%d> - Solicito Contexto Ejecución", pid_tid->tid);
 }
 
 void actualizar_registros_cpu(t_contexto* registros_cpu, t_buffer* buffer, t_log* log){
@@ -306,7 +311,7 @@ void program_counter_jump(t_contexto* registro_cpu, uint32_t salto, t_log* log){
     modificar_registro(registro_cpu, "PC", valor_final, log);
 }
 
-char* fetch(t_pid_tid pid_tid_recibido, uint32_t* program_counter, int fd_memoria, t_log* log){
+char* fetch(t_pid_tid* pid_tid_recibido, uint32_t* program_counter, int fd_memoria, t_log* log){
     t_buffer* buffer;
 
     t_paquete* paquete_memoria = crear_paquete(PETICION_INSTRUCCION);
@@ -314,10 +319,10 @@ char* fetch(t_pid_tid pid_tid_recibido, uint32_t* program_counter, int fd_memori
         (sizeof(uint32_t) * 3)
     );
 
-    buffer_add_uint32(buffer, &(pid_tid_recibido.pid), log);
-    log_debug(log, "[FETCH] PID A ENVIAR: %d", pid_tid_recibido.pid);
-    buffer_add_uint32(buffer, &(pid_tid_recibido.tid), log);
-    log_debug(log, "[FETCH] TID A ENVIAR: %d", pid_tid_recibido.tid);
+    buffer_add_uint32(buffer, &(pid_tid_recibido->pid), log);
+    log_debug(log, "[FETCH] PID A ENVIAR: %d", pid_tid_recibido->pid);
+    buffer_add_uint32(buffer, &(pid_tid_recibido->tid), log);
+    log_debug(log, "[FETCH] TID A ENVIAR: %d", pid_tid_recibido->tid);
     buffer_add_uint32(buffer, program_counter, log);
     log_debug(log, "[FETCH] PROGRAM COUNTER A ENVIAR: %d", *program_counter);
 
@@ -334,15 +339,15 @@ char** decode(char* instruccion){
     return instruccion_parseada;
 }
 
-void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, int conexion_memoria, t_log* log){
+void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid* pid_tid_recibido, int conexion_memoria, t_log* log){
     t_paquete* paquete = crear_paquete(ACTUALIZAR_CONTEXTO_EJECUCION);
     
     t_buffer* buffer = buffer_create(
         sizeof(uint32_t)*13
     );
 
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, log);
     buffer_add_uint32(buffer, &registro_cpu->base, log);
     buffer_add_uint32(buffer, &registro_cpu->limite, log);
     buffer_add_uint32(buffer, &registro_cpu->pc, log);
@@ -358,6 +363,7 @@ void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid pid_tid_recibi
     paquete->buffer = buffer;
 
     enviar_paquete(paquete, conexion_memoria);
+    eliminar_paquete(paquete);
 
     char* respuesta = recibir_mensaje(conexion_memoria, log);
 
@@ -367,37 +373,10 @@ void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid pid_tid_recibi
     } else {
         log_error(log, "ROMPIMOS ALGO EN enviar_registros_memoria");
     }
+    free(respuesta);
 }
 
-bool recibir_aviso_syscall(int fd_conexion_kernel, t_log* log){
-    t_buffer* buffer;
-	uint32_t length = 0;
-    inst_cpu codigo_instruccion = 0;
-	char* mensaje_syscall;
-    bool interrupt_status;
-
-	buffer = buffer_recieve(fd_conexion_kernel);
-
-	mensaje_syscall = buffer_read_string(buffer, &length);
-    codigo_instruccion = buffer_read_uint32(buffer);
-
-    char* string_codigo_instruccion = obtener_string_codigo_instruccion(codigo_instruccion);
-
-    if (strcmp(mensaje_syscall, "DESALOJO_EN_KERNEL") == 0)
-    {
-        log_warning(log, "## La Syscall %s devolvió el mensaje de estado de ejecución en KERNEL: %s", string_codigo_instruccion, mensaje_syscall);
-        interrupt_status = true;
-    } else {
-        log_info(log, "## La Syscall %s devolvió el mensaje de estado de ejecución en KERNEL: %s", string_codigo_instruccion, mensaje_syscall);
-        interrupt_status = false;
-    }
-    free(mensaje_syscall);
-	buffer_destroy(buffer);
-
-    return interrupt_status;
-}
-
-void escribir_valor_en_memoria(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recibido, uint32_t valor_registro, int socket_servidor, t_log* log){
+void escribir_valor_en_memoria(t_direccion_fisica dir_fis, t_pid_tid* pid_tid_recibido, uint32_t valor_registro, int socket_servidor, t_log* log){
     t_buffer* buffer;
 	
 	t_paquete* paquete = crear_paquete(WRITE_MEM);
@@ -405,10 +384,10 @@ void escribir_valor_en_memoria(t_direccion_fisica dir_fis, t_pid_tid pid_tid_rec
 		(sizeof(uint32_t)*3)
 	);
 
-    buffer_add_uint32(buffer, &(pid_tid_recibido.pid), log);
-    log_debug(log, "[WRITE_MEM] PID A ENVIAR: %d", pid_tid_recibido.pid);
-    buffer_add_uint32(buffer, &(pid_tid_recibido.tid), log);
-    log_debug(log, "[WRITE_MEM] TID A ENVIAR: %d", pid_tid_recibido.tid);
+    buffer_add_uint32(buffer, &(pid_tid_recibido->pid), log);
+    log_debug(log, "[WRITE_MEM] PID A ENVIAR: %d", pid_tid_recibido->pid);
+    buffer_add_uint32(buffer, &(pid_tid_recibido->tid), log);
+    log_debug(log, "[WRITE_MEM] TID A ENVIAR: %d", pid_tid_recibido->tid);
 	buffer_add_uint32(buffer, &dir_fis.base, log);
 	log_debug(log, "[WRITE_MEM] BASE A ENVIAR: %d", dir_fis.base);
     buffer_add_uint32(buffer, &dir_fis.desplazamiento, log);

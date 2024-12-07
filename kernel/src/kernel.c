@@ -247,14 +247,36 @@ void* planificador_corto_plazo(){
     bool finalizar_corto_plazo = false;
     while (hilo_en_ejecucion || !finalizar_corto_plazo)
     {
-        hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
-        if (hilo_en_ejecucion)
+        if (strcmp(planificacion, "CMN") == 0)
         {
-            hilo_desalojado = false;
-            ejecutar_hilo(hilo_en_ejecucion);
+            hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
+            if (hilo_en_ejecucion)
+            {
+                hilo_desalojado = false;
+                ejecutar_hilo_cmn(hilo_en_ejecucion);
+
+                pthread_create(&hilo_quantum, NULL, (void*) iniciar_quantum, NULL);
+                pthread_detach(hilo_quantum);
+
+                while (!hilo_desalojado){
+                    int operacion = recibir_operacion(fd_conexion_dispatch);
+        
+                    operacion_a_atender(operacion);
+                }
+            } else {
+                log_info(kernel_log, "[CMN] No hay más hilos para planificar, cierro modulo KERNEL");
+                finalizar_corto_plazo = true;
+            }   
         } else {
-            log_info(kernel_log, "No hay más hilos para planificar, cierro modulo KERNEL");
-            finalizar_corto_plazo = true;
+            hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
+            if (hilo_en_ejecucion)
+            {
+                hilo_desalojado = false;
+                ejecutar_hilo(hilo_en_ejecucion);
+            } else {
+                log_info(kernel_log, "No hay más hilos para planificar, cierro modulo KERNEL");
+                finalizar_corto_plazo = true;
+            }
         }
     }
     sem_post(&kernel_activo);
@@ -292,7 +314,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
     } else if (strcmp(planificacion, "CMN") == 0)
     {
         pthread_mutex_lock(&mutex_cola_ready);
-            if (list_size(lista_prioridades) > 0){
+            if (list_size(lista_colas_multinivel) > 0){
                 hilo = thread_find_by_multilevel_queues_schedule(lista_colas_multinivel);
             }
             if (!hilo) {
@@ -301,6 +323,31 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
         pthread_mutex_unlock(&mutex_cola_ready);
     }
     return hilo;
+}
+
+void* ejecutar_hilo_cmn(t_hilo_planificacion* hilo_a_ejecutar){
+
+    t_hilo_planificacion* hilo = NULL;
+
+    pthread_mutex_lock(&mutex_hilo_exec);
+        change_thread_state(hilo_a_ejecutar->pid_padre, hilo_a_ejecutar->tid_asociado, EXEC_STATE);
+        
+        t_paquete* paquete = crear_paquete(EJECUTAR_HILO);
+        t_buffer* buffer_envio = buffer_create(
+            2*(sizeof(uint32_t))
+        );
+
+        buffer_add_uint32(buffer_envio, &hilo_a_ejecutar->pid_padre, kernel_log);
+        buffer_add_uint32(buffer_envio, &hilo_a_ejecutar->tid_asociado, kernel_log);
+
+        paquete->buffer = buffer_envio;
+        list_add(lista_hilo_en_ejecucion, hilo_a_ejecutar);
+        enviar_paquete(paquete, fd_conexion_dispatch);
+
+        log_info(kernel_log, "## (%d:%d) Hilo a ejecutar en CPU", hilo_a_ejecutar->pid_padre, hilo_a_ejecutar->tid_asociado);
+        eliminar_paquete(paquete);
+    pthread_mutex_unlock(&mutex_hilo_exec);
+
 }
 
 void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso){
@@ -313,7 +360,6 @@ void* poner_en_ready(t_hilo_planificacion* hilo_del_proceso){
         list_add(lista_prioridades, hilo_del_proceso);
 
     }else if(strcmp(kernel_registro.algoritmo_planificacion, "CMN") == 0){
-        log_error(kernel_log, "VOY A PLANIFICAR");
         queue_push_by_priority(hilo_del_proceso);
     }else{
         log_error(kernel_log,"NO SE RECONOCE LA PLANIFICACION");
@@ -374,12 +420,12 @@ void queue_push_by_priority(t_hilo_planificacion* hilo_del_proceso){
     {
         t_cola_prioridades* cola_prioridad = queue_get_by_priority(lista_colas_multinivel, hilo_del_proceso->prioridad);
         list_add(cola_prioridad->cola, hilo_del_proceso);
-        log_info(kernel_log, "## [COLAS MULTINIVEL] Se agregó el hilo (%d:%d) a la cola de prioridad %d en estado READY", hilo_del_proceso->pid_padre, hilo_del_proceso->tid_asociado, hilo_del_proceso->prioridad);
+        log_info(kernel_log, "## [CMN] Se agregó el hilo (%d:%d) a la cola de prioridad %d en estado READY", hilo_del_proceso->pid_padre, hilo_del_proceso->tid_asociado, hilo_del_proceso->prioridad);
     } else {
         t_cola_prioridades* cola_prioridad_nueva = create_priority_queue(hilo_del_proceso->prioridad);
         list_add(cola_prioridad_nueva->cola, hilo_del_proceso);
         list_add(lista_colas_multinivel, cola_prioridad_nueva);
-        log_info(kernel_log, "## [COLAS MULTINIVEL] Se agregó el hilo (%d:%d) a la NUEVA cola de prioridad %d en estado READY", hilo_del_proceso->pid_padre, hilo_del_proceso->tid_asociado, hilo_del_proceso->prioridad);
+        log_info(kernel_log, "## [CMN] Se agregó el hilo (%d:%d) a la NUEVA cola de prioridad %d en estado READY", hilo_del_proceso->pid_padre, hilo_del_proceso->tid_asociado, hilo_del_proceso->prioridad);
     }
 }
 
@@ -432,7 +478,7 @@ t_hilo_planificacion* thread_find_by_priority_schedule(t_list* lista_prioridades
 }
 
 t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_colas_multinivel){
-    t_hilo_planificacion* hilo_a_ejecutar;
+    t_hilo_planificacion* hilo_a_ejecutar = NULL; 
 
     pthread_mutex_lock(&mutex_colas_multinivel_existentes);
     for (int i = 0; i <= maximum_priority_multilevel_queues_schedule(lista_colas_multinivel); i++)
@@ -442,14 +488,14 @@ t_hilo_planificacion* thread_find_by_multilevel_queues_schedule(t_list* lista_co
         if(queue_find_by_priority(lista_colas_multinivel, i)){
             if (list_is_empty(cola_hallada->cola))
             {
-                log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d VACÍA", cola_hallada->prioridad);
+                log_debug(kernel_log, "## [CMN] COLA CON PRIORIDAD: %d VACÍA", cola_hallada->prioridad);
             } else {
                 hilo_a_ejecutar = list_remove(cola_hallada->cola, 0);
-                log_info(kernel_log, "## [COLAS MULTINIVEL](%d:%d) - Prioridad %d Se seleccionó para ejecutar y pasa al estado EXECUTE", hilo_a_ejecutar->pid_padre, hilo_a_ejecutar->tid_asociado, cola_hallada->prioridad);
+                log_info(kernel_log, "## [CMN](%d:%d) - Prioridad %d Se seleccionó para ejecutar y pasa al estado EXECUTE", hilo_a_ejecutar->pid_padre, hilo_a_ejecutar->tid_asociado, cola_hallada->prioridad);
                 i = maximum_priority_multilevel_queues_schedule(lista_colas_multinivel) +1;
             }
         } else {
-            log_debug(kernel_log, "## [COLAS MULTINIVEL] COLA CON PRIORIDAD: %d NO EXISTE, TODAVÍA", i);
+            log_debug(kernel_log, "## [CMN] COLA CON PRIORIDAD: %d NO EXISTE, TODAVÍA", i);
         }
     }
     pthread_mutex_unlock(&mutex_colas_multinivel_existentes);
@@ -780,14 +826,11 @@ void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar){
         eliminar_paquete(paquete);
     pthread_mutex_unlock(&mutex_hilo_exec);
 
-    if(strcmp(kernel_registro.algoritmo_planificacion, "CMN") == 0){
-        pthread_create(&hilo_quantum, NULL, (void*) iniciar_quantum, NULL);
-        pthread_detach(hilo_quantum);
-    }
-
     while (!hilo_desalojado)
     {
-        operacion_a_atender();
+        int operacion = recibir_operacion(fd_conexion_dispatch);
+        
+        operacion_a_atender(operacion);
     }
 }
 
@@ -944,11 +987,10 @@ void enviar_aviso_syscall(char* mensaje, cod_inst* codigo_instruccion){
 
 /*--------------------------------- SYSCALLS --------------------------------*/
 
-void* operacion_a_atender(){
-    pthread_mutex_lock(&mutex_interrupt);
-        int operacion = recibir_operacion(fd_conexion_interrupt);
-        t_buffer* buffer = buffer_recieve(fd_conexion_interrupt);
-    pthread_mutex_unlock(&mutex_interrupt);
+void* operacion_a_atender(int operacion){
+    //pthread_mutex_lock(&mutex_dis);
+        t_buffer* buffer = buffer_recieve(fd_conexion_dispatch);
+    //pthread_mutex_unlock(&mutex_interrupt);
     t_pid_tid pid_tid_recibido = recibir_pid_tid(buffer, kernel_log);
     
     switch (operacion)
@@ -997,11 +1039,17 @@ void* operacion_a_atender(){
         syscall_io(buffer, pid_tid_recibido);
         break;
 
+    case DESALOJO_PID_TID_CPU:
+        hilo_en_ejecucion = desalojar_hilo();
+        log_info(kernel_log, "## [CMN](<%d>:<%d>) Desalojado por fin de Quantum", hilo_en_ejecucion->pid_padre, hilo_en_ejecucion->tid_asociado);
+        poner_en_ready(hilo_en_ejecucion);
+        break;
+
     default:
         log_warning(kernel_log, "## Error en la OP enviada desde CPU");
+        hilo_en_ejecucion = NULL;
         break;
     }
-
     buffer_destroy(buffer);
 }
 
@@ -1082,7 +1130,7 @@ void* syscall_thread_join(t_buffer* buffer, t_pid_tid pid_tid){
         t_hilo_planificacion* hilo = desalojar_hilo();
         add_thread_state_tid_blocked(hilo->pid_padre, hilo->tid_asociado, hilo_bloqueante);
         poner_en_block(hilo);
-        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+        enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
         log_info(kernel_log, "## (<%d>:<%d>) - Bloqueado por: <PTHREAD_JOIN>", pid_tid.pid, pid_tid.tid);
     } else {
         enviar_aviso_syscall("HILO_NO_BLOQUEADO", &codigo);
@@ -1096,7 +1144,7 @@ void* syscall_thread_exit(t_pid_tid pid_tid){
     log_info(kernel_log,"## (%d:%d) - Solicitó syscall: THREAD_EXIT", pid_tid.pid, pid_tid.tid);
 
     poner_en_exit(pid_tid.pid, pid_tid.tid);
-    enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+    enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
 }
 
 void* syscall_thread_cancel(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1112,7 +1160,7 @@ void* syscall_thread_cancel(t_buffer* buffer, t_pid_tid pid_tid){
         poner_en_exit(pid_tid.pid, hilo_a_finalizar);
         if (hilo_a_finalizar == pid_tid.tid)
         {
-            enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+            enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
         } else {
             enviar_aviso_syscall("HILO_CANCELADO", &codigo);
         }
@@ -1130,7 +1178,7 @@ void* syscall_io(t_buffer* buffer, t_pid_tid pid_tid){
 
     t_hilo_planificacion* hilo = desalojar_hilo();
     poner_en_block(hilo);
-    enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+    enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
     log_info(kernel_log, "## (<%d>:<%d>) - Bloqueado por: <IO>", pid_tid.pid, pid_tid.tid);
 
     hilo_args_io* args = malloc(sizeof(hilo_args_io));
@@ -1169,14 +1217,14 @@ void* syscall_mutex_lock(t_buffer* buffer, t_pid_tid pid_tid){
             block_thread_mutex(pid_tid.pid, pid_tid.tid, nombre_mutex);
             t_hilo_planificacion* hilo = desalojar_hilo();
             poner_en_block(hilo);
-            enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+            enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
             log_info(kernel_log, "## (<%d>:<%d>) - Bloqueado por: <MUTEX>", pid_tid.pid, pid_tid.tid);
         } else {
             enviar_aviso_syscall("MUTEX_TOMADO", &codigo);
             lock_mutex_to_thread(pid_tid.pid, pid_tid.tid, nombre_mutex);
         }
     } else {
-        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+        enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
 }
@@ -1201,7 +1249,7 @@ void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
             enviar_aviso_syscall("HILO_NO_DESBLOQUEADO", &codigo);
         }   
     } else {
-        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+        enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
 }
@@ -1238,7 +1286,7 @@ void* syscall_dump_memory(t_pid_tid pid_tid){
         poner_en_ready(hilo_a_desbloquear);
         enviar_aviso_syscall("DUMP_MEMORY", &codigo);
     }else{
-        enviar_aviso_syscall("DESALOJO_EN_KERNEL", &codigo);
+        enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
 }
@@ -1329,9 +1377,9 @@ void signal_handler(int sig) {
 }
 
 void iniciar_quantum(){
-    usleep(kernel_registro.quantum * 1000); 
+    usleep(kernel_registro.quantum * 1000);
 
-    if(!hilo_desalojado){
+    pthread_mutex_lock(&mutex_interrupt);
         char* mensaje = "FIN_QUANTUM";
         int length = strlen(mensaje) + 1;
         t_buffer* buffer = buffer_create(
@@ -1342,17 +1390,11 @@ void iniciar_quantum(){
         buffer_add_string(buffer, length, mensaje, kernel_log);
         paquete->buffer = buffer;
 
-        pthread_mutex_lock(&mutex_interrupt);
-            enviar_paquete(paquete, fd_conexion_interrupt);
-        pthread_mutex_unlock(&mutex_interrupt);
+        enviar_paquete(paquete, fd_conexion_interrupt);
         eliminar_paquete(paquete);
-
-        hilo_desalojado_por_quantum = true;
-        t_hilo_planificacion* hilo_desalojado = desalojar_hilo();
-        poner_en_ready(hilo_desalojado);
-    }
+        log_info(kernel_log, "Se envió la interrupción por QUANTUM a CPU");
+    pthread_mutex_unlock(&mutex_interrupt);
 }
-
 
 /*------------------------------------ WORKING ZONE ------------------------------------*/
 

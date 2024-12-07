@@ -209,6 +209,8 @@
 
     void* ejecutar_hilo(t_hilo_planificacion* hilo_a_ejecutar);
 
+    void* ejecutar_hilo_cmn(t_hilo_planificacion* hilo_a_ejecutar);
+
     //void* esperar_tid_cpu();
 
     t_hilo_planificacion* desalojar_hilo();

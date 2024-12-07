@@ -37,6 +37,7 @@
         EJECUTAR_HILO,
         OUT_OF_MEMORY,
         AVISO_EXITO_SYSCALL,
+        DESALOJO_PID_TID_CPU,
     } cod_inst;
 
     typedef enum{

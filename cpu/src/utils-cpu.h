@@ -49,23 +49,23 @@
     /*-----------------------------------------------------------------------*/
     /*----------------------- Conexiones con módulos ------------------------*/
 
-    t_pid_tid recibir_paquete_kernel(int socket_kernel, t_log* kernel_log);
+    t_pid_tid* recibir_paquete_kernel(int socket_kernel, t_log* kernel_log);
 
     void enviar_paquete_kernel(t_buffer* buffer, int socket_memoria, cod_inst codigo_instruccion);
 
     void recibir_contexto_memoria(t_contexto* registros_cpu, int fd_memoria, t_log* cpu_log);
 
-    void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, int conexion_memoria, t_log* log);
+    void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid* pid_tid_recibido, int conexion_memoria, t_log* log);
 
-    void solicitar_contexto_ejecucion(t_contexto* registros_cpu, t_pid_tid pid_tid, int fd_memoria, t_log* log_cpu);
+    void solicitar_contexto_ejecucion(t_contexto* registros_cpu, t_pid_tid* pid_tid, int fd_memoria, t_log* log_cpu);
 
-    bool recibir_aviso_syscall(int fd_conexion_kernel, t_log* log);
+    //bool recibir_aviso_syscall(int fd_conexion_kernel, t_log* log);
 
-    void enviar_direccion_fisica(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recibido, int socket_servidor, t_log* log);
+    void enviar_direccion_fisica(t_direccion_fisica dir_fis, t_pid_tid* pid_tid_recibido, int socket_servidor, t_log* log);
 
     uint32_t recibir_valor_memoria(t_contexto* registros_cpu, char* registro, int socket_memoria, t_log* cpu_log);
 
-    void escribir_valor_en_memoria(t_direccion_fisica dir_fis, t_pid_tid pid_tid_recibido, uint32_t valor_registro, int socket_servidor, t_log* log);
+    void escribir_valor_en_memoria(t_direccion_fisica dir_fis, t_pid_tid* pid_tid_recibido, uint32_t valor_registro, int socket_servidor, t_log* log);
 
     /*-----------------------------------------------------------------------*/
     /*-------------------- Funciones de registro de CPU ---------------------*/
@@ -85,7 +85,7 @@
     /*-----------------------------------------------------------------------*/
     /*----------------------- Ciclo de instrucciones ------------------------*/
 
-    char* fetch(t_pid_tid pid_tid_recibido, uint32_t* program_counter, int fd_memoria, t_log* log);
+    char* fetch(t_pid_tid* pid_tid_recibido, uint32_t* program_counter, int fd_memoria, t_log* log);
 
     char** decode(char* instruccion);
 

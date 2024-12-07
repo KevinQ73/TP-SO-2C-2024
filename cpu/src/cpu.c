@@ -55,23 +55,41 @@ int main(int argc, char* argv[]) {
     /*--------------------- Atender conexiones a la CPU ---------------------*/
 
 void iniciar_semaforos(){
+
+    pthread_mutex_init(&mutex_pid_tid, NULL);
+    pthread_mutex_init(&mutex_quantum, NULL);
+    pthread_mutex_init(&mutex_interrupt, NULL);
+    pthread_mutex_init(&mutex_dispatch, NULL);
+
     sem_init(&aviso_syscall, 0, 0);
 }
 
 void atender_puerto_dispatch(){
     while (flag_disconect_dispatch)
     {
-        int op = recibir_operacion(fd_conexion_dispatch);
+        pthread_mutex_lock(&mutex_dispatch);
+            int op = recibir_operacion(fd_conexion_dispatch);
+        pthread_mutex_unlock(&mutex_dispatch);
+        pthread_mutex_lock(&mutex_pid_tid);
+            pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
+        pthread_mutex_unlock(&mutex_pid_tid);
+
+        if (pid_tid_recibido)
+        {
+            cpu_replanificar = false;
+            false_quantum();
+            desalojo_kernel = false;
+        } else {
+            log_error(cpu_log, "## PID TID RECIBIDO ES NULL");
+        }
         switch (op)
         {
         case EJECUTAR_HILO:
-            pid_tid_recibido = recibir_paquete_kernel(fd_conexion_dispatch, cpu_log);
-            log_info(cpu_log, "## PID: <%d> - TID: <%d> Recibidos para empezar la ejecución", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            interrupt_is_called = false;
-            quantum_is_called = false;
+            log_info(cpu_log, "## PID: <%d> - TID: <%d> Recibidos para empezar el ciclo de ejecución en CPU", pid_tid_recibido->pid, pid_tid_recibido->tid);
+            solicitar_contexto_ejecucion(registros_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
             ejecutar_hilo(pid_tid_recibido);
             break;
-        
+
         case DESCONEXION:
             log_error(cpu_log, "Desconexion de Kernel - Dispatch");
             flag_disconect_dispatch = false;
@@ -87,33 +105,30 @@ void atender_puerto_dispatch(){
 void atender_puerto_interrupt(){
     while (flag_disconect_interrupt)
     {
+        pthread_mutex_lock(&mutex_interrupt);
         int op = recibir_operacion(fd_conexion_interrupt);
+        pthread_mutex_unlock(&mutex_interrupt);
         switch (op)
         {
         case INTERRUPCION_QUANTUM:
             int length = 0; 
 
-            t_buffer* buffer = buffer_recieve(fd_conexion_interrupt);
+            pthread_mutex_lock(&mutex_interrupt);
+                t_buffer* buffer = buffer_recieve(fd_conexion_interrupt);
+            pthread_mutex_unlock(&mutex_interrupt);
             char* mensaje = buffer_read_string(buffer, &length);
 
             if (strcmp(mensaje, "FIN_QUANTUM") == 0)
             {
-                log_warning(cpu_log, "## DESALOJO POR QUANTUM");
-                quantum_is_called = true;
+                log_warning(cpu_log, "## Llega interrupción al puerto Interrupt");
+                true_quantum();
             }
             free(mensaje);
 	        buffer_destroy(buffer);
             break;
-        
-        case INTERRUPCION_USUARIO:
-            if (check_tid_interrupt(fd_conexion_interrupt)){
-                interrupt_results(&(pid_tid_recibido.tid), "INTERRUPCIÓN POR USUARIO");
-            }
-            break;
 
         case AVISO_EXITO_SYSCALL:
-            bool status_kernel = recibir_aviso_syscall(fd_conexion_interrupt, cpu_log);
-            interrupt_is_called = status_kernel;
+            recibo_kernel_ok = recibir_aviso_syscall(fd_conexion_interrupt, cpu_log);
             sem_post(&aviso_syscall);
             break;
 
@@ -125,146 +140,183 @@ void atender_puerto_interrupt(){
     }
 }
 
-bool check_tid_interrupt(int fd_kernel){
-    t_buffer* buffer = buffer_recieve(fd_kernel);
-    uint32_t tid_recibido = buffer_read_uint32(buffer);
+void check_interrupt(){
+    if (estado_quantum())
+    {
+        log_info(cpu_log, "## Llega interrupción QUANTUM al puerto Interrupt");
+        enviar_registros_memoria(registros_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+        desalojar_pid_tid();
 
-    return tid_recibido == pid_tid_recibido.tid;
+    } else if(desalojo_kernel) 
+    {
+        pthread_mutex_lock(&mutex_pid_tid);
+            pid_tid_recibido = NULL;
+        pthread_mutex_unlock(&mutex_pid_tid);
+        cpu_replanificar = true;
+        log_info(cpu_log, "## Hubo replanificación en Kernel");
+    } else {
+        log_debug(cpu_log, "NO HUBO INTERRUPCIÓN");
+    }
 }
 
-void interrupt_results(uint32_t* tid, char* motivo){
-    uint32_t length = strlen(motivo) + 1;
-    t_paquete* paquete = crear_paquete(ENVIO_TID);
-    t_buffer* buffer = buffer_create(
-        sizeof(uint32_t) + length
+bool estado_quantum(){
+    bool estado;
+    pthread_mutex_lock(&mutex_quantum);
+    estado = quantum_is_called;
+    pthread_mutex_unlock(&mutex_quantum);
+
+    return estado;
+}
+
+bool true_quantum(){
+    pthread_mutex_lock(&mutex_quantum);
+    quantum_is_called = true;
+    pthread_mutex_unlock(&mutex_quantum);
+
+    return quantum_is_called;
+}
+
+bool false_quantum(){
+    pthread_mutex_lock(&mutex_quantum);
+    quantum_is_called = false;
+    pthread_mutex_unlock(&mutex_quantum);
+
+    return quantum_is_called;
+}
+
+void desalojar_pid_tid(){
+    t_buffer* buffer;
+    char* mensaje_quantum = "CPU_DESALOJADO";
+    int length = strlen(mensaje_quantum) + 1;
+
+	t_paquete* paquete = crear_paquete(DESALOJO_PID_TID_CPU);
+	buffer = buffer_create(
+	    length
     );
 
-    buffer_add_uint32(buffer, tid, cpu_log);
-    log_debug(cpu_log, "TID A ENVIAR: %d", *tid);
-    buffer_add_string(buffer, length, motivo, cpu_log);
-    log_debug(cpu_log, "AVISO A ENVIAR: %s", motivo);
+    buffer_add_string(buffer, length, mensaje_quantum, cpu_log);
 
     paquete->buffer = buffer;
-    enviar_paquete(paquete, fd_conexion_interrupt);
+    enviar_paquete(paquete, fd_conexion_dispatch);
     eliminar_paquete(paquete);
+
+    log_info(cpu_log, "## TID <%d> fue desalojado en Kernel y CPU.", pid_tid_recibido->tid);
+    pthread_mutex_lock(&mutex_pid_tid);
+        pid_tid_recibido = NULL;
+    pthread_mutex_unlock(&mutex_pid_tid);
+
+    cpu_replanificar = true;
 }
+
     /*-----------------------------------------------------------------------*/
     /*-------------------------- Ciclo de ejecución -------------------------*/
 
-void ejecutar_hilo(t_pid_tid pid_tid_recibido){
-    solicitar_contexto_ejecucion(registros_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    do
-    {
+void ejecutar_hilo(t_pid_tid* pid_tid_recibido){
+    while (!cpu_replanificar){
         char* instruccion = fetch(pid_tid_recibido, &registros_cpu->pc, conexion_memoria, cpu_log);
-        log_info(cpu_log, "## TID: <%d> - FETCH - Program Counter: <%d>", pid_tid_recibido.tid, registros_cpu->pc);
+        log_info(cpu_log, "## TID: <%d> - FETCH - Program Counter: <%d>", pid_tid_recibido->tid, registros_cpu->pc);
 
-        if (strcmp(instruccion, "NO_INSTRUCCION") == 0)
-        {
-            interrupt_is_called = true;
-        } else {
-            char** instruccion_parseada = decode(instruccion);
+        char** instruccion_parseada = decode(instruccion);
 
-            execute(registros_cpu, pid_tid_recibido, instruccion_parseada);
+        execute(registros_cpu, pid_tid_recibido, instruccion_parseada);
 
-            string_array_destroy(instruccion_parseada);
-            free(instruccion);
-        }
-
-    } while (!interrupt_is_called && !segmentation_fault && !quantum_is_called);
+        string_array_destroy(instruccion_parseada);
+        free(instruccion);
+    }
 }
 
-void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instruccion_parseada){
+void execute(t_contexto* registros_cpu, t_pid_tid* pid_tid_recibido, char** instruccion_parseada){
     inst_cpu op = obtener_codigo_instruccion(instruccion_parseada[0]);
 
     switch (op)
     {
     case SET:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SET> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SET> - <%s> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1], instruccion_parseada[2]);
         execute_set(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
     
-    case READ_MEM:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <READ_MEM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+    case READ_MEM: // REPLANIFICA SI HAY SEGFAULT -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <READ_MEM> - <%s> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1], instruccion_parseada[2]);
         execute_read_mem(registros_cpu, pid_tid_recibido, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
-    case WRITE_MEM:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <WRITE_MEM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+    case WRITE_MEM: // REPLANIFICA SI HAY SEGFAULT -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <WRITE_MEM> - <%s> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1], instruccion_parseada[2]);
         execute_write_mem(registros_cpu, pid_tid_recibido, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case SUM:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SUM> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SUM> - <%s> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1], instruccion_parseada[2]);
         execute_sum(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case SUB:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SUB> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <SUB> - <%s> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1], instruccion_parseada[2]);
         execute_sub(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case JNZ:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <JNZ> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <JNZ> - <%s> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1], instruccion_parseada[2]);
         execute_jnz(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
     case LOG:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <LOG> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <LOG> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1]);
         execute_log(registros_cpu, instruccion_parseada[1]);
         break;
 
-    case DUMP_MEMORY:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <DUMP_MEMORY>", pid_tid_recibido.tid);
+    case DUMP_MEMORY: // NO REPLANIFICA -- NO LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <DUMP_MEMORY>", pid_tid_recibido->tid);
         execute_dump_memory(registros_cpu);
         break;
 
-    case IO:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <IO> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+    case IO: // NO REPLANIFICA -- NO LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <IO> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1]);
         execute_io(registros_cpu, instruccion_parseada[1]);
         break;
 
-    case PROCESS_CREATE:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <PROCESS_CREATE> - <%s> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2], instruccion_parseada[3]);
+    case PROCESS_CREATE: // NO REPLANIFICA -- NO LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <PROCESS_CREATE> - <%s> - <%s> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1], instruccion_parseada[2], instruccion_parseada[3]);
         execute_process_create(registros_cpu, instruccion_parseada[1], instruccion_parseada[2], instruccion_parseada[3]);
         break;
 
-    case THREAD_CREATE:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_CREATE> - <%s> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1], instruccion_parseada[2]);
+    case THREAD_CREATE: // NO REPLANIFICA -- NO LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_CREATE> - <%s> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1], instruccion_parseada[2]);
         execute_thread_create(registros_cpu, instruccion_parseada[1], instruccion_parseada[2]);
         break;
 
-    case THREAD_JOIN:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_JOIN> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+    case THREAD_JOIN: // REPLANIFICA -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_JOIN> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1]);
         execute_thread_join(registros_cpu, instruccion_parseada[1]);
         break;
 
-    case THREAD_CANCEL:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_CANCEL> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+    case THREAD_CANCEL: // REPLANIFICA SI EL CANCEL ES AL MISMO HILO -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_CANCEL> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1]);
         execute_thread_cancel(registros_cpu, instruccion_parseada[1]);
         break;
 
-    case MUTEX_CREATE:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_CREATE> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+    case MUTEX_CREATE: // NO REPLANIFICA -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_CREATE> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1]);
         execute_mutex_create(registros_cpu, instruccion_parseada[1]);
         break;
 
-    case MUTEX_LOCK:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_LOCK> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+    case MUTEX_LOCK: // REPLANIFICA SI EL MUTEX SOLICITADO ESTÁ TOMADO -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_LOCK> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1]);
         execute_mutex_lock(registros_cpu, instruccion_parseada[1]);
         break;
 
-    case MUTEX_UNLOCK:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_UNLOCK> - <%s>", pid_tid_recibido.tid, instruccion_parseada[1]);
+    case MUTEX_UNLOCK: // NO REPLANIFICA -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <MUTEX_UNLOCK> - <%s>", pid_tid_recibido->tid, instruccion_parseada[1]);
         execute_mutex_unlock(registros_cpu, instruccion_parseada[1]);
         break;
 
-    case THREAD_EXIT:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_EXIT>", pid_tid_recibido.tid);
+    case THREAD_EXIT: // REPLANIFICA -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <THREAD_EXIT>", pid_tid_recibido->tid);
         execute_thread_exit(registros_cpu);
         break;
 
-    case PROCESS_EXIT:
-        log_info(cpu_log, "## TID: <%d> - Ejecutando: <PROCESS_EXIT>", pid_tid_recibido.tid);
+    case PROCESS_EXIT: // REPLANIFICA -- LISTO
+        log_info(cpu_log, "## TID: <%d> - Ejecutando: <PROCESS_EXIT>", pid_tid_recibido->tid);
         execute_process_exit(registros_cpu);
         break;
 
@@ -279,26 +331,44 @@ void execute_set(t_contexto* registro_cpu, char* registro, char* valor){
     int valor_int = (int)strtol(valor, NULL, 10);
     modificar_registro(registro_cpu, registro, valor_int, cpu_log);
     program_counter_update(registro_cpu, cpu_log);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_set");
+    }
 }
 
-void execute_read_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, char* registro_datos, char* registro_direccion){
+void execute_read_mem(t_contexto* registro_cpu, t_pid_tid* pid_tid_recibido, char* registro_datos, char* registro_direccion){
     uint32_t valor_registro_direccion = get_register(registro_cpu, registro_direccion);
     t_direccion_fisica dir_fis = mmu(registro_cpu->base, registro_cpu->limite, valor_registro_direccion);
     
     if (dir_fis.segmentation_fault)
     {
         segmentation_fault = true;
-        log_warning(cpu_log, "## TID: <%d> SEGMENTATION FAULT", pid_tid_recibido.tid);
+        log_warning(cpu_log, "## TID: <%d> SEGMENTATION FAULT", pid_tid_recibido->tid);
         enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+        desalojar_pid_tid();
     } else {
-        log_info(cpu_log, "## TID: <%d> - Acción: <LEER> - Dirección Física: <BASE: %d - DESPLAZAMIENTO: %d>", pid_tid_recibido.tid, dir_fis.base, dir_fis.desplazamiento);
+        log_info(cpu_log, "## TID: <%d> - Acción: <LEER> - Dirección Física: <BASE: %d - DESPLAZAMIENTO: %d>", pid_tid_recibido->tid, dir_fis.base, dir_fis.desplazamiento);
         enviar_direccion_fisica(dir_fis, pid_tid_recibido, conexion_memoria, cpu_log);
         recibir_valor_memoria(registro_cpu, registro_datos, conexion_memoria, cpu_log);
         program_counter_update(registro_cpu, cpu_log);
     }
+
+    if (!segmentation_fault)
+    {
+        if (recibo_kernel_ok)
+        {
+            check_interrupt();
+        } else {
+            log_error(cpu_log, "ERROR EN execute_read_mem");
+        }
+    }
 }
 
-void execute_write_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, char* registro_direccion, char* registro_datos){
+void execute_write_mem(t_contexto* registro_cpu, t_pid_tid* pid_tid_recibido, char* registro_direccion, char* registro_datos){
     uint32_t valor_registro_datos = get_register(registro_cpu, registro_datos);
     uint32_t valor_registro_direccion = get_register(registro_cpu, registro_direccion);
 
@@ -306,15 +376,25 @@ void execute_write_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, cha
     
     if (dir_fis.segmentation_fault)
     {
-        segmentation_fault = true;
-        log_warning(cpu_log, "## TID: <%d> SEGMENTATION FAULT", pid_tid_recibido.tid);
+        log_warning(cpu_log, "## TID: <%d> SEGMENTATION FAULT", pid_tid_recibido->tid);
         enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+        desalojar_pid_tid();
     } else {
-        log_info(cpu_log, "## TID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <BASE: %d - DESPLAZAMIENTO: %d - VALOR A ESCRIBIR: %d>", pid_tid_recibido.tid, dir_fis.base, dir_fis.desplazamiento, valor_registro_datos);
+        log_info(cpu_log, "## TID: <%d> - Acción: <ESCRIBIR> - Dirección Física: <BASE: %d - DESPLAZAMIENTO: %d - VALOR A ESCRIBIR: %d>", pid_tid_recibido->tid, dir_fis.base, dir_fis.desplazamiento, valor_registro_datos);
         escribir_valor_en_memoria(dir_fis, pid_tid_recibido, valor_registro_datos, conexion_memoria, cpu_log);
         char* response_memoria = recibir_mensaje(conexion_memoria, cpu_log);
         log_debug(cpu_log, "STRING RECIBIDO execute_write_mem: %s", response_memoria);
         program_counter_update(registro_cpu, cpu_log);
+    }
+    
+    if (!segmentation_fault)
+    {
+        if (recibo_kernel_ok)
+        {
+            check_interrupt();
+        } else {
+            log_error(cpu_log, "ERROR EN execute_write_mem");
+        }
     }
 }
 
@@ -322,12 +402,26 @@ void execute_sum(t_contexto* registro_cpu, char* registro_destino, char* registr
     int resultado_int = get_register(registro_cpu, registro_destino) + get_register(registro_cpu, registro_origen);
     modificar_registro(registro_cpu, registro_destino, resultado_int, cpu_log);
     program_counter_update(registro_cpu, cpu_log);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_sum");
+    }
 }
 
 void execute_sub(t_contexto* registro_cpu, char* registro_destino, char* registro_origen){
     int resultado_int = get_register(registro_cpu, registro_destino) - get_register(registro_cpu, registro_origen);
     modificar_registro(registro_cpu, registro_destino, resultado_int, cpu_log);
     program_counter_update(registro_cpu, cpu_log);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_sub");
+    }
 }
 
 void execute_jnz(t_contexto* registro_cpu, char* registro, char* instruccion){
@@ -338,11 +432,25 @@ void execute_jnz(t_contexto* registro_cpu, char* registro, char* instruccion){
     } else {
         program_counter_update(registro_cpu, cpu_log);
     }
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_jnz");
+    }
 }
 
 void execute_log(t_contexto* registro_cpu, char* registro){
     int info_int = get_register(registro_cpu, registro);
     log_info(cpu_log, "## Registro %s tiene valor %d", registro, info_int);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_log");
+    }
 }
 
 void execute_dump_memory(t_contexto* registro_cpu){
@@ -350,14 +458,21 @@ void execute_dump_memory(t_contexto* registro_cpu){
         sizeof(int)*2
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
 
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, DUMP_MEMORY);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, DUMP_MEMORY);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_dump_memory");
+    }
 }
 
 void execute_io(t_contexto* registro_cpu, char* tiempo){
@@ -367,15 +482,22 @@ void execute_io(t_contexto* registro_cpu, char* tiempo){
         sizeof(int)*3
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_uint32(buffer, &valor_tiempo, cpu_log);
 
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, IO);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, IO);
 
     program_counter_update(registro_cpu, cpu_log);
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_io");
+    }
 }
 
 void execute_process_create(t_contexto* registro_cpu, char* path, char* size_process, char* prioridad_hilo_main){
@@ -387,31 +509,25 @@ void execute_process_create(t_contexto* registro_cpu, char* path, char* size_pro
         sizeof(int)*4 + length
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_uint32(buffer, &valor_size, cpu_log);
     buffer_add_uint32(buffer, &valor_prioridad, cpu_log);
     buffer_add_string(buffer, length, path, cpu_log);
 
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_CREATE);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, PROCESS_CREATE);
 
     program_counter_update(registro_cpu, cpu_log);
-    sem_wait(&aviso_syscall);
-}
-
-void execute_process_exit(t_contexto* registro_cpu){
-    t_buffer* buffer = buffer_create(
-        sizeof(int)*2
-    );
-    
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
-
-    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, PROCESS_EXIT);
 
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_process_create");
+    }
 }
 
 void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad){
@@ -422,16 +538,23 @@ void execute_thread_create(t_contexto* registro_cpu, char* path, char* prioridad
         sizeof(int)*3 + length
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_uint32(buffer, &valor_prioridad, cpu_log);
     buffer_add_string(buffer, length, path, cpu_log);
 
     program_counter_update(registro_cpu, cpu_log);
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CREATE);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, THREAD_CREATE);
 
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_thread_create");
+    }
 }
 
 void execute_thread_join(t_contexto* registro_cpu, char* tid_join){
@@ -441,15 +564,22 @@ void execute_thread_join(t_contexto* registro_cpu, char* tid_join){
         sizeof(int)*3
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_uint32(buffer, &valor_tid_join, cpu_log);
 
-    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_JOIN);
-
     program_counter_update(registro_cpu, cpu_log);
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, THREAD_JOIN);
+
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_thread_join");
+    }
 }
 
 void execute_thread_cancel(t_contexto* registro_cpu, char* tid_cancel){
@@ -459,15 +589,23 @@ void execute_thread_cancel(t_contexto* registro_cpu, char* tid_cancel){
         sizeof(int)*3
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_uint32(buffer, &valor_tid_cancel, cpu_log);
 
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_CANCEL);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, THREAD_CANCEL);
 
     program_counter_update(registro_cpu, cpu_log);
+
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_thread_cancel");
+    }
 }
 
 void execute_mutex_create(t_contexto* registro_cpu, char* recurso){
@@ -477,15 +615,23 @@ void execute_mutex_create(t_contexto* registro_cpu, char* recurso){
         sizeof(int)*2 + length
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_string(buffer, length, recurso, cpu_log);
 
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_CREATE);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, MUTEX_CREATE);
 
     program_counter_update(registro_cpu, cpu_log);
+
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_mutex_create");
+    }
 }
 
 void execute_mutex_lock(t_contexto* registro_cpu, char* recurso){
@@ -495,15 +641,22 @@ void execute_mutex_lock(t_contexto* registro_cpu, char* recurso){
         sizeof(int)*2 + length
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_string(buffer, length, recurso, cpu_log);
 
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_LOCK);
-
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, MUTEX_LOCK);
     program_counter_update(registro_cpu, cpu_log);
+
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_mutex_lock");
+    }
 }
 
 void execute_mutex_unlock(t_contexto* registro_cpu, char* recurso){
@@ -513,15 +666,43 @@ void execute_mutex_unlock(t_contexto* registro_cpu, char* recurso){
         sizeof(int)*2 + length
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_string(buffer, length, recurso, cpu_log);
 
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, MUTEX_UNLOCK);
-
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, MUTEX_UNLOCK);
     program_counter_update(registro_cpu, cpu_log);
+
     sem_wait(&aviso_syscall);
+
+    if (recibo_kernel_ok)
+    {
+        check_interrupt();
+    } else {
+        log_error(cpu_log, "ERROR EN execute_mutex_unlock");
+    }
+}
+
+void execute_process_exit(t_contexto* registro_cpu){
+    t_buffer* buffer = buffer_create(
+        sizeof(int)*2
+    );
+    
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
+
+    enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, PROCESS_EXIT);
+
+    log_warning(cpu_log, "Cambio de contexto de CPU a Kernel por PROCESS_EXIT");
+
+    pthread_mutex_lock(&mutex_pid_tid);
+        pid_tid_recibido = NULL;
+    pthread_mutex_unlock(&mutex_pid_tid);
+
+    sem_wait(&aviso_syscall);
+    cpu_replanificar = true;
 }
 
 void execute_thread_exit(t_contexto* registro_cpu){
@@ -529,11 +710,42 @@ void execute_thread_exit(t_contexto* registro_cpu){
         sizeof(int)*2
     );
     
-    buffer_add_uint32(buffer, &pid_tid_recibido.pid, cpu_log);
-    buffer_add_uint32(buffer, &pid_tid_recibido.tid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
 
     enviar_registros_memoria(registro_cpu, pid_tid_recibido, conexion_memoria, cpu_log);
-    enviar_paquete_kernel(buffer, fd_conexion_interrupt, THREAD_EXIT);
+    enviar_paquete_kernel(buffer, fd_conexion_dispatch, THREAD_EXIT);
 
+    log_warning(cpu_log, "Cambio de contexto de CPU a Kernel por THREAD_EXIT");
+
+    pthread_mutex_lock(&mutex_pid_tid);
+        pid_tid_recibido = NULL;
+    pthread_mutex_unlock(&mutex_pid_tid);
+    
     sem_wait(&aviso_syscall);
+    cpu_replanificar = true;
+}
+
+bool recibir_aviso_syscall(int fd_conexion_kernel, t_log* log){
+    t_buffer* buffer;
+	uint32_t length = 0;
+    inst_cpu codigo_instruccion = 0;
+
+	buffer = buffer_recieve(fd_conexion_kernel);
+
+	char* mensaje_syscall = buffer_read_string(buffer, &length);
+    codigo_instruccion = buffer_read_uint32(buffer);
+
+    char* string_codigo_instruccion = obtener_string_codigo_instruccion(codigo_instruccion);
+
+    if (strcmp(mensaje_syscall, "REPLANIFICACION_KERNEL") == 0)
+    {
+        desalojo_kernel = true;
+    }
+    
+    log_warning(log, "## La Syscall %s devolvió el mensaje de estado de ejecución en KERNEL: %s", string_codigo_instruccion, mensaje_syscall);
+    free(mensaje_syscall);
+	buffer_destroy(buffer);
+
+    return true;
 }

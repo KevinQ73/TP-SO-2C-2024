@@ -488,7 +488,6 @@ cod_inst obtener_codigo_instruccion(char* operacion){
 }
 
 char* obtener_string_codigo_instruccion(inst_cpu operacion){
-
 	switch (operacion)
 	{
 	case DUMP_MEMORY:

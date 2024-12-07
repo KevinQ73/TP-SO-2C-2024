@@ -13,20 +13,28 @@
     int fd_conexion_dispatch;
     int fd_conexion_interrupt;
 
-    t_pid_tid pid_tid_recibido;
+    t_pid_tid* pid_tid_recibido;
     t_contexto* registros_cpu;
     t_dictionary* direccion_fisica;
     
     pthread_t hilo_kernel_dispatch;
     pthread_t hilo_kernel_interrupt;
 
+    pthread_mutex_t mutex_pid_tid;
+    pthread_mutex_t mutex_quantum;
+    pthread_mutex_t mutex_interrupt;
+    pthread_mutex_t mutex_dispatch;
+    
     sem_t aviso_syscall;
 
     bool flag_disconect_dispatch = true;
     bool flag_disconect_interrupt = true;
-    bool interrupt_is_called = false;
+    bool desalojo_kernel = false;
     bool segmentation_fault = false;
     bool quantum_is_called = false;
+
+    bool cpu_replanificar = false;
+    bool recibo_kernel_ok = false;
     
     /*--------------------- Atender conexiones a la CPU ---------------------*/
 
@@ -42,17 +50,17 @@
 
     /*-------------------------- Ciclo de ejecución -------------------------*/
     
-    void ejecutar_hilo(t_pid_tid pid_tid_recibido);
+    void ejecutar_hilo(t_pid_tid* pid_tid_recibido);
 
     /*-------------------------- Funciones execute --------------------------*/
 
-    void execute(t_contexto* registros_cpu, t_pid_tid pid_tid_recibido, char** instruccion_parseada);
+    void execute(t_contexto* registros_cpu, t_pid_tid* pid_tid_recibido, char** instruccion_parseada);
 
     void execute_set(t_contexto* registro_cpu, char* registro, char* valor);
 
-    void execute_read_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, char* registro_datos, char* registro_direccion);
+    void execute_read_mem(t_contexto* registro_cpu, t_pid_tid* pid_tid_recibido, char* registro_datos, char* registro_direccion);
 
-    void execute_write_mem(t_contexto* registro_cpu, t_pid_tid pid_tid_recibido, char* registro_direccion, char* registro_datos);
+    void execute_write_mem(t_contexto* registro_cpu, t_pid_tid* pid_tid_recibido, char* registro_direccion, char* registro_datos);
 
     void execute_sum(t_contexto* registro_cpu, char* registro_destino, char* registro_origen);
 
@@ -83,6 +91,18 @@
     void execute_thread_exit(t_contexto* registro_cpu);
 
     void execute_process_exit(t_contexto* registro_cpu);
+
+
+    bool estado_quantum();
+
+    bool true_quantum();
+
+    bool false_quantum();
+
+    void desalojar_pid_tid();
+
+    bool recibir_aviso_syscall(int fd_conexion_kernel, t_log* log);
+
 
     /*-----------------------------------------------------------------------*/
 

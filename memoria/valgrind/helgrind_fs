@@ -1,0 +1,1607 @@
+==322054== Helgrind, a thread error detector
+==322054== Copyright (C) 2007-2017, and GNU GPL'd, by OpenWorks LLP et al.
+==322054== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==322054== Command: ./bin/memoria ./files/prueba_planificacion.config
+==322054== Parent PID: 321433
+==322054== 
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #4 was created
+==322054==    at 0x49A19F3: clone (clone.S:76)
+==322054==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==322054==    by 0x49106D8: create_thread (pthread_create.c:295)
+==322054==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==322054==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B287: atender_kernel (memoria.c:140)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #3 was created
+==322054==    at 0x49A19F3: clone (clone.S:76)
+==322054==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==322054==    by 0x49106D8: create_thread (pthread_create.c:295)
+==322054==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==322054==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B18A: atender_solicitudes (memoria.c:115)
+==322054==    by 0x10AE5F: main (memoria.c:32)
+==322054== 
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #1 is the program's root thread
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during write of size 1 at 0x4AA8D10 by thread #4
+==322054== Locks held: none
+==322054==    at 0x4859796: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==322054==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F114C: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F114C: __vfprintf_internal (vfprintf-internal.c:1263)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x10DD58: buffer_recieve (serializacion.c:117)
+==322054==    by 0x10B305: atender_solicitudes_kernel (memoria.c:155)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 1 by thread #3
+==322054== Locks held: none
+==322054==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==322054==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==322054==    by 0x4875527: _log_write_in_level (log.c:146)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10B1D0: atender_kernel (memoria.c:126)
+==322054==  Address 0x4aa8d10 is 0 bytes inside a block of size 1,024 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==322054==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==322054==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==322054==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==322054==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==322054==    by 0x4875527: _log_write_in_level (log.c:146)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10AEEF: iniciar_memoria (memoria.c:76)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+==322054==  Block was alloc'd by thread #1
+==322054== 
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during write of size 1 at 0x4AA8D11 by thread #4
+==322054== Locks held: none
+==322054==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==322054==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F1CA8: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F1CA8: __vfprintf_internal (vfprintf-internal.c:1516)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x10DD58: buffer_recieve (serializacion.c:117)
+==322054==    by 0x10B305: atender_solicitudes_kernel (memoria.c:155)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 1 by thread #3
+==322054== Locks held: none
+==322054==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==322054==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==322054==    by 0x4875527: _log_write_in_level (log.c:146)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10B1D0: atender_kernel (memoria.c:126)
+==322054==  Address 0x4aa8d11 is 1 bytes inside a block of size 1,024 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==322054==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==322054==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==322054==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==322054==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==322054==    by 0x4875527: _log_write_in_level (log.c:146)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10AEEF: iniciar_memoria (memoria.c:76)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+==322054==  Block was alloc'd by thread #1
+==322054== 
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during read of size 1 at 0x1FFEFFFE10 by thread #4
+==322054== Locks held: none
+==322054==    at 0x4874CDC: bitarray_test_bit (bitarray.c:47)
+==322054==    by 0x10CEB4: obtener_espacio_desocupado (memoria.c:744)
+==322054==    by 0x10CC2F: hay_particion_disponible (memoria.c:666)
+==322054==    by 0x10B7DA: crear_proceso (memoria.c:258)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Address 0x1ffefffe10 is on thread #1's stack
+==322054== 
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0xa3
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during write of size 1 at 0x1FFEFFFE10 by thread #4
+==322054== Locks held: none
+==322054==    at 0x4874D5E: bitarray_set_bit (bitarray.c:51)
+==322054==    by 0x10CED6: obtener_espacio_desocupado (memoria.c:746)
+==322054==    by 0x10CC2F: hay_particion_disponible (memoria.c:666)
+==322054==    by 0x10B7DA: crear_proceso (memoria.c:258)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Address 0x1ffefffe10 is on thread #1's stack
+==322054== 
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during write of size 1 at 0x4AA8D10 by thread #3
+==322054== Locks held: none
+==322054==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==322054==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==322054==    by 0x4875527: _log_write_in_level (log.c:146)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10B25E: atender_kernel (memoria.c:139)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 1 by thread #4
+==322054== Locks held: none
+==322054==    at 0x4859796: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==322054==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F114C: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F114C: __vfprintf_internal (vfprintf-internal.c:1263)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x10DD58: buffer_recieve (serializacion.c:117)
+==322054==    by 0x10B305: atender_solicitudes_kernel (memoria.c:155)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==  Address 0x4aa8d10 is 0 bytes inside a block of size 1,024 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==322054==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==322054==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==322054==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==322054==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48F300B: outstring_func (vfprintf-internal.c:239)
+==322054==    by 0x48F300B: __vfprintf_internal (vfprintf-internal.c:1517)
+==322054==    by 0x48DC79E: printf (printf.c:33)
+==322054==    by 0x487481C: txt_write_in_stdout (txt.c:32)
+==322054==    by 0x4875527: _log_write_in_level (log.c:146)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10AEEF: iniciar_memoria (memoria.c:76)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+==322054==  Block was alloc'd by thread #1
+==322054== 
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #5 was created
+==322054==    at 0x49A19F3: clone (clone.S:76)
+==322054==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==322054==    by 0x49106D8: create_thread (pthread_create.c:295)
+==322054==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==322054==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B287: atender_kernel (memoria.c:140)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during write of size 1 at 0x4AAA900 by thread #5
+==322054== Locks held: none
+==322054==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==322054==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48FBA9C: fputs (iofputs.c:38)
+==322054==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==322054==    by 0x48754D9: _log_write_in_level (log.c:138)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10B4B5: atender_solicitudes_kernel (memoria.c:183)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 1 by thread #3
+==322054== Locks held: none
+==322054==    at 0x48597B4: mempcpy (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4907664: _IO_new_file_xsputn (fileops.c:1235)
+==322054==    by 0x4907664: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48FBA9C: fputs (iofputs.c:38)
+==322054==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==322054==    by 0x48754D9: _log_write_in_level (log.c:138)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10B1D0: atender_kernel (memoria.c:126)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==  Address 0x4aaa900 is 0 bytes inside a block of size 4,096 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x48FABA3: _IO_file_doallocate (filedoalloc.c:101)
+==322054==    by 0x4909CDF: _IO_doallocbuf (genops.c:347)
+==322054==    by 0x4908F5F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:744)
+==322054==    by 0x49076D4: _IO_new_file_xsputn (fileops.c:1243)
+==322054==    by 0x49076D4: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1196)
+==322054==    by 0x48FBA9C: fputs (iofputs.c:38)
+==322054==    by 0x48747E2: txt_write_in_file (txt.c:27)
+==322054==    by 0x48754D9: _log_write_in_level (log.c:138)
+==322054==    by 0x487518F: log_info (log.c:91)
+==322054==    by 0x10AEEF: iniciar_memoria (memoria.c:76)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+==322054==  Block was alloc'd by thread #1
+==322054== 
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #2 was created
+==322054==    at 0x49A19F3: clone (clone.S:76)
+==322054==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==322054==    by 0x49106D8: create_thread (pthread_create.c:295)
+==322054==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==322054==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B158: atender_solicitudes (memoria.c:112)
+==322054==    by 0x10AE5F: main (memoria.c:32)
+==322054== 
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #6 was created
+==322054==    at 0x49A19F3: clone (clone.S:76)
+==322054==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==322054==    by 0x49106D8: create_thread (pthread_create.c:295)
+==322054==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==322054==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B287: atender_kernel (memoria.c:140)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054==  Lock at 0x1131C0 was first observed
+==322054==    at 0x4854BFE: pthread_mutex_init (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B0D5: iniciar_semaforos (memoria.c:103)
+==322054==    by 0x10B07E: iniciar_memoria (memoria.c:98)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==322054==  Location 0x1131c0 is 0 bytes inside global var "contexto_ejecucion_procesos"
+==322054==  declared at memoria.h:33
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AAC110 by thread #2
+==322054== Locks held: none
+==322054==    at 0x4872830: dictionary_get (dictionary.c:99)
+==322054==    by 0x10C820: buscar_instruccion (memoria.c:602)
+==322054==    by 0x10BBDB: atender_cpu (memoria.c:359)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 8 by thread #6
+==322054== Locks held: 1, at address 0x1131C0
+==322054==    at 0x48726E6: dictionary_put (dictionary.c:67)
+==322054==    by 0x10B911: crear_hilo (memoria.c:283)
+==322054==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Address 0x4aac110 is 16 bytes inside a block of size 32 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4872E4C: dictionary_create_element (dictionary.c:249)
+==322054==    by 0x4872745: dictionary_put (dictionary.c:73)
+==322054==    by 0x10B830: crear_proceso (memoria.c:264)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #4
+==322054== 
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #10 was created
+==322054==    at 0x49A19F3: clone (clone.S:76)
+==322054==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==322054==    by 0x49106D8: create_thread (pthread_create.c:295)
+==322054==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==322054==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B287: atender_kernel (memoria.c:140)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054==  Lock at 0x1131C0 was first observed
+==322054==    at 0x4854BFE: pthread_mutex_init (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B0D5: iniciar_semaforos (memoria.c:103)
+==322054==    by 0x10B07E: iniciar_memoria (memoria.c:98)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+==322054==  Location 0x1131c0 is 0 bytes inside global var "contexto_ejecucion_procesos"
+==322054==  declared at memoria.h:33
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AA8BF8 by thread #10
+==322054== Locks held: none
+==322054==    at 0x4872EE2: dictionary_get_element (dictionary.c:263)
+==322054==    by 0x4872820: dictionary_get (dictionary.c:98)
+==322054==    by 0x10C053: buscar_contexto_proceso (memoria.c:469)
+==322054==    by 0x10B965: finalizar_hilo (memoria.c:294)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 8 by thread #4
+==322054== Locks held: 1, at address 0x1131C0
+==322054==    at 0x4872782: dictionary_put (dictionary.c:78)
+==322054==    by 0x10B830: crear_proceso (memoria.c:264)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Address 0x4aa8bf8 is 152 bytes inside a block of size 160 alloc'd
+==322054==    at 0x484FB03: calloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x487260A: dictionary_create (dictionary.c:40)
+==322054==    by 0x10AF10: iniciar_memoria (memoria.c:79)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+==322054==  Block was alloc'd by thread #1
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during read of size 4 at 0x4AAC108 by thread #10
+==322054== Locks held: none
+==322054==    at 0x4872EFB: dictionary_get_element (dictionary.c:271)
+==322054==    by 0x4872820: dictionary_get (dictionary.c:98)
+==322054==    by 0x10C053: buscar_contexto_proceso (memoria.c:469)
+==322054==    by 0x10B965: finalizar_hilo (memoria.c:294)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Address 0x4aac108 is 8 bytes inside a block of size 32 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4872E4C: dictionary_create_element (dictionary.c:249)
+==322054==    by 0x4872745: dictionary_put (dictionary.c:73)
+==322054==    by 0x10B830: crear_proceso (memoria.c:264)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #4
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054==  Lock at 0x1131C0 was first observed
+==322054==    at 0x4854BFE: pthread_mutex_init (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B0D5: iniciar_semaforos (memoria.c:103)
+==322054==    by 0x10B07E: iniciar_memoria (memoria.c:98)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+==322054==  Location 0x1131c0 is 0 bytes inside global var "contexto_ejecucion_procesos"
+==322054==  declared at memoria.h:33
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AAC110 by thread #10
+==322054== Locks held: none
+==322054==    at 0x4872830: dictionary_get (dictionary.c:99)
+==322054==    by 0x10C053: buscar_contexto_proceso (memoria.c:469)
+==322054==    by 0x10B965: finalizar_hilo (memoria.c:294)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 8 by thread #2
+==322054== Locks held: 1, at address 0x1131C0
+==322054==    at 0x48726E6: dictionary_put (dictionary.c:67)
+==322054==    by 0x10CBFD: actualizar_contexto_ejecucion (memoria.c:657)
+==322054==    by 0x10BB34: atender_cpu (memoria.c:344)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Address 0x4aac110 is 16 bytes inside a block of size 32 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4872E4C: dictionary_create_element (dictionary.c:249)
+==322054==    by 0x4872745: dictionary_put (dictionary.c:73)
+==322054==    by 0x10B830: crear_proceso (memoria.c:264)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #4
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AA9B10 by thread #10
+==322054== Locks held: none
+==322054==    at 0x10B971: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Address 0x4aa9b10 is 16 bytes inside a block of size 24 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10BDF8: crear_contexto_proceso (memoria.c:410)
+==322054==    by 0x10B803: crear_proceso (memoria.c:262)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #4
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054==  Lock at 0x1131C0 was first observed
+==322054==    at 0x4854BFE: pthread_mutex_init (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B0D5: iniciar_semaforos (memoria.c:103)
+==322054==    by 0x10B07E: iniciar_memoria (memoria.c:98)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+--322054-- warning: evaluate_Dwarf3_Expr: unhandled DW_OP_ 0x9b
+==322054==  Location 0x1131c0 is 0 bytes inside global var "contexto_ejecucion_procesos"
+==322054==  declared at memoria.h:33
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AACF68 by thread #2
+==322054== Locks held: 1, at address 0x1131C0
+==322054==    at 0x4874564: list_get_indirect_by_condition (list.c:375)
+==322054==    by 0x48735A1: list_find (list.c:81)
+==322054==    by 0x10C3CE: thread_get_by_tid (memoria.c:522)
+==322054==    by 0x10BF62: buscar_contexto (memoria.c:447)
+==322054==    by 0x10BAB9: atender_cpu (memoria.c:331)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 8 by thread #10
+==322054== Locks held: none
+==322054==    at 0x48744D8: list_unlink_element (list.c:360)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==  Address 0x4aacf68 is 8 bytes inside a block of size 16 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x487444D: list_create_element (list.c:346)
+==322054==    by 0x48745AF: list_add_element (list.c:382)
+==322054==    by 0x4873319: list_add (list.c:42)
+==322054==    by 0x10B8F7: crear_hilo (memoria.c:281)
+==322054==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #6
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AACF68 by thread #2
+==322054== Locks held: none
+==322054==    at 0x4874564: list_get_indirect_by_condition (list.c:375)
+==322054==    by 0x48735A1: list_find (list.c:81)
+==322054==    by 0x10C3CE: thread_get_by_tid (memoria.c:522)
+==322054==    by 0x10C839: buscar_instruccion (memoria.c:603)
+==322054==    by 0x10BBDB: atender_cpu (memoria.c:359)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 8 by thread #10
+==322054== Locks held: none
+==322054==    at 0x48744D8: list_unlink_element (list.c:360)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==  Address 0x4aacf68 is 8 bytes inside a block of size 16 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x487444D: list_create_element (list.c:346)
+==322054==    by 0x48745AF: list_add_element (list.c:382)
+==322054==    by 0x4873319: list_add (list.c:42)
+==322054==    by 0x10B8F7: crear_hilo (memoria.c:281)
+==322054==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #6
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054==  Lock at 0x1131C0 was first observed
+==322054==    at 0x4854BFE: pthread_mutex_init (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B0D5: iniciar_semaforos (memoria.c:103)
+==322054==    by 0x10B07E: iniciar_memoria (memoria.c:98)
+==322054==    by 0x10AD8A: main (memoria.c:17)
+==322054==  Location 0x1131c0 is 0 bytes inside global var "contexto_ejecucion_procesos"
+==322054==  declared at memoria.h:33
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AACF68 by thread #2
+==322054== Locks held: 1, at address 0x1131C0
+==322054==    at 0x4874564: list_get_indirect_by_condition (list.c:375)
+==322054==    by 0x48735A1: list_find (list.c:81)
+==322054==    by 0x10C3CE: thread_get_by_tid (memoria.c:522)
+==322054==    by 0x10C984: actualizar_contexto_ejecucion (memoria.c:632)
+==322054==    by 0x10BB34: atender_cpu (memoria.c:344)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 8 by thread #10
+==322054== Locks held: none
+==322054==    at 0x48744D8: list_unlink_element (list.c:360)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==  Address 0x4aacf68 is 8 bytes inside a block of size 16 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x487444D: list_create_element (list.c:346)
+==322054==    by 0x48745AF: list_add_element (list.c:382)
+==322054==    by 0x4873319: list_add (list.c:42)
+==322054==    by 0x10B8F7: crear_hilo (memoria.c:281)
+==322054==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #6
+==322054== 
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #11 was created
+==322054==    at 0x49A19F3: clone (clone.S:76)
+==322054==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==322054==    by 0x49106D8: create_thread (pthread_create.c:295)
+==322054==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==322054==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B287: atender_kernel (memoria.c:140)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AACF68 by thread #11
+==322054== Locks held: none
+==322054==    at 0x4874564: list_get_indirect_by_condition (list.c:375)
+==322054==    by 0x4873734: list_remove_by_condition (list.c:106)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 8 by thread #10
+==322054== Locks held: none
+==322054==    at 0x48744D8: list_unlink_element (list.c:360)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==  Address 0x4aacf68 is 8 bytes inside a block of size 16 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x487444D: list_create_element (list.c:346)
+==322054==    by 0x48745AF: list_add_element (list.c:382)
+==322054==    by 0x4873319: list_add (list.c:42)
+==322054==    by 0x10B8F7: crear_hilo (memoria.c:281)
+==322054==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #6
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during write of size 8 at 0x4AACF68 by thread #11
+==322054== Locks held: none
+==322054==    at 0x48744D8: list_unlink_element (list.c:360)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous read of size 8 by thread #2
+==322054== Locks held: none
+==322054==    at 0x4874564: list_get_indirect_by_condition (list.c:375)
+==322054==    by 0x48735A1: list_find (list.c:81)
+==322054==    by 0x10C3CE: thread_get_by_tid (memoria.c:522)
+==322054==    by 0x10C839: buscar_instruccion (memoria.c:603)
+==322054==    by 0x10BBDB: atender_cpu (memoria.c:359)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Address 0x4aacf68 is 8 bytes inside a block of size 16 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x487444D: list_create_element (list.c:346)
+==322054==    by 0x48745AF: list_add_element (list.c:382)
+==322054==    by 0x4873319: list_add (list.c:42)
+==322054==    by 0x10B8F7: crear_hilo (memoria.c:281)
+==322054==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #6
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during read of size 4 at 0x4AAC068 by thread #11
+==322054== Locks held: none
+==322054==    at 0x48744DF: list_unlink_element (list.c:361)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 4 by thread #10
+==322054== Locks held: none
+==322054==    at 0x48744E9: list_unlink_element (list.c:361)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==  Address 0x4aac068 is 8 bytes inside a block of size 16 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x48732AE: list_create (list.c:34)
+==322054==    by 0x10BE23: crear_contexto_proceso (memoria.c:415)
+==322054==    by 0x10B803: crear_proceso (memoria.c:262)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #4
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during write of size 4 at 0x4AAC068 by thread #11
+==322054== Locks held: none
+==322054==    at 0x48744E9: list_unlink_element (list.c:361)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 4 by thread #10
+==322054== Locks held: none
+==322054==    at 0x48744E9: list_unlink_element (list.c:361)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==  Address 0x4aac068 is 8 bytes inside a block of size 16 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x48732AE: list_create (list.c:34)
+==322054==    by 0x10BE23: crear_contexto_proceso (memoria.c:415)
+==322054==    by 0x10B803: crear_proceso (memoria.c:262)
+==322054==    by 0x10B387: atender_solicitudes_kernel (memoria.c:163)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #4
+==322054== 
+==322054== ---Thread-Announcement------------------------------------------
+==322054== 
+==322054== Thread #12 was created
+==322054==    at 0x49A19F3: clone (clone.S:76)
+==322054==    by 0x49A28EE: __clone_internal (clone-internal.c:83)
+==322054==    by 0x49106D8: create_thread (pthread_create.c:295)
+==322054==    by 0x49111FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==322054==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10B287: atender_kernel (memoria.c:140)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== ----------------------------------------------------------------
+==322054== 
+==322054== Possible data race during read of size 8 at 0x4AACF68 by thread #12
+==322054== Locks held: none
+==322054==    at 0x48744D0: list_unlink_element (list.c:360)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054== 
+==322054== This conflicts with a previous write of size 8 by thread #11
+==322054== Locks held: none
+==322054==    at 0x48744D8: list_unlink_element (list.c:360)
+==322054==    by 0x4874621: list_remove_indirect (list.c:392)
+==322054==    by 0x4873757: list_remove_by_condition (list.c:107)
+==322054==    by 0x10C4AB: thread_remove_by_tid (memoria.c:532)
+==322054==    by 0x10B97E: finalizar_hilo (memoria.c:295)
+==322054==    by 0x10B540: atender_solicitudes_kernel (memoria.c:202)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==  Address 0x4aacf68 is 8 bytes inside a block of size 16 alloc'd
+==322054==    at 0x484A919: malloc (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x487444D: list_create_element (list.c:346)
+==322054==    by 0x48745AF: list_add_element (list.c:382)
+==322054==    by 0x4873319: list_add (list.c:42)
+==322054==    by 0x10B8F7: crear_hilo (memoria.c:281)
+==322054==    by 0x10B46C: atender_solicitudes_kernel (memoria.c:180)
+==322054==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x4910AC2: start_thread (pthread_create.c:442)
+==322054==    by 0x49A1A03: clone (clone.S:100)
+==322054==  Block was alloc'd by thread #6
+==322054== 
+==322054== 
+==322054== Process terminating with default action of signal 2 (SIGINT)
+==322054==    at 0x490D117: __futex_abstimed_wait_common64 (futex-internal.c:57)
+==322054==    by 0x490D117: __futex_abstimed_wait_common (futex-internal.c:87)
+==322054==    by 0x490D117: __futex_abstimed_wait_cancelable64 (futex-internal.c:139)
+==322054==    by 0x4918C77: __new_sem_wait_slow64.constprop.0 (sem_waitcommon.c:183)
+==322054==    by 0x48540A8: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==322054==    by 0x10AE6E: main (memoria.c:34)
+==322054== 
+==322054== Use --history-level=approx or =none to gain increased speed, at
+==322054== the cost of reduced accuracy of conflicting-access information
+==322054== For lists of detected and suppressed errors, rerun with: -s
+==322054== ERROR SUMMARY: 20094 errors from 19 contexts (suppressed: 7567 from 128)
