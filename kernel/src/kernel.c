@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    //kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
+    kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
 
-    kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
+    //kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
 
     kernel_config = iniciar_config(argv[3]);
 
@@ -134,21 +134,25 @@ void* inicializar_pcb_en_espera(){
 
         char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->pid), &pcb->size_process, kernel_log);
 
-        if (strcmp(respuesta_memoria, "OK"))
+        if (strcmp(respuesta_memoria, "OK") == 0)
         {
             t_tcb* tcb_main = list_get(pcb->lista_tcb, 0);
             char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(&pcb->pid, &tcb_main->tid, pcb->path_instrucciones_hilo_main, &(tcb_main->prioridad), kernel_log);
-            if (strcmp(respuesta_memoria_hilo, "OK"))
+            if (strcmp(respuesta_memoria_hilo, "OK") == 0)
             {
                 t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_main);
+                log_debug(kernel_log, "Se creó el t_hilo_planificacion (%d:%d) de prioridad %d", hilo->pid_padre, hilo->tid_asociado, hilo->prioridad);
                 create_thread_state(pcb->pid, tcb_main->tid, tcb_main->prioridad);
+                agregar_proceso_activo(pcb);
                 poner_en_ready(hilo);
             } else {
                 log_debug(kernel_log, "NO SE PUDO INICIALIZAR HILO EN MEMORIA");
             }
+            free(respuesta_memoria);
             free(respuesta_memoria_hilo);
         } else {
             reintentar_inicializar_pcb_en_espera(pcb);
+            free(respuesta_memoria);
         }
     } else {
         log_debug(kernel_log, "NO HAY PCB EN COLA NEW");
@@ -160,13 +164,14 @@ void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
     int prioridad = tcb_asociado->prioridad;
     char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->size_process), &prioridad, kernel_log);
 
-        if (strcmp(respuesta_memoria, "OK"))
+        if (strcmp(respuesta_memoria, "OK") == 0)
         {
             char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(&pcb->pid, &tcb_asociado->tid, pcb->path_instrucciones_hilo_main, &prioridad, kernel_log);
-            if (strcmp(respuesta_memoria_hilo, "OK"))
+            if (strcmp(respuesta_memoria_hilo, "OK") == 0)
             {
                 t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_asociado);
                 create_thread_state(pcb->pid, tcb_asociado->tid, tcb_asociado->prioridad);
+                agregar_proceso_activo(pcb);
                 poner_en_ready(hilo);
             } else {
                 log_debug(kernel_log, "NO SE PUDO REINTENTAR INICIALIZAR HILO EN MEMORIA");
@@ -183,7 +188,6 @@ void poner_en_new(t_pcb* pcb){
     pthread_mutex_lock(&mutex_cola_new);
         queue_push(cola_new, pcb);
     pthread_mutex_unlock(&mutex_cola_new);
-    sem_post(&contador_procesos_en_new);
 }
 
 void poner_en_exit(uint32_t pid, uint32_t tid){
@@ -1069,6 +1073,7 @@ void* syscall_process_create(t_buffer* buffer, t_pid_tid pid_tid){
 
     create_process_state(pcb->pid);
     poner_en_new(pcb);
+    sem_post(&contador_procesos_en_new);
     enviar_aviso_syscall("PROCESO INICIALIZADO", &codigo);
     log_info(kernel_log,"## PID: %d- Se crea el proceso- Estado: NEW", pcb->pid);
 }   

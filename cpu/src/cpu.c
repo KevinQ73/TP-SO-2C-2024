@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    //cpu_log = iniciar_logger("./files/cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
+    cpu_log = iniciar_logger("./files/cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
     
-    cpu_log = iniciar_logger("./files/cpu_obligatorio.log", "CPU", 1, LOG_LEVEL_INFO);
+    //cpu_log = iniciar_logger("./files/cpu_obligatorio.log", "CPU", 1, LOG_LEVEL_INFO);
 
     cpu_config = iniciar_config("./files/cpu.config");
 
@@ -44,10 +44,10 @@ int main(int argc, char* argv[]) {
     pthread_join(hilo_kernel_interrupt, NULL);
 
     // ------------------------ FINALIZACIÓN CPU -------------------------
+    sem_wait(&cpu_activo);
 
-    log_debug(cpu_log, "TERMINANDO CPU");
-    //terminar_modulo(fd_conexion_dispatch, cpu_log, cpu_config);
-    //terminar_modulo(fd_conexion_interrupt, cpu_log, cpu_config);
+    log_warning(cpu_log, "TERMINANDO CPU");
+    finalizar_cpu();
 
     return EXIT_SUCCESS;
 }
@@ -62,6 +62,30 @@ void iniciar_semaforos(){
     pthread_mutex_init(&mutex_dispatch, NULL);
 
     sem_init(&aviso_syscall, 0, 0);
+    sem_init(&cpu_activo, 0, 0);
+}
+
+void finalizar_cpu(){
+    pthread_cancel(hilo_kernel_interrupt);
+
+    pthread_mutex_destroy(&mutex_pid_tid);
+    pthread_mutex_destroy(&mutex_quantum);
+    pthread_mutex_destroy(&mutex_interrupt);
+    pthread_mutex_destroy(&mutex_dispatch);
+
+    sem_destroy(&aviso_syscall);
+    sem_destroy(&cpu_activo);
+
+    free(pid_tid_recibido);
+    free(registros_cpu);
+
+    eliminar_logger(cpu_log);
+    eliminar_config(cpu_config);
+
+    close(fd_conexion_dispatch);
+    close(fd_conexion_interrupt);
+
+    log_debug(cpu_log, "eliminé todo");
 }
 
 void atender_puerto_dispatch(){
@@ -100,6 +124,7 @@ void atender_puerto_dispatch(){
             break;
         }
     }
+    sem_post(&cpu_activo);
 }
 
 void atender_puerto_interrupt(){
@@ -121,6 +146,7 @@ void atender_puerto_interrupt(){
             if (strcmp(mensaje, "FIN_QUANTUM") == 0)
             {
                 log_warning(cpu_log, "## Llega interrupción al puerto Interrupt");
+                recibo_kernel_ok = true;
                 true_quantum();
             }
             free(mensaje);
@@ -138,6 +164,7 @@ void atender_puerto_interrupt(){
             break;
         }
     }
+    sem_post(&cpu_activo);
 }
 
 void check_interrupt(){
@@ -191,9 +218,11 @@ void desalojar_pid_tid(){
 
 	t_paquete* paquete = crear_paquete(DESALOJO_PID_TID_CPU);
 	buffer = buffer_create(
-	    length
+	    sizeof(uint32_t)*2 + length 
     );
 
+    buffer_add_uint32(buffer, &pid_tid_recibido->pid, cpu_log);
+    buffer_add_uint32(buffer, &pid_tid_recibido->tid, cpu_log);
     buffer_add_string(buffer, length, mensaje_quantum, cpu_log);
 
     paquete->buffer = buffer;
@@ -336,7 +365,7 @@ void execute_set(t_contexto* registro_cpu, char* registro, char* valor){
     {
         check_interrupt();
     } else {
-        log_error(cpu_log, "ERROR EN execute_set");
+        log_debug(cpu_log, "ERROR EN execute_set");
     }
 }
 

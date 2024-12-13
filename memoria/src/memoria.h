@@ -36,6 +36,7 @@
     pthread_mutex_t mutex_procesos_activos;
 
     sem_t memoria_activo;
+    sem_t actualizar_contexto;
 
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 

@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    // memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
+    memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
 
-    memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
+    //memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
 
     memoria_config = iniciar_config(argv[1]);
 
@@ -80,6 +80,7 @@ void iniciar_semaforos(){
     pthread_mutex_init(&mutex_procesos_activos, NULL);
 
     sem_init(&memoria_activo, 0, 0);
+    sem_init(&actualizar_contexto, 0, 0);
 }
 
 void atender_solicitudes(){
@@ -163,6 +164,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
     case FINALIZAR_PROCESO:
         pid = buffer_read_uint32(buffer);
 
+        sem_wait(&actualizar_contexto);
         finalizar_proceso(pid);
         enviar_mensaje("FINALIZACION_ACEPTADA", fd_memoria, memoria_log);
         
@@ -173,6 +175,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         pid = buffer_read_uint32(buffer);
         tid = buffer_read_uint32(buffer);
 
+        sem_wait(&actualizar_contexto);
         finalizar_hilo(pid, tid);
         enviar_mensaje("OK", fd_memoria, memoria_log);
         
@@ -210,6 +213,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
 			enviar_mensaje("ERROR", fd_conexion_kernel, memoria_log);
 		}
         free(nombre_archivo);
+        free(contexto);
         close(fd_memoria);
         break;
 
@@ -217,6 +221,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
         break;
     }
+    buffer_destroy(buffer);
 }
 
 bool crear_proceso(uint32_t pid, uint32_t size){
@@ -258,12 +263,14 @@ void* finalizar_proceso(uint32_t pid){
 }
 
 void* finalizar_hilo(uint32_t pid, uint32_t tid){
+    pthread_mutex_lock(&contexto_ejecucion_procesos);
     t_contexto_proceso* contexto_padre = buscar_contexto_proceso(pid);
     t_contexto_hilo* hilo_a_finalizar = thread_remove_by_tid(contexto_padre->lista_hilos, tid);
 
     thread_context_destroy(hilo_a_finalizar);
 
     log_info(memoria_log, "## [MEMORIA:KERNEL] ## Hilo <Destruido> - (PID:TID) - (<%d>:<%d>). Cerrando FD del socket.\n", pid, tid);
+    pthread_mutex_unlock(&contexto_ejecucion_procesos);
     return NULL;
 }
 
@@ -308,9 +315,11 @@ void* atender_cpu(){
             usleep(memoria_registro.retardo_respuesta * 1000);
 
             actualizar_contexto_ejecucion(contexto_recibido, pid_tid_recibido.pid, pid_tid_recibido.tid);
+            sem_post(&actualizar_contexto);
             log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
             escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
             enviar_mensaje("OK_CONTEXTO", fd_conexion_cpu, memoria_log);
+            free(contexto_recibido);
             break;
             
         case PETICION_INSTRUCCION:
@@ -366,6 +375,7 @@ void* atender_cpu(){
             liberar_hilo_cpu = false;
             break;
         }
+        buffer_destroy(buffer);
     }
 }
 
@@ -438,7 +448,6 @@ t_contexto_proceso* buscar_contexto_proceso(uint32_t pid){
 
 t_contexto_hilo* buscar_contexto_hilo(t_contexto_proceso* contexto_proceso, uint32_t tid){
     t_contexto_hilo* contexto_hilo;
-
     contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
     return contexto_hilo;
 }
@@ -481,12 +490,10 @@ t_contexto_hilo* thread_get_by_tid(t_list* lista_hilos, int tid){
 }
 
 t_contexto_hilo* thread_remove_by_tid(t_list* lista_hilos, int tid){
-    pthread_mutex_lock(&contexto_ejecucion_procesos);
     bool _list_contains(void* ptr) {
 	    t_contexto_hilo* hilo = (t_contexto_hilo*) ptr;
 	    return (tid == hilo->tid);
 	}
-    pthread_mutex_unlock(&contexto_ejecucion_procesos);
 	return list_remove_by_condition(lista_hilos, _list_contains);
 }
 
@@ -545,6 +552,7 @@ void enviar_contexto_solicitado(t_contexto* contexto){
 
     enviar_paquete(paquete, fd_conexion_cpu);
     eliminar_paquete(paquete);
+    free(contexto);
 }
 
 void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura){
@@ -579,7 +587,7 @@ bool busqueda_pid_tid(t_pseudocodigo* pseudocodigo){
 
 void enviar_datos_memoria(void* buffer, uint32_t tamanio){
     t_paquete* paquete = crear_paquete(READ_MEM);
-    agregar_a_paquete(paquete, buffer, tamanio);
+    paquete->buffer = buffer;
     enviar_paquete(paquete, fd_conexion_cpu);
     eliminar_paquete(paquete);
 }

@@ -80,6 +80,7 @@ t_pid_tid* recibir_paquete_kernel(int socket_kernel, t_log* cpu_log){
     pid_tid->pid = buffer_read_uint32(buffer);
     pid_tid->tid = buffer_read_uint32(buffer);
 
+    buffer_destroy(buffer);
     return pid_tid;
 }
 

@@ -26,6 +26,7 @@
     pthread_mutex_t mutex_dispatch;
     
     sem_t aviso_syscall;
+    sem_t cpu_activo;
 
     bool flag_disconect_dispatch = true;
     bool flag_disconect_interrupt = true;
