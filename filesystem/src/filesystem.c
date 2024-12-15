@@ -19,6 +19,16 @@ int main(int argc, char* argv[]) {
 
     atender_memoria();
 
+	//Finalizar todo
+	close(fd_escucha_memoria);
+	munmap(puntero_bitmap, strlen(puntero_bitmap));
+	munmap(buffer_bloques, strlen(buffer_bloques));
+	log_destroy(filesystem_log);
+	config_destroy(filesystem_config);
+	free(filesystem_registro.path_mount_dir);
+	free(filesystem_registro.log_level);
+	free(filesystem_registro.puerto_escucha);
+
     log_debug(filesystem_log, "TERMINANDO MEMORIA");
 }
 
@@ -28,17 +38,29 @@ void inicializar_fs(){
 	string_append(&name_bitmap, "/bitmap.dat");
 	string_append(&name_bloques, "/bloques.dat");
 
-	int bitmap_fd = open(name_bitmap, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-	int bloques_fd = open(name_bloques, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-
 	int size_bitmap = ceil((double)filesystem_registro.block_count/(double)8);
+	int bitmap_fd;
+	if(access(name_bitmap, F_OK) == -1){
+		bitmap_fd = open(name_bitmap, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+		crear_bitmap(bitmap_fd, size_bitmap);
+		log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BITMAP.DAT> - Tamaño: <%d> PATH: %s", size_bitmap, name_bitmap);
+	}else{
+		bitmap_fd = open(name_bitmap, O_RDWR);
+		abrir_bitmap(bitmap_fd);
+		log_info(filesystem_log, "## [FILESYSTEM] Archivo Abierto: <BITMAP.DAT> - Tamaño: <%d> PATH: %s", size_bitmap, name_bitmap);
+	}
+
 	int size_bloques = filesystem_registro.block_count * filesystem_registro.block_size;
-
-	log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BITMAP.DAT> - Tamaño: <%d> PATH: %s", size_bitmap, name_bitmap);
-	log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BLOQUES.DAT> - Tamaño: <%d> PATH: %s", size_bloques, name_bloques);
-
-	crear_bitmap(bitmap_fd, size_bitmap);
-	crear_bloques(bloques_fd, size_bloques);
+	int bloques_fd;
+	if(access(name_bloques, F_OK) == -1){
+		bloques_fd = open(name_bloques, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+		crear_bloques(bloques_fd, size_bloques);
+		log_info(filesystem_log, "## [FILESYSTEM] Archivo Creado: <BLOQUES.DAT> - Tamaño: <%d> PATH: %s", size_bloques, name_bloques);
+	}else{
+		bloques_fd = open(name_bloques, O_RDWR);
+		abrir_bloques(bloques_fd);
+		log_info(filesystem_log, "## [FILESYSTEM] Archivo Abierto: <BLOQUES.DAT> - Tamaño: <%d> PATH: %s", size_bloques, name_bloques);
+	}
 
 	free(name_bitmap);
 	free(name_bloques);
@@ -79,13 +101,14 @@ void* atender_solicitudes(void* fd_conexion){
 	switch(operacion_memoria){
 		case DUMP_MEMORY:
 			log_info(filesystem_log, "MEMORY DUMP LEIDO");
+
 			uint32_t tamanio_buffer;
 			uint32_t tamanio;
-	
+
 			char* nombre = buffer_read_string(buffer, &tamanio_buffer);
 			void* contenido = buffer_read_string(buffer,&tamanio);
 
-			if(dump_memory(nombre, tamanio, contenido) == EXIT_SUCCESS){
+			if( dump_memory(nombre, tamanio, contenido) == EXIT_SUCCESS){
 				enviar_mensaje("OK_FS", fd_memoria, filesystem_log);
 			}else {
 				enviar_mensaje("ERROR", fd_memoria, filesystem_log);
@@ -95,12 +118,13 @@ void* atender_solicitudes(void* fd_conexion){
 			log_debug(filesystem_log, "## [FILESYSTEM:MEMORIA] OPERACIÓN DE MEMORIA ERRONEA");
         break;
 	}
+	close(fd_memoria);
+	close(fd_conexion);
 }
 
 //Funciones del dump_memory
 int dump_memory(char* nombre_archivo, int tamanio, void* contenido){
 	int bloques_totales = cantidad_bloques(tamanio) + 1;
-
 	u_int32_t* puntero_bloques = buscar_bloques_bitmap(bloques_totales);
 
 	if(puntero_bloques == NULL || ((filesystem_registro.block_size/sizeof(u_int32_t)) < cantidad_bloques(tamanio))){
@@ -113,7 +137,6 @@ int dump_memory(char* nombre_archivo, int tamanio, void* contenido){
 		crear_metadata(nombre_archivo, puntero_bloques[0], tamanio);
 		log_info(filesystem_log, "## Archivo Creado: %s - Tamaño: <%i>\n", nombre_archivo, tamanio);
 		log_info(filesystem_log, "## Fin de solicitud - Archivo: %s\n", nombre_archivo);
-
 		free(puntero_bloques);
 		return EXIT_SUCCESS;
 	}
@@ -139,6 +162,7 @@ void abrir_bloques(int file_descriptor){
 	fstat(file_descriptor, &buf);
 	buffer_bloques = mmap(NULL, buf.st_size, PROT_READ|PROT_WRITE, MAP_SHARED, file_descriptor, 0);
 
+	close(file_descriptor);
 }
 
 int inicio_bloque(int n_bloque){
@@ -235,6 +259,7 @@ void abrir_bitmap(int file_descriptor){
 			bloques_libres++;
 		}
 	}
+	close(file_descriptor);
 }
 
 u_int32_t* buscar_bloques_bitmap(int longitud){
@@ -276,7 +301,7 @@ int crear_metadata(char* ruta, int bloque_indexado, int tamanio_archivo){
 	char* bloque_string = malloc(50*sizeof(char));
 	char* tamanio_string = malloc(50*sizeof(char));
 
-	sprintf(bloque_string, "%i", bloque_indexado);
+	sprintf|"%i", bloque_indexado);
 	sprintf(tamanio_string, "%i", tamanio_archivo);
 
 	modificar_metadata(ruta_archivo, bloque_indexado, tamanio_archivo);
