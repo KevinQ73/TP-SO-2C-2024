@@ -46,6 +46,9 @@ int main(int argc, char* argv[]) {
 
 /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 
+// AAAAAAAAAAAAAA
+
+
 void iniciar_memoria(){
     log_info(memoria_log, "MEMORIA INICIALIZADA\n");
     memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
