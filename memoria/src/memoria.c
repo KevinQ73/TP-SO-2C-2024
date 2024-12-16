@@ -46,9 +46,6 @@ int main(int argc, char* argv[]) {
 
 /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 
-// AAAAAAAAAAAAAA
-
-
 void iniciar_memoria(){
     log_info(memoria_log, "MEMORIA INICIALIZADA\n");
     memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
@@ -160,7 +157,6 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         enviar_mensaje("OK", fd_memoria, memoria_log);
         log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s. Cerrando FD del socket.\n", pid, tid, prioridad, path);
 
-        free(path);
         close(fd_memoria);
         break;
 
@@ -224,6 +220,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
         break;
     }
+    free(path);
     buffer_destroy(buffer);
 }
 
@@ -257,6 +254,8 @@ void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path){
 
     dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
+
+    free(key);
 }
 
 void* finalizar_proceso(uint32_t pid){
@@ -335,6 +334,7 @@ void* atender_cpu(){
         	char* instruccion = buscar_instruccion(pid_tid_recibido.pid, pid_tid_recibido.tid, programCounter);
       	    log_info(memoria_log, "## Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: %s", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
             enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
+            free(instruccion);
         	break;
 
         case WRITE_MEM:
@@ -500,19 +500,19 @@ t_contexto_hilo* thread_remove_by_tid(t_list* lista_hilos, int tid){
 	return list_remove_by_condition(lista_hilos, _list_contains);
 }
 
-void process_remove_and_destroy_by_pid(int tid){
-    char* key = string_itoa(tid);
-    dictionary_remove_and_destroy(contextos_de_ejecucion, key, process_context_destroy);
-
-    free(key);
-}
-
 t_contexto_proceso* process_remove_by_pid(int pid){
     char* key = string_itoa(pid);
     t_contexto_proceso* contexto = dictionary_remove(contextos_de_ejecucion, key);
 
     free(key);
     return contexto;
+}
+
+void process_remove_and_destroy_by_pid(int tid){
+    char* key = string_itoa(tid);
+    dictionary_remove_and_destroy(contextos_de_ejecucion, key, process_context_destroy);
+
+    free(key);
 }
 
 void thread_context_destroy(t_contexto_hilo* contexto_hilo){
@@ -581,6 +581,8 @@ char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
     } else {
         instruccion = "NO_INSTRUCCION";
     }
+
+    free(key);
     return instruccion;
 }
 
@@ -629,6 +631,8 @@ void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, 
 
     dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
+
+    free(key);
 }
 
 /*------------------------------------ WORKING ZONE ------------------------------------*/

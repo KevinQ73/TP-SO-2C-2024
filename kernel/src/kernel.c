@@ -1052,6 +1052,7 @@ void* operacion_a_atender(int operacion){
     default:
         log_warning(kernel_log, "## Error en la OP enviada desde CPU");
         hilo_en_ejecucion = NULL;
+        sem_post(&kernel_activo);
         break;
     }
     buffer_destroy(buffer);

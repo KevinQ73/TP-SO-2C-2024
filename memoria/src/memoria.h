@@ -8,6 +8,9 @@
     t_memoria memoria_registro;
     t_list* lista_pseudocodigos;
 
+    t_dictionary* contextos_de_ejecucion; // Se guarda una t_list de contextos de ejecución de los hilos de un proceso. 
+                                          // La key es el PID del proceso.
+
     void* memoria;
 
     int fd_conexiones;
@@ -34,8 +37,6 @@
 
     char** lista_particiones; // Vienen del config
     t_bitarray* bitmap_particion_fija; // Bitmap de particiones, verifica si una partición se usa o no.
-    t_dictionary* contextos_de_ejecucion; // Se guarda una t_list de contextos de ejecución de los hilos de un proceso. 
-                                          // La key es el PID del proceso.
 
     // Particiones dinámicas
 

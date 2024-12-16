@@ -65,6 +65,7 @@ t_list* leer_instrucciones(char* path, char* carpeta, t_log* log_modulo){
     fclose(archivo_instrucciones);
     log_debug(log_modulo, "SE LEYERON %d INSTRUCCIONES", list_size(lista_instrucciones_a_devolver));
 
+	free(path_instrucciones);
 	return lista_instrucciones_a_devolver;
 }
 
