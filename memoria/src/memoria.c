@@ -50,7 +50,7 @@ void iniciar_memoria(){
     log_info(memoria_log, "MEMORIA INICIALIZADA\n");
     memoria = malloc(memoria_registro.tam_memoria); //Lo puse como variable global
 
-    contexto_ejecucion = dictionary_create();
+    contextos_de_ejecucion = dictionary_create();
     lista_particiones = memoria_registro.particiones;
 
     int size_lista_particiones = string_array_size(lista_particiones);
@@ -233,7 +233,7 @@ bool crear_proceso(uint32_t pid, uint32_t size){
         char* key = string_itoa(pid);
         t_contexto_proceso* contexto_proceso = crear_contexto_proceso(pid, base_asignada, size);
         pthread_mutex_lock(&contexto_ejecucion_procesos);
-            dictionary_put(contexto_ejecucion, key, contexto_proceso);
+            dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
         pthread_mutex_unlock(&contexto_ejecucion_procesos);
         free(key);
         memoria_asignada = true;
@@ -247,12 +247,12 @@ bool crear_proceso(uint32_t pid, uint32_t size){
 void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path){
     char* key = string_itoa(pid);
     pthread_mutex_lock(&contexto_ejecucion_procesos);
-    t_contexto_proceso* contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    t_contexto_proceso* contexto_proceso = dictionary_get(contextos_de_ejecucion, key);
     t_contexto_hilo* contexto_hilo = crear_contexto_hilo(tid, prioridad, path);
 
     list_add(contexto_proceso->lista_hilos, contexto_hilo);
 
-    dictionary_put(contexto_ejecucion, key, contexto_proceso);
+    dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
 }
 
@@ -317,7 +317,7 @@ void* atender_cpu(){
             actualizar_contexto_ejecucion(contexto_recibido, pid_tid_recibido.pid, pid_tid_recibido.tid);
             sem_post(&actualizar_contexto);
             log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            escribir_en_memoria(contexto_ejecucion, tamanio_contexto, direccion_fisica);
+            escribir_en_memoria(contextos_de_ejecucion, tamanio_contexto, direccion_fisica);
             enviar_mensaje("OK_CONTEXTO", fd_conexion_cpu, memoria_log);
             free(contexto_recibido);
             break;
@@ -418,7 +418,7 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
 
     char* key = string_itoa(pid);
     pthread_mutex_lock(&contexto_ejecucion_procesos);
-        contexto_proceso = dictionary_get(contexto_ejecucion, key);
+        contexto_proceso = dictionary_get(contextos_de_ejecucion, key);
         contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
 
         contexto_a_enviar->base = contexto_proceso->base;
@@ -441,7 +441,7 @@ t_contexto_proceso* buscar_contexto_proceso(uint32_t pid){
     t_contexto_proceso* contexto_proceso;
 
     char* key = string_itoa(pid);
-    contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    contexto_proceso = dictionary_get(contextos_de_ejecucion, key);
     free(key);
     return contexto_proceso;
 }
@@ -499,14 +499,14 @@ t_contexto_hilo* thread_remove_by_tid(t_list* lista_hilos, int tid){
 
 void process_remove_and_destroy_by_pid(int tid){
     char* key = string_itoa(tid);
-    dictionary_remove_and_destroy(contexto_ejecucion, key, process_context_destroy);
+    dictionary_remove_and_destroy(contextos_de_ejecucion, key, process_context_destroy);
 
     free(key);
 }
 
 t_contexto_proceso* process_remove_by_pid(int pid){
     char* key = string_itoa(pid);
-    t_contexto_proceso* contexto = dictionary_remove(contexto_ejecucion, key);
+    t_contexto_proceso* contexto = dictionary_remove(contextos_de_ejecucion, key);
 
     free(key);
     return contexto;
@@ -569,7 +569,7 @@ void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32
 
 char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
     char* key = string_itoa(pid);
-    t_contexto_proceso* contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    t_contexto_proceso* contexto_proceso = dictionary_get(contextos_de_ejecucion, key);
     t_contexto_hilo* contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
     char* instruccion = string_new();
 
@@ -598,7 +598,7 @@ void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, 
 
     char* key = string_itoa(pid);
     pthread_mutex_lock(&contexto_ejecucion_procesos);
-    contexto_proceso = dictionary_get(contexto_ejecucion, key);
+    contexto_proceso = dictionary_get(contextos_de_ejecucion, key);
     contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
     
     log_info(memoria_log, "## Registro BASE cambia valor %d a %d", contexto_proceso->base, contexto_recibido->base);
@@ -624,7 +624,7 @@ void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, 
     log_info(memoria_log, "## Registro HX cambia valor %d a %d", contexto_hilo->hx, contexto_recibido->hx);
     contexto_hilo->hx = contexto_recibido->hx;
 
-    dictionary_put(contexto_ejecucion, key, contexto_proceso);
+    dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
 }
 

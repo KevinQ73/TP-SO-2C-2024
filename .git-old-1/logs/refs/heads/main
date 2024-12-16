@@ -1,0 +1,6 @@
+0000000000000000000000000000000000000000 df6f833d07f986a0b0ece89ce9cd5ed1b8fa8e73 KevinQ73 <kquinones@frba.utn.edu.ar> 1732884398 +0000	clone: from https://github.com/sisoputnfrba/tp-2024-2c-The-Ultimate-Kernel.git
+df6f833d07f986a0b0ece89ce9cd5ed1b8fa8e73 c5b4e6b5ee1d5c3d0d090e93e5871596abb21e52 KevinQ73 <kquinones@frba.utn.edu.ar> 1732895115 +0000	commit: Cambios en memoria
+c5b4e6b5ee1d5c3d0d090e93e5871596abb21e52 43e18c40b8286efd0779a1d3bcd6043d903289e8 KevinQ73 <kquinones@frba.utn.edu.ar> 1732895290 +0000	commit: change
+43e18c40b8286efd0779a1d3bcd6043d903289e8 4f873b18329946b33ecdc15c7a9e886d043c0980 KevinQ73 <kquinones@frba.utn.edu.ar> 1732932612 +0000	pull: Fast-forward
+4f873b18329946b33ecdc15c7a9e886d043c0980 cd5c421d36e19c7052ed58226738d430bd0b68d1 KevinQ73 <kquinones@frba.utn.edu.ar> 1732932652 +0000	rebase (finish): refs/heads/main onto 8015f19e4a78967011e162f98bf685f6604f0bf7
+cd5c421d36e19c7052ed58226738d430bd0b68d1 f573a6f37eb8cfc70f785665356cf9828b92688d KevinQ73 <kquinones@frba.utn.edu.ar> 1732932696 +0000	rebase (finish): refs/heads/main onto 4f873b18329946b33ecdc15c7a9e886d043c0980

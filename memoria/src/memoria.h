@@ -6,15 +6,7 @@
     t_log* memoria_log;
     t_config* memoria_config;
     t_memoria memoria_registro;
-
-    t_bitarray* bitmap_particion_fija;
-    t_dictionary* contexto_ejecucion;
     t_list* lista_pseudocodigos;
-
-    char** lista_particiones;
-
-    t_dictionary* lista_procesos_activos;
-    t_list* lista_huecos_disponibles;
 
     void* memoria;
 
@@ -37,6 +29,18 @@
 
     sem_t memoria_activo;
     sem_t actualizar_contexto;
+
+    // Particiones fijas
+
+    char** lista_particiones; // Vienen del config
+    t_bitarray* bitmap_particion_fija; // Bitmap de particiones, verifica si una partición se usa o no.
+    t_dictionary* contextos_de_ejecucion; // Se guarda una t_list de contextos de ejecución de los hilos de un proceso. 
+                                          // La key es el PID del proceso.
+
+    // Particiones dinámicas
+
+    t_dictionary* lista_procesos_activos;
+    t_list* lista_huecos_disponibles;
 
     /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/
 
