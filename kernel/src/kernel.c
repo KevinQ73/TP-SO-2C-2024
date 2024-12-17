@@ -220,6 +220,7 @@ void poner_en_exit(uint32_t pid, uint32_t tid){
 
     liberar_hilos_bloqueados_por_tid(hilo_a_eliminar);
     log_info(kernel_log, "## (<%d>:<%d>) Finaliza el hilo", hilo_a_eliminar->pid_padre, hilo_a_eliminar->tid_asociado);
+
     eliminar_tcb_de_pcb(hilo_a_eliminar);
     t_hilo_planificacion_destroy(hilo_a_eliminar);
 

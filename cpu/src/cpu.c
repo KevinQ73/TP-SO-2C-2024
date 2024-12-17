@@ -473,6 +473,7 @@ void execute_jnz(t_contexto* registro_cpu, char* registro, char* instruccion){
 void execute_log(t_contexto* registro_cpu, char* registro){
     int info_int = get_register(registro_cpu, registro);
     log_info(cpu_log, "## Registro %s tiene valor %d", registro, info_int);
+    program_counter_update(registro_cpu, cpu_log);
 
     if (recibo_kernel_ok)
     {

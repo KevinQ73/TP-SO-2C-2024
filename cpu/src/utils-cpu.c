@@ -58,7 +58,7 @@ uint32_t recibir_valor_memoria(t_contexto* registros_cpu, char* registro, int so
     
     int op = recibir_operacion(socket_memoria);
 
-    if (op == RECIBIR_VALOR_MEMORIA)
+    if (op == READ_MEM)
     {
         log_debug(cpu_log, "SE RECIBIÓ EL VALOR DE MEMORIA LEÍDA");
     } else {

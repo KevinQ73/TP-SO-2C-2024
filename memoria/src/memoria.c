@@ -293,6 +293,8 @@ void* atender_cpu(){
         uint32_t tamanio_contexto = 11*sizeof(uint32_t);
         t_contexto* contexto;
 
+        int byte_inicial = 0;
+
         int op = recibir_operacion(fd_conexion_cpu);
         buffer = buffer_recieve(fd_conexion_cpu);
 
@@ -334,7 +336,7 @@ void* atender_cpu(){
         	char* instruccion = buscar_instruccion(pid_tid_recibido.pid, pid_tid_recibido.tid, programCounter);
       	    log_info(memoria_log, "## Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: %s", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
             enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
-            free(instruccion);
+            //free(instruccion);
         	break;
 
         case WRITE_MEM:
@@ -345,7 +347,9 @@ void* atender_cpu(){
             desplazamiento = buffer_read_uint32(buffer);
             valor_a_escribir = buffer_read_uint32(buffer);
 
-            direccion_fisica = base + desplazamiento;
+            byte_inicial = obtener_byte_inicial(base);
+
+            direccion_fisica = byte_inicial + desplazamiento;
 
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_info(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
@@ -360,7 +364,9 @@ void* atender_cpu(){
             base = buffer_read_uint32(buffer);
             desplazamiento = buffer_read_uint32(buffer);
 
-            direccion_fisica = base + desplazamiento;
+            byte_inicial = obtener_byte_inicial(base);
+
+            direccion_fisica = byte_inicial + desplazamiento;
 
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_info(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
@@ -381,6 +387,23 @@ void* atender_cpu(){
         buffer_destroy(buffer);
     }
 }
+
+int obtener_byte_inicial(int base){
+    int valor_byte_inicial = 0;
+    
+    if (strcmp(memoria_registro.esquema, "FIJAS") == 0)
+    {
+        for (int i = 0; i < base; i++)
+        {
+            valor_byte_inicial = valor_byte_inicial + atoi(lista_particiones[i]);
+        }
+    } else {
+
+    }
+
+    return valor_byte_inicial;
+}
+
 
 /*-------------------- FUNCIONES DE CONTEXTO DE EJECUCION -------------------*/
 
@@ -582,7 +605,7 @@ char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
         instruccion = "NO_INSTRUCCION";
     }
 
-    free(key);
+    //free(key);
     return instruccion;
 }
 
@@ -590,8 +613,14 @@ bool busqueda_pid_tid(t_pseudocodigo* pseudocodigo){
     return (pseudocodigo->pid == pid_busqueda) && (pseudocodigo->tid == tid_busqueda);
 }
 
-void enviar_datos_memoria(void* buffer, uint32_t tamanio){
+void enviar_datos_memoria(void* buffer_recibido, uint32_t tamanio){
     t_paquete* paquete = crear_paquete(READ_MEM);
+    t_buffer* buffer = buffer_create(4);
+
+    buffer->stream = buffer_recibido;
+    buffer->offset = 0;
+    buffer->size = 4;
+
     paquete->buffer = buffer;
     enviar_paquete(paquete, fd_conexion_cpu);
     eliminar_paquete(paquete);
@@ -639,15 +668,20 @@ void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, 
 
 int hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
     uint32_t valor_resultado;
-
+    uint32_t size_particion;
+    
     uint32_t valor_espacio_desocupado = obtener_espacio_desocupado();
-    uint size_particion = atoi(lista_particiones[valor_espacio_desocupado]);
+
+    if (valor_espacio_desocupado == OUT_OF_MEMORY)
+    {
+        valor_resultado = -1;
+    } else {
+        size_particion = atoi(lista_particiones[valor_espacio_desocupado]);
+    }
+    
     if (strcmp(esquema, "FIJAS") == 0)
     {
-        if (valor_espacio_desocupado == OUT_OF_MEMORY)
-        {
-            valor_resultado = -1;
-        } if (size > size_particion){
+        if (size > size_particion){
             valor_resultado = -1;
         } else {
             valor_resultado = valor_espacio_desocupado;

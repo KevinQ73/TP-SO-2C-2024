@@ -58,6 +58,7 @@
 
     bool termino_proceso = false;
     bool hilo_desalojado = false;
+    //bool proceso_desalojado = false;
     bool hilo_desalojado_por_quantum = false;
 
     t_list* procesos_creados;
