@@ -59,9 +59,22 @@ void iniciar_memoria(){
     for (int i = 0; i < size_lista_particiones; i++){
         bitmap_espacio_reservado[i] = 0;
     }
-    
-    bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
+    //Para particiones fijas
+    int desplazamiento = 0; //Para usarlo como desplazamiento y saber la base de memoria
+    particiones_memoria = list_create();
+    for(int i=0;i< string_array_size(memoria_registro.particiones);i++){
+        t_particion* particion = malloc(sizeof(t_particion));
+        particion->base = desplazamiento;
+        particion->limite = atoi(memoria_registro.particiones[i]);
+        desplazamiento += atoi(memoria_registro.particiones[i]);
 
+        list_add(particiones_memoria, particion);
+    }
+    //Para arriba
+
+
+    bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
+    
     // Para particiones dinamicas
     lista_procesos_activos = dictionary_create();
     lista_huecos_disponibles = list_create();
@@ -134,6 +147,13 @@ void* atender_solicitudes_kernel(void* fd_conexion){
     case CREAR_PROCESO:
         pid = buffer_read_uint32(buffer);
         uint32_t size_process = buffer_read_uint32(buffer);
+        for(int i=0;i<bitmap_particion_fija->size;i++){
+            if(bitarray_test_bit(bitmap_particion_fija, i)){
+                log_debug(memoria_log, "POS(%i), BIT(1)", i);
+            }else{
+                log_debug(memoria_log, "POS(%i), BIT(0)", i);
+            }
+        }
 
         if (crear_proceso(pid, size_process))
         {
@@ -151,6 +171,13 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         pid = buffer_read_uint32(buffer);
         uint32_t tid = buffer_read_uint32(buffer);
         uint32_t prioridad = buffer_read_uint32(buffer);
+                for(int i=0;i<bitmap_particion_fija->size;i++){
+            if(bitarray_test_bit(bitmap_particion_fija, i)){
+                log_debug(memoria_log, "POS(%i), BIT(1)", i);
+            }else{
+                log_debug(memoria_log, "POS(%i), BIT(0)", i);
+            }
+        }
 
         crear_hilo(pid, tid, prioridad, path);
 
@@ -262,6 +289,13 @@ void* finalizar_proceso(uint32_t pid){
 
     liberar_espacio_en_memoria(pid);
     process_remove_and_destroy_by_pid(pid);
+            for(int i=0;i<bitmap_particion_fija->size;i++){
+            if(bitarray_test_bit(bitmap_particion_fija, i)){
+                log_debug(memoria_log, "POS(%i), BIT(1)", i);
+            }else{
+                log_debug(memoria_log, "POS(%i), BIT(0)", i);
+            }
+        }
 }
 
 void* finalizar_hilo(uint32_t pid, uint32_t tid){
@@ -270,9 +304,18 @@ void* finalizar_hilo(uint32_t pid, uint32_t tid){
     t_contexto_hilo* hilo_a_finalizar = thread_remove_by_tid(contexto_padre->lista_hilos, tid);
 
     thread_context_destroy(hilo_a_finalizar);
+    bitarray_clean_bit(bitmap_particion_fija, contexto_padre->base); //Solo limpia el bit del bitarray
+
 
     log_info(memoria_log, "## [MEMORIA:KERNEL] ## Hilo <Destruido> - (PID:TID) - (<%d>:<%d>). Cerrando FD del socket.\n", pid, tid);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
+            for(int i=0;i<bitmap_particion_fija->size;i++){
+            if(bitarray_test_bit(bitmap_particion_fija, i)){
+                log_debug(memoria_log, "POS(%i), BIT(1)", i);
+            }else{
+                log_debug(memoria_log, "POS(%i), BIT(0)", i);
+            }
+        }
     return NULL;
 }
 
@@ -667,35 +710,163 @@ void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, 
 /*------------------------------------ WORKING ZONE ------------------------------------*/
 
 int hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
-    uint32_t valor_resultado;
-    uint32_t size_particion;
+    // uint32_t valor_resultado;
+    // uint32_t size_particion;
     
-    uint32_t valor_espacio_desocupado = obtener_espacio_desocupado();
+    // uint32_t valor_espacio_desocupado = obtener_espacio_desocupado();
 
-    if (valor_espacio_desocupado == OUT_OF_MEMORY)
-    {
-        valor_resultado = -1;
-    } else {
-        size_particion = atoi(lista_particiones[valor_espacio_desocupado]);
+    // if (valor_espacio_desocupado == OUT_OF_MEMORY)
+    // {
+    //     valor_resultado = -1;
+    // } else {
+    //     size_particion = atoi(lista_particiones[valor_espacio_desocupado]);
+    // }
+
+    // if (strcmp(esquema, "FIJAS") == 0)
+    // {
+    //     if (size > size_particion){
+    //         valor_resultado = -1;
+    //     } else {
+    //         valor_resultado = valor_espacio_desocupado;
+    //     }
+    // } else {
+    //     if (particion_dinamica(pid, size))
+    //     {
+    //         valor_resultado = pid;
+    //     } else {
+    //         valor_resultado = -1;
+    //     }
+    // }
+    // return valor_resultado;
+
+    if(strcmp(esquema, "FIJAS") == 0){
+        return asignacion_fija(pid, size);
     }
-    
-    if (strcmp(esquema, "FIJAS") == 0)
-    {
-        if (size > size_particion){
-            valor_resultado = -1;
-        } else {
-            valor_resultado = valor_espacio_desocupado;
-        }
-    } else {
-        if (particion_dinamica(pid, size))
-        {
-            valor_resultado = pid;
-        } else {
-            valor_resultado = -1;
-        }
-    }
-    return valor_resultado;
 }
+
+//--- De aca para abajo es particion fija
+int asignacion_fija(int pid,int tamanio){
+    int bloque_asignado = -1;
+    if(strcmp(memoria_registro.algoritmo_busqueda,"FIRST") == 0){
+        bloque_asignado = buscar_primer_bloque(tamanio);
+    }
+    if(strcmp(memoria_registro.algoritmo_busqueda,"NEXT") == 0){
+        bloque_asignado = buscar_siguiente_bloque(tamanio);
+    }
+    if(strcmp(memoria_registro.algoritmo_busqueda,"BEST") == 0){
+        bloque_asignado = buscar_mejor_bloque(tamanio);
+    }
+    if(strcmp(memoria_registro.algoritmo_busqueda,"WORST") == 0){
+        bloque_asignado = buscar_peor_bloque(tamanio);
+    }
+    if(bloque_asignado != -1){
+        bitarray_set_bit(bitmap_particion_fija, bloque_asignado);
+    }
+    log_debug(memoria_log, "SE LE VA A ASIGNAR LA PARTICION (%i)", bloque_asignado);
+    return bloque_asignado;
+}
+
+int buscar_primer_bloque(int tamanio){
+    int bloque_asignado = -1;
+    int contador = 0;
+
+    do{
+        log_debug(memoria_log, "LA PARTICION REBISADATIENE UN TAMANIO DE (%i)", atoi(memoria_registro.particiones[contador]));
+
+        if(!bitarray_test_bit(bitmap_particion_fija, contador)){
+            log_debug(memoria_log, "LA PARTICION ES LA  (%i)", contador);
+            log_debug(memoria_log, "LA PARTICION LIBRE TIENE UN TAMANIO DE (%i)", atoi(memoria_registro.particiones[contador]));
+            log_debug(memoria_log, "LA PARTICION NECESITA SER DE (%i)", tamanio);
+            if(tamanio <= atoi(memoria_registro.particiones[contador])){
+                log_debug(memoria_log, "LA PARTICION TIENE ESPACIO SUFICIENTE");
+                bloque_asignado = contador;
+            }
+        }
+        contador++;
+    }while(bloque_asignado == -1 && contador < bitmap_particion_fija->size);
+    
+
+    return bloque_asignado;
+}
+
+int buscar_siguiente_bloque(int tamanio){
+    int bloque_asignado = -1;
+    int contador = 0;
+    do{
+        if(!bitarray_test_bit(bitmap_particion_fija, contador) && contador >= ultima_asignacion){
+            if(tamanio <= atoi(memoria_registro.particiones[contador])){
+                bloque_asignado = contador;
+                ultima_asignacion = contador;
+            }
+        }
+        contador++;
+    }while(bloque_asignado == -1 && contador < bitmap_particion_fija->size);
+
+    if(bloque_asignado == -1 && ultima_asignacion >= 0){
+        bloque_asignado = buscar_primer_bloque(tamanio);
+        if(bloque_asignado != -1){
+            ultima_asignacion = bloque_asignado;
+        }
+    }
+
+    return bloque_asignado;
+}
+
+int buscar_mejor_bloque(int tamanio){
+    int bloque_asignado = -1;
+    int contador = 0;
+    int fragmentacion = 0;
+    int mejor_posicion = -1;
+    do{
+        if(!bitarray_test_bit(bitmap_particion_fija, contador)){
+            if(tamanio <= atoi(memoria_registro.particiones[contador])){
+                if(mejor_posicion == -1){
+                    fragmentacion = atoi(memoria_registro.particiones[contador])-tamanio;
+                    mejor_posicion = contador;
+                }else{
+                    if((atoi(memoria_registro.particiones[contador])-tamanio) < fragmentacion){
+                        mejor_posicion = contador;
+                        fragmentacion = atoi(memoria_registro.particiones[contador])-tamanio;
+                    }
+                }
+            }
+        }
+        contador++;
+    }while(bloque_asignado == -1 && contador < bitmap_particion_fija->size);
+
+    bloque_asignado = mejor_posicion;
+
+    return bloque_asignado;
+}
+
+int buscar_peor_bloque(int tamanio){
+    int bloque_asignado = -1;
+    int contador = 0;
+    int fragmentacion = 0;
+    int peor_posicion = -1;
+    do{
+        if(!bitarray_test_bit(bitmap_particion_fija, contador)){
+            if(tamanio <= atoi(memoria_registro.particiones[contador])){
+                if(peor_posicion == -1){
+                    fragmentacion = atoi(memoria_registro.particiones[contador])-tamanio;
+                    peor_posicion = contador;
+                }else{
+                    if((atoi(memoria_registro.particiones[contador])-tamanio) > fragmentacion){
+                        peor_posicion = contador;
+                        fragmentacion = atoi(memoria_registro.particiones[contador])-tamanio;
+                    }
+                }
+            }
+        }
+        contador++;
+    }while(bloque_asignado == -1 && contador < bitmap_particion_fija->size);
+
+    bloque_asignado = peor_posicion;
+
+    return bloque_asignado;
+}
+
+//---- Para arriba es una idea de particiones fijas, funciona.
 
 bool particion_dinamica(uint32_t pid, uint32_t size){
     t_hueco* hueco = obtener_hueco(size);
@@ -749,7 +920,7 @@ t_proceso* obtener_proceso_activo(uint32_t pid){
 uint32_t obtener_espacio_desocupado(){
     int base_particion = -1;
 
-    uint32_t largo_bitmap = bitarray_get_max_bit(bitmap_particion_fija);
+    uint32_t largo_bitmap = bitmap_particion_fija->size;
     uint32_t i = 0;
     while(i < largo_bitmap && (base_particion < 0)){
         if(bitarray_test_bit(bitmap_particion_fija, i) == 0){
@@ -867,6 +1038,7 @@ void liberar_espacio_en_memoria(uint32_t pid){
     {
         int size_particion = get_size_partition(contexto_proceso->base);
         liberar_hueco_bitmap_fijas(contexto_proceso->base);
+        bitarray_clean_bit(bitmap_particion_fija, contexto_proceso->base); //Solo limpia el bit del bitarray
         log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Destruido> - PID: <%d> -Tamaño: <%d>. Cerrando FD del socket.\n", pid, size_particion);
     } else {
         liberar_hueco_dinamico(contexto_proceso);

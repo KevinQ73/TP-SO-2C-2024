@@ -38,6 +38,13 @@
     char** lista_particiones; // Vienen del config
     t_bitarray* bitmap_particion_fija; // Bitmap de particiones, verifica si una partición se usa o no.
 
+    typedef struct{
+        int base;
+        int limite;
+    }t_particion;
+
+    t_list* particiones_memoria;
+    int ultima_asignacion = -1; //Para usarla en NEXT_FIST
     // Particiones dinámicas
 
     t_dictionary* lista_procesos_activos;
@@ -118,6 +125,13 @@
     void actualizar_contexto_ejecucion(t_contexto* contexto_recibido, uint32_t pid, uint32_t tid);
 
     int get_size_partition(uint32_t base);
+
+    /*--------------------------- PARTICIONES FIJAS --------------------------*/
+    int buscar_peor_bloque(int tamanio);
+    int buscar_mejor_bloque(int tamanio);
+    int buscar_siguiente_bloque(int tamanio);
+    int buscar_primer_bloque(int tamanio);
+    int asignacion_fija(int pid,int tamanio);
 
     /*--------------------------- PARTICIONES DINAMICAS --------------------------*/
 
