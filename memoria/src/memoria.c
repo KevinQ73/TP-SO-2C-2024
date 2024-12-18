@@ -197,7 +197,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         t_buffer* buffer = buffer_create(strlen(nombre_archivo)+2*sizeof(uint32_t)+strlen(contenido_proceso));
 
         buffer_add_string(buffer, strlen(nombre_archivo), nombre_archivo, memoria_log);
-        buffer_add_string(buffer, strlen(contenido_proceso), contenido_proceso, memoria_log);
+        buffer_add_string(buffer, contexto->limite, contenido_proceso, memoria_log);
 
         archivo_fs->buffer = buffer;
 
@@ -321,7 +321,7 @@ void* atender_cpu(){
             actualizar_contexto_ejecucion(contexto_recibido, pid_tid_recibido.pid, pid_tid_recibido.tid);
             sem_post(&actualizar_contexto);
             log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            escribir_en_memoria(contextos_de_ejecucion, tamanio_contexto, direccion_fisica);
+            escribir_en_memoria(contexto_recibido, tamanio_contexto, contexto_recibido->base);
             enviar_mensaje("OK_CONTEXTO", fd_conexion_cpu, memoria_log);
             free(contexto_recibido);
             break;

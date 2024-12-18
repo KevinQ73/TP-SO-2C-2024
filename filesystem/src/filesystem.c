@@ -301,7 +301,7 @@ int crear_metadata(char* ruta, int bloque_indexado, int tamanio_archivo){
 	char* bloque_string = malloc(50*sizeof(char));
 	char* tamanio_string = malloc(50*sizeof(char));
 
-	sprintf("%i", bloque_indexado);
+	sprintf(bloque_string, "%i", bloque_indexado);
 	sprintf(tamanio_string, "%i", tamanio_archivo);
 
 	modificar_metadata(ruta_archivo, bloque_indexado, tamanio_archivo);
