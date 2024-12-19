@@ -285,6 +285,7 @@ void* finalizar_hilo(uint32_t pid, uint32_t tid){
     pthread_mutex_lock(&contexto_ejecucion_procesos);
     t_contexto_proceso* contexto_padre = buscar_contexto_proceso(pid);
     t_contexto_hilo* hilo_a_finalizar = thread_remove_by_tid(contexto_padre->lista_hilos, tid);
+    pthread_mutex_unlock(&contexto_ejecucion_procesos);
 
     thread_context_destroy(hilo_a_finalizar);
 
@@ -460,7 +461,7 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
     t_contexto_hilo* contexto_hilo;
 
     char* key = string_itoa(pid);
-    //pthread_mutex_lock(&contexto_ejecucion_procesos);
+    pthread_mutex_lock(&contexto_ejecucion_procesos);
         contexto_proceso = dictionary_get(contextos_de_ejecucion, key);
         contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
 
@@ -475,7 +476,7 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
         contexto_a_enviar->fx = contexto_hilo->fx;
         contexto_a_enviar->gx = contexto_hilo->gx;
         contexto_a_enviar->hx = contexto_hilo->hx;
-    //pthread_mutex_unlock(&contexto_ejecucion_procesos);
+    pthread_mutex_unlock(&contexto_ejecucion_procesos);
     free(key);
     return contexto_a_enviar;
 }
