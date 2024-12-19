@@ -1,46 +1,46 @@
-==9845== Memcheck, a memory error detector
-==9845== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==9845== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==9845== Command: ./bin/filesystem ./files/race_condition.config
-==9845== Parent PID: 7850
-==9845== 
-==9845== 
-==9845== Process terminating with default action of signal 2 (SIGINT)
-==9845==    at 0x4A8345F: accept (accept.c:26)
-==9845==    by 0x10CD48: esperar_cliente (servidor.c:55)
-==9845==    by 0x10AD38: atender_memoria (filesystem.c:75)
-==9845==    by 0x10A9B3: main (filesystem.c:20)
-==9845== 
-==9845== HEAP SUMMARY:
-==9845==     in use at exit: 8,114 bytes in 35 blocks
-==9845==   total heap usage: 201 allocs, 166 frees, 26,854 bytes allocated
-==9845== 
-==9845== 32 (16 direct, 16 indirect) bytes in 1 blocks are definitely lost in loss record 11 of 20
-==9845==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==9845==    by 0x10BE49: buffer_create (serializacion.c:24)
-==9845==    by 0x10C170: buffer_recieve (serializacion.c:113)
-==9845==    by 0x10AE4B: atender_solicitudes (filesystem.c:100)
-==9845==    by 0x49F0AC2: start_thread (pthread_create.c:442)
-==9845==    by 0x4A81A03: clone (clone.S:100)
-==9845== 
-==9845== 272 bytes in 1 blocks are possibly lost in loss record 16 of 20
-==9845==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==9845==    by 0x40147D9: calloc (rtld-malloc.h:44)
-==9845==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
-==9845==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
-==9845==    by 0x49F17B4: allocate_stack (allocatestack.c:430)
-==9845==    by 0x49F17B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
-==9845==    by 0x10ADCC: atender_memoria (filesystem.c:87)
-==9845==    by 0x10A9B3: main (filesystem.c:20)
-==9845== 
-==9845== LEAK SUMMARY:
-==9845==    definitely lost: 16 bytes in 1 blocks
-==9845==    indirectly lost: 16 bytes in 1 blocks
-==9845==      possibly lost: 272 bytes in 1 blocks
-==9845==    still reachable: 7,810 bytes in 32 blocks
-==9845==         suppressed: 0 bytes in 0 blocks
-==9845== Reachable blocks (those to which a pointer was found) are not shown.
-==9845== To see them, rerun with: --leak-check=full --show-leak-kinds=all
-==9845== 
-==9845== For lists of detected and suppressed errors, rerun with: -s
-==9845== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
+==188645== Memcheck, a memory error detector
+==188645== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==188645== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==188645== Command: bin/filesystem ./files/race_condition.config
+==188645== Parent PID: 169784
+==188645== 
+==188645== 
+==188645== Process terminating with default action of signal 2 (SIGINT)
+==188645==    at 0x4A8345F: accept (accept.c:26)
+==188645==    by 0x10CD4A: esperar_cliente (servidor.c:55)
+==188645==    by 0x10AD38: atender_memoria (filesystem.c:75)
+==188645==    by 0x10A9B3: main (filesystem.c:20)
+==188645== 
+==188645== HEAP SUMMARY:
+==188645==     in use at exit: 8,114 bytes in 35 blocks
+==188645==   total heap usage: 201 allocs, 166 frees, 26,966 bytes allocated
+==188645== 
+==188645== 32 (16 direct, 16 indirect) bytes in 1 blocks are definitely lost in loss record 11 of 20
+==188645==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==188645==    by 0x10BE4B: buffer_create (serializacion.c:24)
+==188645==    by 0x10C172: buffer_recieve (serializacion.c:113)
+==188645==    by 0x10AE4B: atender_solicitudes (filesystem.c:100)
+==188645==    by 0x49F0AC2: start_thread (pthread_create.c:442)
+==188645==    by 0x4A81A03: clone (clone.S:100)
+==188645== 
+==188645== 272 bytes in 1 blocks are possibly lost in loss record 16 of 20
+==188645==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==188645==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==188645==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==188645==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==188645==    by 0x49F17B4: allocate_stack (allocatestack.c:430)
+==188645==    by 0x49F17B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==188645==    by 0x10ADCC: atender_memoria (filesystem.c:87)
+==188645==    by 0x10A9B3: main (filesystem.c:20)
+==188645== 
+==188645== LEAK SUMMARY:
+==188645==    definitely lost: 16 bytes in 1 blocks
+==188645==    indirectly lost: 16 bytes in 1 blocks
+==188645==      possibly lost: 272 bytes in 1 blocks
+==188645==    still reachable: 7,810 bytes in 32 blocks
+==188645==         suppressed: 0 bytes in 0 blocks
+==188645== Reachable blocks (those to which a pointer was found) are not shown.
+==188645== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==188645== 
+==188645== For lists of detected and suppressed errors, rerun with: -s
+==188645== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)

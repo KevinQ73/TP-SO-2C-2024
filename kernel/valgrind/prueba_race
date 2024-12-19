@@ -1,309 +1,86 @@
-==10020== Memcheck, a memory error detector
-==10020== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==10020== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==10020== Command: ./bin/kernel RECURSOS_MUTEX_PROC 32 ./files/race_condition.config
-==10020== Parent PID: 7972
-==10020== 
-==10020== Thread 2:
-==10020== Conditional jump or move depends on uninitialised value(s)
-==10020==    at 0x48EBAD6: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F3FF: _string_append_with_format_list (string.c:305)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Use of uninitialised value of size 8
-==10020==    at 0x48CF2EB: _itoa_word (_itoa.c:177)
-==10020==    by 0x48EAABD: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F3FF: _string_append_with_format_list (string.c:305)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Conditional jump or move depends on uninitialised value(s)
-==10020==    at 0x48CF2FC: _itoa_word (_itoa.c:177)
-==10020==    by 0x48EAABD: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F3FF: _string_append_with_format_list (string.c:305)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Conditional jump or move depends on uninitialised value(s)
-==10020==    at 0x48EB5C3: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F3FF: _string_append_with_format_list (string.c:305)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Conditional jump or move depends on uninitialised value(s)
-==10020==    at 0x48EAC05: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F3FF: _string_append_with_format_list (string.c:305)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Conditional jump or move depends on uninitialised value(s)
-==10020==    at 0x48EBAD6: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F44E: _string_append_with_format_list (string.c:310)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Use of uninitialised value of size 8
-==10020==    at 0x48CF2EB: _itoa_word (_itoa.c:177)
-==10020==    by 0x48EAABD: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F44E: _string_append_with_format_list (string.c:310)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Conditional jump or move depends on uninitialised value(s)
-==10020==    at 0x48CF2FC: _itoa_word (_itoa.c:177)
-==10020==    by 0x48EAABD: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F44E: _string_append_with_format_list (string.c:310)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Conditional jump or move depends on uninitialised value(s)
-==10020==    at 0x48EB5C3: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F44E: _string_append_with_format_list (string.c:310)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== Conditional jump or move depends on uninitialised value(s)
-==10020==    at 0x48EAC05: __vfprintf_internal (vfprintf-internal.c:1516)
-==10020==    by 0x48FD499: __vsnprintf_internal (vsnprintf.c:114)
-==10020==    by 0x486F44E: _string_append_with_format_list (string.c:310)
-==10020==    by 0x486E83F: string_from_vformat (string.c:74)
-==10020==    by 0x486E440: _log_write_in_level (log.c:125)
-==10020==    by 0x486E0B8: log_debug (log.c:89)
-==10020==    by 0x1103DE: recibir_pid_tid (serializacion.c:385)
-==10020==    by 0x10E3B2: operacion_a_atender (kernel.c:998)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020==  Uninitialised value was created by a heap allocation
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10FD46: buffer_recieve (serializacion.c:118)
-==10020==    by 0x10E398: operacion_a_atender (kernel.c:996)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== 
-==10020== HEAP SUMMARY:
-==10020==     in use at exit: 1,637 bytes in 66 blocks
-==10020==   total heap usage: 5,483 allocs, 5,417 frees, 206,927 bytes allocated
-==10020== 
-==10020== Thread 1:
-==10020== 12 bytes in 1 blocks are definitely lost in loss record 5 of 42
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10ACA6: create_hilo_planificacion (utils-kernel.c:48)
-==10020==    by 0x10B38C: iniciar_primer_proceso (kernel.c:94)
-==10020==    by 0x10B02F: main (kernel.c:32)
-==10020== 
-==10020== 12 bytes in 1 blocks are definitely lost in loss record 6 of 42
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10ACA6: create_hilo_planificacion (utils-kernel.c:48)
-==10020==    by 0x10B601: inicializar_pcb_en_espera (kernel.c:143)
-==10020==    by 0x10B4E8: planificador_largo_plazo (kernel.c:124)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== 12 bytes in 1 blocks are definitely lost in loss record 7 of 42
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10ACA6: create_hilo_planificacion (utils-kernel.c:48)
-==10020==    by 0x10E8C4: syscall_thread_create (kernel.c:1116)
-==10020==    by 0x10E424: operacion_a_atender (kernel.c:1011)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== 32 (16 direct, 16 indirect) bytes in 1 blocks are definitely lost in loss record 29 of 42
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10AD07: create_priority_queue (utils-kernel.c:60)
-==10020==    by 0x10C333: queue_push_by_priority (kernel.c:429)
-==10020==    by 0x10C03F: poner_en_ready (kernel.c:367)
-==10020==    by 0x10B3B9: iniciar_primer_proceso (kernel.c:96)
-==10020==    by 0x10B02F: main (kernel.c:32)
-==10020== 
-==10020== 32 (16 direct, 16 indirect) bytes in 1 blocks are definitely lost in loss record 30 of 42
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10AD07: create_priority_queue (utils-kernel.c:60)
-==10020==    by 0x10C333: queue_push_by_priority (kernel.c:429)
-==10020==    by 0x10C03F: poner_en_ready (kernel.c:367)
-==10020==    by 0x10B66B: inicializar_pcb_en_espera (kernel.c:147)
-==10020==    by 0x10B4E8: planificador_largo_plazo (kernel.c:124)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== 236 (48 direct, 188 indirect) bytes in 1 blocks are definitely lost in loss record 39 of 42
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10ABC6: create_pcb (utils-kernel.c:24)
-==10020==    by 0x10E60B: syscall_process_create (kernel.c:1071)
-==10020==    by 0x10E3FB: operacion_a_atender (kernel.c:1003)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== 260 (32 direct, 228 indirect) bytes in 2 blocks are definitely lost in loss record 40 of 42
-==10020==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x10AD07: create_priority_queue (utils-kernel.c:60)
-==10020==    by 0x10C333: queue_push_by_priority (kernel.c:429)
-==10020==    by 0x10C03F: poner_en_ready (kernel.c:367)
-==10020==    by 0x10E8EC: syscall_thread_create (kernel.c:1118)
-==10020==    by 0x10E424: operacion_a_atender (kernel.c:1011)
-==10020==    by 0x10BB8D: planificador_corto_plazo (kernel.c:268)
-==10020==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==10020==    by 0x499AA03: clone (clone.S:100)
-==10020== 
-==10020== 272 bytes in 1 blocks are possibly lost in loss record 41 of 42
-==10020==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x40147D9: calloc (rtld-malloc.h:44)
-==10020==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
-==10020==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
-==10020==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
-==10020==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
-==10020==    by 0x10B492: iniciar_planificacion (kernel.c:112)
-==10020==    by 0x10B039: main (kernel.c:33)
-==10020== 
-==10020== 272 bytes in 1 blocks are possibly lost in loss record 42 of 42
-==10020==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==10020==    by 0x40147D9: calloc (rtld-malloc.h:44)
-==10020==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
-==10020==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
-==10020==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
-==10020==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
-==10020==    by 0x10B4C4: iniciar_planificacion (kernel.c:115)
-==10020==    by 0x10B039: main (kernel.c:33)
-==10020== 
-==10020== LEAK SUMMARY:
-==10020==    definitely lost: 148 bytes in 8 blocks
-==10020==    indirectly lost: 448 bytes in 32 blocks
-==10020==      possibly lost: 544 bytes in 2 blocks
-==10020==    still reachable: 497 bytes in 24 blocks
-==10020==         suppressed: 0 bytes in 0 blocks
-==10020== Reachable blocks (those to which a pointer was found) are not shown.
-==10020== To see them, rerun with: --leak-check=full --show-leak-kinds=all
-==10020== 
-==10020== For lists of detected and suppressed errors, rerun with: -s
-==10020== ERROR SUMMARY: 49 errors from 19 contexts (suppressed: 0 from 0)
+==188662== Memcheck, a memory error detector
+==188662== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==188662== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==188662== Command: bin/kernel RECURSOS_MUTEX_PROC 32 ./files/race_condition.config
+==188662== Parent PID: 160847
+==188662== 
+==188662== 
+==188662== Process terminating with default action of signal 6 (SIGABRT)
+==188662==    at 0x490B9FC: __pthread_kill_implementation (pthread_kill.c:44)
+==188662==    by 0x490B9FC: __pthread_kill_internal (pthread_kill.c:78)
+==188662==    by 0x490B9FC: pthread_kill@@GLIBC_2.34 (pthread_kill.c:89)
+==188662==    by 0x48B7475: raise (raise.c:26)
+==188662==    by 0x489D7F2: abort (abort.c:79)
+==188662==    by 0x10B952: poner_en_exit (kernel.c:216)
+==188662==    by 0x10BAA1: finalizar_hilos_de_proceso (kernel.c:245)
+==188662==    by 0x10E722: syscall_process_exit (kernel.c:1094)
+==188662==    by 0x10E413: operacion_a_atender (kernel.c:1012)
+==188662==    by 0x10BB8D: planificador_corto_plazo (kernel.c:271)
+==188662==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==188662==    by 0x499AA03: clone (clone.S:100)
+==188662== 
+==188662== HEAP SUMMARY:
+==188662==     in use at exit: 12,746 bytes in 130 blocks
+==188662==   total heap usage: 33,781 allocs, 33,651 frees, 1,254,524 bytes allocated
+==188662== 
+==188662== 272 bytes in 1 blocks are possibly lost in loss record 73 of 81
+==188662==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==188662==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==188662==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==188662==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==188662==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==188662==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==188662==    by 0x10B492: iniciar_planificacion (kernel.c:112)
+==188662==    by 0x10B039: main (kernel.c:33)
+==188662== 
+==188662== 272 bytes in 1 blocks are possibly lost in loss record 74 of 81
+==188662==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==188662==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==188662==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==188662==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==188662==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==188662==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==188662==    by 0x10B4C4: iniciar_planificacion (kernel.c:115)
+==188662==    by 0x10B039: main (kernel.c:33)
+==188662== 
+==188662== 272 bytes in 1 blocks are possibly lost in loss record 75 of 81
+==188662==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==188662==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==188662==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==188662==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==188662==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==188662==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==188662==    by 0x10BB5D: planificador_corto_plazo (kernel.c:265)
+==188662==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==188662==    by 0x499AA03: clone (clone.S:100)
+==188662== 
+==188662== 2,304 bytes in 1 blocks are possibly lost in loss record 80 of 81
+==188662==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==188662==    by 0x4005D97: malloc (rtld-malloc.h:56)
+==188662==    by 0x4005D97: _dlfo_mappings_segment_allocate (dl-find_object.c:217)
+==188662==    by 0x4005D97: _dl_find_object_update_1 (dl-find_object.c:671)
+==188662==    by 0x4005D97: _dl_find_object_update (dl-find_object.c:804)
+==188662==    by 0x400ECCF: dl_open_worker_begin (dl-open.c:735)
+==188662==    by 0x49E9A97: _dl_catch_exception (dl-error-skeleton.c:208)
+==188662==    by 0x400DF99: dl_open_worker (dl-open.c:782)
+==188662==    by 0x49E9A97: _dl_catch_exception (dl-error-skeleton.c:208)
+==188662==    by 0x400E34D: _dl_open (dl-open.c:883)
+==188662==    by 0x49E9E00: do_dlopen (dl-libc.c:95)
+==188662==    by 0x49E9A97: _dl_catch_exception (dl-error-skeleton.c:208)
+==188662==    by 0x49E9B62: _dl_catch_error (dl-error-skeleton.c:227)
+==188662==    by 0x49E9F36: dlerror_run (dl-libc.c:45)
+==188662==    by 0x49E9F36: __libc_dlopen_mode (dl-libc.c:162)
+==188662==    by 0x499A610: __libc_unwind_link_get (unwind-link.c:50)
+==188662==    by 0x499A610: __libc_unwind_link_get (unwind-link.c:40)
+==188662== 
+==188662== LEAK SUMMARY:
+==188662==    definitely lost: 0 bytes in 0 blocks
+==188662==    indirectly lost: 0 bytes in 0 blocks
+==188662==      possibly lost: 3,120 bytes in 4 blocks
+==188662==    still reachable: 9,626 bytes in 126 blocks
+==188662==         suppressed: 0 bytes in 0 blocks
+==188662== Reachable blocks (those to which a pointer was found) are not shown.
+==188662== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==188662== 
+==188662== For lists of detected and suppressed errors, rerun with: -s
+==188662== ERROR SUMMARY: 4 errors from 4 contexts (suppressed: 0 from 0)

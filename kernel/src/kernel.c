@@ -136,12 +136,14 @@ void* inicializar_pcb_en_espera(){
 
         if (strcmp(respuesta_memoria, "OK") == 0)
         {
-            t_tcb* tcb_main = list_get(pcb->lista_tcb, 0);
+            t_tcb* tcb_main = list_remove(pcb->lista_tcb, 0);
             char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(&pcb->pid, &tcb_main->tid, pcb->path_instrucciones_hilo_main, &(tcb_main->prioridad), kernel_log);
             if (strcmp(respuesta_memoria_hilo, "OK") == 0)
             {
                 t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_main);
                 log_debug(kernel_log, "Se creó el t_hilo_planificacion (%d:%d) de prioridad %d", hilo->pid_padre, hilo->tid_asociado, hilo->prioridad);
+                log_tids_de_lista(pcb->lista_tcb);
+
                 create_thread_state(pcb->pid, tcb_main->tid, tcb_main->prioridad);
                 agregar_proceso_activo(pcb);
                 poner_en_ready(hilo);
@@ -160,7 +162,7 @@ void* inicializar_pcb_en_espera(){
 }
 
 void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
-    t_tcb* tcb_asociado = list_get(pcb->lista_tcb, 0);
+    t_tcb* tcb_asociado = list_remove(pcb->lista_tcb, 0);
     int prioridad = tcb_asociado->prioridad;
     char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->size_process), &prioridad, kernel_log);
 
@@ -207,6 +209,11 @@ void poner_en_exit(uint32_t pid, uint32_t tid){
     case EXEC_STATE:
         hilo_a_eliminar = desalojar_hilo();
         break;
+//CAMBIO: ANTES NO ESTABA ESTE CASE
+    /*case EXIT_STATE:
+
+
+        break;*/
 
     default:
         log_error(kernel_log, "Error en eliminar_hilo_del_planificador");
@@ -220,7 +227,6 @@ void poner_en_exit(uint32_t pid, uint32_t tid){
 
     liberar_hilos_bloqueados_por_tid(hilo_a_eliminar);
     log_info(kernel_log, "## (<%d>:<%d>) Finaliza el hilo", hilo_a_eliminar->pid_padre, hilo_a_eliminar->tid_asociado);
-
     eliminar_tcb_de_pcb(hilo_a_eliminar);
     t_hilo_planificacion_destroy(hilo_a_eliminar);
 
@@ -235,14 +241,40 @@ void eliminar_tcb_de_pcb(t_hilo_planificacion* hilo){
         free(tcb);
     pthread_mutex_unlock(&mutex_lista_procesos_ready);
 }
-
+//CAMBIO
 void finalizar_hilos_de_proceso(uint32_t pid, uint32_t tid){
     t_pcb* pcb = active_process_find_by_pid(pid);
     while (!list_is_empty(pcb->lista_tcb))
     {
+         log_debug(kernel_log, "Iterando: Elementos restantes en lista_tcb: %d", list_size(pcb->lista_tcb));
+        log_tids_de_lista(pcb->lista_tcb);
+
         poner_en_exit(pid, tid);
     }
 }
+void log_tids_de_lista(t_list* lista_tcb) {
+    if (list_is_empty(lista_tcb)) {
+        log_debug(kernel_log, "La lista_tcb está vacía.");
+        return;
+    }
+
+    char* tids = string_new(); // Inicializamos una cadena dinámica para almacenar los TIDs.
+    string_append(&tids, "TIDs en lista_tcb: ");
+
+    for (int i = 0; i < list_size(lista_tcb); i++) {
+        t_tcb* tcb = list_get(lista_tcb, i);
+        if (tcb != NULL) {
+            char* tid_str = string_from_format("%d", tcb->tid);
+            string_append(&tids, tid_str);
+            string_append(&tids, " "); // Separador entre TIDs.
+            free(tid_str);
+        }
+    }
+
+    log_debug(kernel_log, "%s", tids);
+    free(tids); // Liberar la memoria utilizada por la cadena dinámica.
+}
+
 
 /*------------------------- PLANIFICADOR CORTO PLAZO ------------------------*/
 
@@ -1005,7 +1037,14 @@ void* operacion_a_atender(int operacion){
         break;
 
     case PROCESS_EXIT:
-        syscall_process_exit(pid_tid_recibido);
+
+       if(pid_tid_recibido.tid == 0){
+            syscall_process_exit(pid_tid_recibido);
+        }else{
+            log_debug(kernel_log, "NO EJECUTA PROCESS_EXIT POR QUE NO ES TID 0");
+        }
+        
+       
         break;
 
     case THREAD_CREATE:
@@ -1053,7 +1092,6 @@ void* operacion_a_atender(int operacion){
     default:
         log_warning(kernel_log, "## Error en la OP enviada desde CPU");
         hilo_en_ejecucion = NULL;
-        sem_post(&kernel_activo);
         break;
     }
     buffer_destroy(buffer);

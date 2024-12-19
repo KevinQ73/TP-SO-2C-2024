@@ -6,7 +6,11 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
+<<<<<<< HEAD
       "args": ["./files/fibo.config"],
+=======
+      "args": ["./files/race_condition.config"],
+>>>>>>> e8e7aeb (Solucionado kernel (falla en memoria))
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
