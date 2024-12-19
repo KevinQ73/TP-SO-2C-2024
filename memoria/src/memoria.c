@@ -72,14 +72,13 @@ void iniciar_memoria(){
     }
     //Para arriba
 
-
     bitmap_particion_fija = bitarray_create_with_mode(bitmap_espacio_reservado, size_lista_particiones, LSB_FIRST);
     
     // Para particiones dinamicas
     lista_procesos_activos = dictionary_create();
     lista_huecos_disponibles = list_create();
 
-    t_hueco* hueco_inicial = crear_hueco(0, (memoria_registro.tam_memoria - 1));
+    t_hueco* hueco_inicial = crear_hueco(0, (memoria_registro.tam_memoria));
     agregar_hueco(hueco_inicial);
 
     iniciar_semaforos();
@@ -461,7 +460,7 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
     t_contexto_hilo* contexto_hilo;
 
     char* key = string_itoa(pid);
-    pthread_mutex_lock(&contexto_ejecucion_procesos);
+    //pthread_mutex_lock(&contexto_ejecucion_procesos);
         contexto_proceso = dictionary_get(contextos_de_ejecucion, key);
         contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
 
@@ -476,7 +475,7 @@ t_contexto* buscar_contexto(uint32_t pid, uint32_t tid){
         contexto_a_enviar->fx = contexto_hilo->fx;
         contexto_a_enviar->gx = contexto_hilo->gx;
         contexto_a_enviar->hx = contexto_hilo->hx;
-    pthread_mutex_unlock(&contexto_ejecucion_procesos);
+    //pthread_mutex_unlock(&contexto_ejecucion_procesos);
     free(key);
     return contexto_a_enviar;
 }
@@ -716,6 +715,8 @@ int hay_particion_disponible(uint32_t pid, uint32_t size, char* esquema){
 
     if(strcmp(esquema, "FIJAS") == 0){
         return asignacion_fija(pid, size);
+    } else {
+        return particion_dinamica(pid, size);
     }
 }
 
@@ -841,16 +842,38 @@ int buscar_peor_bloque(int tamanio){
 
 //---- Para arriba es una idea de particiones fijas, funciona.
 
-bool particion_dinamica(uint32_t pid, uint32_t size){
+
+void imprimir_estado_huecos(){
+    void* print_hueco(void* ptr) {
+	    t_hueco* hueco = (t_hueco*) ptr;
+	    log_debug(memoria_log, "## <HUECO> Inicio:%d - Size:%d\n", hueco->inicio, hueco->size);
+	}
+	list_iterate(lista_huecos_disponibles, print_hueco);
+}
+
+void imprimir_estado_procesos_activos(){
+    void* print_proceso(char* key, void* ptr) {
+	    t_proceso* proceso = (t_proceso*) ptr;
+	    log_debug(memoria_log, "## <PROCESO KEY:%s> PID:%d - Base:%d - Inicio:%d - Size:%d\n", key, proceso->pid, proceso->base, proceso->inicio, proceso->size);
+	}
+	dictionary_iterator(lista_procesos_activos, print_proceso);
+}
+
+
+int particion_dinamica(uint32_t pid, uint32_t size){
     t_hueco* hueco = obtener_hueco(size);
-    bool asignacion_realizada;
+    int asignacion_realizada;
 
     if (hueco == NULL)
     {
-        asignacion_realizada = false;
+        asignacion_realizada = -1;
+        log_warning(memoria_log, "No hay un hueco disponible");
     } else {
-        asignar_particion_dinamica(hueco, pid, size);
-        asignacion_realizada = true;
+        log_debug(memoria_log, "## HUECO HALLADO (INICIO:%d - SIZE:%d)", hueco->inicio, hueco->size);
+        asignacion_realizada = asignar_particion_dinamica(hueco, pid, size);
+
+        imprimir_estado_huecos();
+        imprimir_estado_procesos_activos();
     }
     return asignacion_realizada;
 }
@@ -876,7 +899,7 @@ t_hueco* obtener_hueco(uint32_t size){
 }
 
 
-void asignar_particion_dinamica(t_hueco* hueco, uint32_t pid, uint32_t size){
+int asignar_particion_dinamica(t_hueco* hueco, uint32_t pid, uint32_t size){
     t_proceso* proceso = malloc(sizeof(t_proceso));
 
     proceso->pid = pid;
@@ -888,11 +911,11 @@ void asignar_particion_dinamica(t_hueco* hueco, uint32_t pid, uint32_t size){
     log_info(memoria_log, "## PID:%d Se agregó a la tabla de procesos activos", pid);
 
     particionar_hueco(hueco, proceso);
+
+    return proceso->base;
 }
 
 void particionar_hueco(t_hueco* hueco_padre, t_proceso* proceso_activo){
-    pthread_mutex_lock(&mutex_huecos_disponibles);
-
         log_debug(memoria_log, "## HUECO PADRE PRE-PARTICIONADO: INICIO=%d, SIZE=%d", hueco_padre->inicio, hueco_padre->size);
 
         hueco_padre->inicio = hueco_padre->inicio + proceso_activo->size; 
@@ -900,10 +923,11 @@ void particionar_hueco(t_hueco* hueco_padre, t_proceso* proceso_activo){
 
         log_debug(memoria_log, "## HUECO PADRE PARTICIONADO: INICIO=%d, SIZE=%d", hueco_padre->inicio, hueco_padre->size);
 
-        t_hueco* hueco_particionado = crear_hueco(proceso_activo->inicio, proceso_activo->size);
-        log_debug(memoria_log, "## NUEVO HUECO DE LA PARTICIÓN: INICIO=%d, SIZE=%d", hueco_particionado->inicio, hueco_particionado->size);
-        agregar_hueco(hueco_particionado);
-    pthread_mutex_unlock(&mutex_huecos_disponibles);
+        //t_hueco* hueco_particionado = crear_hueco(proceso_activo->inicio, proceso_activo->size);
+        //log_debug(memoria_log, "## NUEVO HUECO DE LA PARTICIÓN: INICIO=%d, SIZE=%d", hueco_particionado->inicio, hueco_particionado->size);
+        
+        agregar_hueco(hueco_padre);
+        //agregar_hueco(hueco_particionado);
 }
 
 void agregar_proceso_activo(t_proceso* proceso){
@@ -911,7 +935,7 @@ void agregar_proceso_activo(t_proceso* proceso){
         char* key = string_itoa(proceso->pid);
         dictionary_put(lista_procesos_activos, key, proceso);
 
-        log_debug(memoria_log, "## PID:%d KEY:%s BASE:%d INICIO:%s SIZE:%s Se agregó a la tabla de procesos activos", proceso->pid, key, proceso->base, proceso->inicio, proceso->size);
+        log_debug(memoria_log, "## PID:%d KEY:%s BASE:%d INICIO:%d SIZE:%d Se agregó a la tabla de procesos activos", proceso->pid, key, proceso->base, proceso->inicio, proceso->size);
     pthread_mutex_unlock(&mutex_procesos_activos);
 
     free(key);
@@ -968,7 +992,7 @@ t_hueco* first_fit(uint32_t size){
             t_hueco* hueco = (t_hueco*) ptr;
 	        return (hueco->size >= size);
 	    }
-	    return list_find(lista_huecos_disponibles, _list_contains);
+	    return list_remove_by_condition(lista_huecos_disponibles, _list_contains);
     pthread_mutex_unlock(&mutex_huecos_disponibles);
 }
 
@@ -995,14 +1019,16 @@ t_hueco* best_fit(uint32_t size){
                 }
             }
 	    }
-	    t_hueco* hueco_hallado = list_get_minimum(lista_huecos_disponibles, _min_size_byte);
+	    t_hueco* hueco_a_comparar = list_get_minimum(lista_huecos_disponibles, _min_size_byte);
 
-        if (hueco_hallado->size < size)
+        if (hueco_a_comparar->size < size)
         {
-            hueco_hallado = NULL;
+            hueco_a_comparar = NULL;
+        } else {
+            list_remove_element(lista_huecos_disponibles, hueco_a_comparar);
         }
     pthread_mutex_unlock(&mutex_huecos_disponibles);
-    return hueco_hallado;
+    return hueco_a_comparar;
 }
 
 t_hueco* worst_fit(uint32_t size){
@@ -1012,11 +1038,14 @@ t_hueco* worst_fit(uint32_t size){
 	        t_hueco* hueco_b = (t_hueco*) b;
             return hueco_a->size >= hueco_b->size ? hueco_a : hueco_b;
 	    }
-	    t_hueco* hueco_hallado = list_get_maximum(lista_huecos_disponibles, _max_size_byte);
+	    t_hueco* hueco_a_comparar = list_get_maximum(lista_huecos_disponibles, _max_size_byte);
 
-        if (hueco_hallado->size < size)
+        t_hueco* hueco_hallado;
+        if (hueco_a_comparar->size < size)
         {
             hueco_hallado = NULL;
+        } else {
+            list_remove_element(lista_huecos_disponibles, hueco_a_comparar);
         }
     pthread_mutex_unlock(&mutex_huecos_disponibles);
     return hueco_hallado;

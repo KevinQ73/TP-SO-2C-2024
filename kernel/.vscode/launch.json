@@ -31,11 +31,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-<<<<<<< HEAD
-      "args": ["PRUEBA_FS", "8", "./files/fibo.config"],
-=======
       "args": ["RECURSOS_MUTEX_PROC", "32", "./files/race_condition.config"],
->>>>>>> e8e7aeb (Solucionado kernel (falla en memoria))
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],

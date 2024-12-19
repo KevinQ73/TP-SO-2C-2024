@@ -135,7 +135,7 @@
 
     /*--------------------------- PARTICIONES DINAMICAS --------------------------*/
 
-    bool particion_dinamica(uint32_t pid, uint32_t size);
+    int particion_dinamica(uint32_t pid, uint32_t size);
 
     t_hueco* crear_hueco(uint32_t inicio, uint32_t size);
 
@@ -162,5 +162,11 @@
     t_hueco* remover_hueco_que_contiene_byte(uint32_t byte);
 
     void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
+
+// WORKING ZONE
+
+void imprimir_estado_huecos();
+
+void imprimir_estado_procesos_activos();
 
 #endif /* MEMORIA_SRC_MEMORIA_H_ */
