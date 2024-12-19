@@ -97,6 +97,10 @@ void iniciar_semaforos(){
 }
 
 void atender_solicitudes(){
+    for (int i = 0; i < bitmap_particion_fija->size; i++){
+        bitarray_clean_bit(bitmap_particion_fija, i);
+    }
+
     pthread_create(&hiloMemoriaCpu, NULL, atender_cpu, NULL);
     pthread_detach(hiloMemoriaCpu);
 
@@ -147,13 +151,6 @@ void* atender_solicitudes_kernel(void* fd_conexion){
     case CREAR_PROCESO:
         pid = buffer_read_uint32(buffer);
         uint32_t size_process = buffer_read_uint32(buffer);
-        for(int i=0;i<bitmap_particion_fija->size;i++){
-            if(bitarray_test_bit(bitmap_particion_fija, i)){
-                log_debug(memoria_log, "POS(%i), BIT(1)", i);
-            }else{
-                log_debug(memoria_log, "POS(%i), BIT(0)", i);
-            }
-        }
 
         if (crear_proceso(pid, size_process))
         {
@@ -171,13 +168,6 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         pid = buffer_read_uint32(buffer);
         uint32_t tid = buffer_read_uint32(buffer);
         uint32_t prioridad = buffer_read_uint32(buffer);
-                for(int i=0;i<bitmap_particion_fija->size;i++){
-            if(bitarray_test_bit(bitmap_particion_fija, i)){
-                log_debug(memoria_log, "POS(%i), BIT(1)", i);
-            }else{
-                log_debug(memoria_log, "POS(%i), BIT(0)", i);
-            }
-        }
 
         crear_hilo(pid, tid, prioridad, path);
 
@@ -191,6 +181,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         pid = buffer_read_uint32(buffer);
 
         sem_wait(&actualizar_contexto);
+        log_debug(memoria_log, "Voy a finalizar proceso (%i)", pid);
         finalizar_proceso(pid);
         enviar_mensaje("FINALIZACION_ACEPTADA", fd_memoria, memoria_log);
         
@@ -289,13 +280,6 @@ void* finalizar_proceso(uint32_t pid){
 
     liberar_espacio_en_memoria(pid);
     process_remove_and_destroy_by_pid(pid);
-            for(int i=0;i<bitmap_particion_fija->size;i++){
-            if(bitarray_test_bit(bitmap_particion_fija, i)){
-                log_debug(memoria_log, "POS(%i), BIT(1)", i);
-            }else{
-                log_debug(memoria_log, "POS(%i), BIT(0)", i);
-            }
-        }
 }
 
 void* finalizar_hilo(uint32_t pid, uint32_t tid){
@@ -304,18 +288,9 @@ void* finalizar_hilo(uint32_t pid, uint32_t tid){
     t_contexto_hilo* hilo_a_finalizar = thread_remove_by_tid(contexto_padre->lista_hilos, tid);
 
     thread_context_destroy(hilo_a_finalizar);
-    bitarray_clean_bit(bitmap_particion_fija, contexto_padre->base); //Solo limpia el bit del bitarray
-
 
     log_info(memoria_log, "## [MEMORIA:KERNEL] ## Hilo <Destruido> - (PID:TID) - (<%d>:<%d>). Cerrando FD del socket.\n", pid, tid);
-    pthread_mutex_unlock(&contexto_ejecucion_procesos);
-            for(int i=0;i<bitmap_particion_fija->size;i++){
-            if(bitarray_test_bit(bitmap_particion_fija, i)){
-                log_debug(memoria_log, "POS(%i), BIT(1)", i);
-            }else{
-                log_debug(memoria_log, "POS(%i), BIT(0)", i);
-            }
-        }
+
     return NULL;
 }
 
@@ -771,8 +746,6 @@ int buscar_primer_bloque(int tamanio){
     int contador = 0;
 
     do{
-        log_debug(memoria_log, "LA PARTICION REBISADATIENE UN TAMANIO DE (%i)", atoi(memoria_registro.particiones[contador]));
-
         if(!bitarray_test_bit(bitmap_particion_fija, contador)){
             log_debug(memoria_log, "LA PARTICION ES LA  (%i)", contador);
             log_debug(memoria_log, "LA PARTICION LIBRE TIENE UN TAMANIO DE (%i)", atoi(memoria_registro.particiones[contador]));
@@ -1038,7 +1011,10 @@ void liberar_espacio_en_memoria(uint32_t pid){
     {
         int size_particion = get_size_partition(contexto_proceso->base);
         liberar_hueco_bitmap_fijas(contexto_proceso->base);
-        bitarray_clean_bit(bitmap_particion_fija, contexto_proceso->base); //Solo limpia el bit del bitarray
+
+        log_debug(memoria_log, "Voy a borrar la particion (%i)", contexto_proceso->base);
+        perror("Voy a borrar??");
+
         log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Destruido> - PID: <%d> -Tamaño: <%d>. Cerrando FD del socket.\n", pid, size_particion);
     } else {
         liberar_hueco_dinamico(contexto_proceso);
