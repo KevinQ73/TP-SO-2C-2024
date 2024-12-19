@@ -79,7 +79,7 @@ void iniciar_memoria(){
     lista_procesos_activos = dictionary_create();
     lista_huecos_disponibles = list_create();
 
-    t_hueco* hueco_inicial = crear_hueco(0, memoria_registro.tam_memoria);
+    t_hueco* hueco_inicial = crear_hueco(0, (memoria_registro.tam_memoria - 1));
     agregar_hueco(hueco_inicial);
 
     iniciar_semaforos();
@@ -855,6 +855,27 @@ bool particion_dinamica(uint32_t pid, uint32_t size){
     return asignacion_realizada;
 }
 
+t_hueco* obtener_hueco(uint32_t size){
+    t_hueco* hueco;
+
+    if (strcmp(memoria_registro.algoritmo_busqueda, "FIRST") == 0)
+    {
+        hueco = first_fit(size);
+    } else if (strcmp(memoria_registro.algoritmo_busqueda, "BEST") == 0)
+    {
+        hueco = best_fit(size);
+    } else if (strcmp(memoria_registro.algoritmo_busqueda, "WORST") == 0)
+    {
+        hueco = worst_fit(size);
+    } else {
+        log_error(memoria_log, "ERROR EN obtener_hueco");
+        abort();
+    }
+    
+    return hueco;
+}
+
+
 void asignar_particion_dinamica(t_hueco* hueco, uint32_t pid, uint32_t size){
     t_proceso* proceso = malloc(sizeof(t_proceso));
 
@@ -864,18 +885,33 @@ void asignar_particion_dinamica(t_hueco* hueco, uint32_t pid, uint32_t size){
     proceso->size = size;
     
     agregar_proceso_activo(proceso);
+    log_info(memoria_log, "## PID:%d Se agregó a la tabla de procesos activos", pid);
 
+    particionar_hueco(hueco, proceso);
+}
+
+void particionar_hueco(t_hueco* hueco_padre, t_proceso* proceso_activo){
     pthread_mutex_lock(&mutex_huecos_disponibles);
-        hueco->inicio = hueco->inicio + size;
-        hueco->size = hueco->inicio - size;
-    pthread_mutex_unlock(&mutex_huecos_disponibles);
 
+        log_debug(memoria_log, "## HUECO PADRE PRE-PARTICIONADO: INICIO=%d, SIZE=%d", hueco_padre->inicio, hueco_padre->size);
+
+        hueco_padre->inicio = hueco_padre->inicio + proceso_activo->size; 
+        hueco_padre->size = hueco_padre->size - proceso_activo->size;
+
+        log_debug(memoria_log, "## HUECO PADRE PARTICIONADO: INICIO=%d, SIZE=%d", hueco_padre->inicio, hueco_padre->size);
+
+        t_hueco* hueco_particionado = crear_hueco(proceso_activo->inicio, proceso_activo->size);
+        log_debug(memoria_log, "## NUEVO HUECO DE LA PARTICIÓN: INICIO=%d, SIZE=%d", hueco_particionado->inicio, hueco_particionado->size);
+        agregar_hueco(hueco_particionado);
+    pthread_mutex_unlock(&mutex_huecos_disponibles);
 }
 
 void agregar_proceso_activo(t_proceso* proceso){
     pthread_mutex_lock(&mutex_procesos_activos);
         char* key = string_itoa(proceso->pid);
         dictionary_put(lista_procesos_activos, key, proceso);
+
+        log_debug(memoria_log, "## PID:%d KEY:%s BASE:%d INICIO:%s SIZE:%s Se agregó a la tabla de procesos activos", proceso->pid, key, proceso->base, proceso->inicio, proceso->size);
     pthread_mutex_unlock(&mutex_procesos_activos);
 
     free(key);
@@ -923,6 +959,7 @@ void agregar_hueco(t_hueco* hueco){
     pthread_mutex_lock(&mutex_huecos_disponibles);
         list_add(lista_huecos_disponibles, hueco);
     pthread_mutex_unlock(&mutex_huecos_disponibles);
+    log_debug(memoria_log, "Se agregó a la lista el hueco de inicio: %d y size:%d", hueco->inicio, hueco->size);
 }
 
 t_hueco* first_fit(uint32_t size){
@@ -985,36 +1022,14 @@ t_hueco* worst_fit(uint32_t size){
     return hueco_hallado;
 }
 
-t_hueco* obtener_hueco(uint32_t size){
-    t_hueco* hueco;
-
-    if (strcmp(memoria_registro.algoritmo_busqueda, "FIRST") == 0)
-    {
-        hueco = first_fit(size);
-    } else if (strcmp(memoria_registro.algoritmo_busqueda, "BEST") == 0)
-    {
-        hueco = best_fit(size);
-    } else if (strcmp(memoria_registro.algoritmo_busqueda, "WORST") == 0)
-    {
-        hueco = worst_fit(size);
-    } else {
-        log_error(memoria_log, "ERROR EN obtener_hueco");
-        abort();
-    }
-    
-    return hueco;
-}
-
 void liberar_espacio_en_memoria(uint32_t pid){
     t_contexto_proceso* contexto_proceso = process_remove_by_pid(pid);
     if (strcmp(memoria_registro.esquema, "FIJAS") == 0)
     {
         int size_particion = get_size_partition(contexto_proceso->base);
         liberar_hueco_bitmap_fijas(contexto_proceso->base);
-
         log_debug(memoria_log, "Voy a borrar la particion (%i)", contexto_proceso->base);
         perror("Voy a borrar??");
-
         log_info(memoria_log, "## [MEMORIA:KERNEL] Proceso <Destruido> - PID: <%d> -Tamaño: <%d>. Cerrando FD del socket.\n", pid, size_particion);
     } else {
         liberar_hueco_dinamico(contexto_proceso);
