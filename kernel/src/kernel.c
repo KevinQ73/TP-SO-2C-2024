@@ -59,7 +59,7 @@ void iniciar_semaforos(){
     pthread_mutex_init(&mutex_cola_block, NULL);
     pthread_mutex_init(&mutex_hilo_exec, NULL);
     pthread_mutex_init(&mutex_siguiente_id, NULL);
-    pthread_mutex_init(&mutex_uso_fd_memoria, NULL);
+    //pthread_mutex_init(&mutex_uso_fd_memoria, NULL);
     pthread_mutex_init(&mutex_uso_estado_hilos, NULL);
     pthread_mutex_init(&mutex_lista_procesos_ready, NULL);
     pthread_mutex_init(&mutex_colas_multinivel_existentes, NULL);
@@ -1008,7 +1008,7 @@ char* avisar_creacion_proceso_memoria(int* pid, int* size_process, t_log* kernel
 
     paquete->buffer = buffer;
 
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
+    //pthread_mutex_lock(&mutex_uso_fd_memoria);
         int socket_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, socket_memoria);
         eliminar_paquete(paquete);
@@ -1016,7 +1016,7 @@ char* avisar_creacion_proceso_memoria(int* pid, int* size_process, t_log* kernel
         char* response_memoria = recibir_mensaje(socket_memoria, kernel_log);
         log_debug(kernel_log, "STRING RECIBIDO avisar_creacion_proceso_memoria: %s", response_memoria);
         close(socket_memoria);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
+    //pthread_mutex_unlock(&mutex_uso_fd_memoria);
 
     return response_memoria;
 }
@@ -1035,7 +1035,7 @@ char* avisar_creacion_hilo_memoria(int* pid, int* tid, char* path, int* priorida
 
     paquete->buffer = buffer;
 
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
+    //pthread_mutex_lock(&mutex_uso_fd_memoria);
         int socket_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, socket_memoria);
         eliminar_paquete(paquete);
@@ -1043,7 +1043,7 @@ char* avisar_creacion_hilo_memoria(int* pid, int* tid, char* path, int* priorida
         char* response_memoria = recibir_mensaje(socket_memoria, kernel_log);
         log_debug(kernel_log, "STRING RECIBIDO avisar_creacion_hilo_memoria: %s", response_memoria);
         close(socket_memoria);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
+    //pthread_mutex_unlock(&mutex_uso_fd_memoria);
 
     return response_memoria;
 }
@@ -1058,7 +1058,7 @@ char* avisar_fin_proceso_memoria(uint32_t* pid){
 
     paquete->buffer = buffer;
 
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
+    //pthread_mutex_lock(&mutex_uso_fd_memoria);
         int socket_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, socket_memoria);
         eliminar_paquete(paquete);
@@ -1066,7 +1066,7 @@ char* avisar_fin_proceso_memoria(uint32_t* pid){
         char* response_memoria = recibir_mensaje(socket_memoria, kernel_log);
         log_debug(kernel_log, "STRING RECIBIDO avisar_fin_proceso_memoria: %s", response_memoria);
         close(socket_memoria);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
+    //pthread_mutex_unlock(&mutex_uso_fd_memoria);
 
     return response_memoria;
 }
@@ -1082,13 +1082,13 @@ char* avisar_fin_hilo_memoria(uint32_t* pid, uint32_t* tid){
 
     paquete->buffer = buffer;
 
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
+    //pthread_mutex_lock(&mutex_uso_fd_memoria);
         int socket_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, socket_memoria);
         char* response_memoria = recibir_mensaje(socket_memoria, kernel_log);
         log_debug(kernel_log, "STRING RECIBIDO avisar_fin_hilo_memoria: %s", response_memoria);
         close(socket_memoria);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
+    //pthread_mutex_unlock(&mutex_uso_fd_memoria);
 
     eliminar_paquete(paquete);
 
@@ -1183,7 +1183,7 @@ void* operacion_a_atender(int operacion){
             poner_en_ready(hilo_en_ejecucion);
             break;
         } else {
-            log_warning(kernel_log, "## Se solicitó desalojar por QUANTUM el hilo (%d:%d) pero no es el que está ejecutando", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            log_debug(kernel_log, "## Se solicitó desalojar por QUANTUM el hilo (%d:%d) pero no es el que está ejecutando", pid_tid_recibido.pid, pid_tid_recibido.tid);
             break;
         }
 
@@ -1434,7 +1434,7 @@ void* syscall_dump_memory(t_pid_tid pid_tid){
     paquete->buffer = buffer;
 
     //ENVIA EL PEDIDO A MEMORIA PARA FINALIZAR EL PROCESO
-    pthread_mutex_lock(&mutex_uso_fd_memoria);
+    //pthread_mutex_lock(&mutex_uso_fd_memoria);
         int conexion_memoria = crear_conexion_con_memoria(kernel_log, kernel_registro.ip_memoria, kernel_registro.puerto_memoria);
         enviar_paquete(paquete, conexion_memoria);
         eliminar_paquete(paquete);
@@ -1443,7 +1443,7 @@ void* syscall_dump_memory(t_pid_tid pid_tid){
         char* respuesta_memoria = recibir_mensaje(conexion_memoria, kernel_log);
         log_debug(kernel_log, "RESPUESTA DE MEMORIA POR MEMORY DUMP: %s", respuesta_memoria);
         close(conexion_memoria);
-    pthread_mutex_unlock(&mutex_uso_fd_memoria);
+    //pthread_mutex_unlock(&mutex_uso_fd_memoria);
 
     if(strcmp(respuesta_memoria, "OK") == 0){
         t_hilo_planificacion* hilo_a_desbloquear = remover_de_block(pid_tid.pid, pid_tid.tid);
@@ -1502,7 +1502,7 @@ void finalizar_semaforos(){
     pthread_mutex_destroy(&mutex_cola_ready);
     pthread_mutex_destroy(&mutex_cola_block);
     pthread_mutex_destroy(&mutex_hilo_exec);
-    pthread_mutex_destroy(&mutex_uso_fd_memoria);
+    //pthread_mutex_destroy(&mutex_uso_fd_memoria);
     pthread_mutex_destroy(&mutex_uso_estado_hilos);
     pthread_mutex_destroy(&mutex_lista_procesos_ready);
     pthread_mutex_destroy(&mutex_colas_multinivel_existentes);

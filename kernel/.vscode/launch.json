@@ -31,7 +31,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-      "args": ["PRUEBA_FS", "8", "./files/fibo.config"],
+      "args": ["MEM_FIJA_BASE", "12", "./files/particiones_fijas.config"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
