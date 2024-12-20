@@ -69,6 +69,7 @@ void iniciar_semaforos(){
     sem_init(&contador_procesos_en_new, 0, 0);
     sem_init(&kernel_activo, 0, 0);
     sem_init(&aviso_exit_proceso, 0, 0);
+    sem_init(&hay_hilos_en_block, 0, 0);
 }
 
 void iniciar_colas(){
@@ -363,8 +364,16 @@ void* planificador_corto_plazo(){
                     operacion_a_atender(operacion);
                 }
             } else {
-                log_info(kernel_log, "[CMN] No hay más hilos para planificar, cierro modulo KERNEL");
-                finalizar_corto_plazo = true;
+                log_info(kernel_log, "[CMN] No hay más hilos para planificar");
+                bool verificacion = verificar_cola_block();
+
+                if (verificacion)
+                {
+                    sem_wait(&hay_hilos_en_block);
+                } else {
+                    log_info(kernel_log, "[CMN] Tampoco hay más hilos bloqueados. CIerro Kernel");
+                    finalizar_corto_plazo = true;
+                }                
             }   
         } else {
             hilo_en_ejecucion = obtener_hilo_segun_algoritmo(planificacion);
@@ -381,6 +390,15 @@ void* planificador_corto_plazo(){
     sem_post(&kernel_activo);
 }
 
+bool verificar_cola_block(){
+    if (!list_is_empty(lista_t_hilos_bloqueados))
+    {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
     t_hilo_planificacion* hilo = NULL;
 
@@ -391,7 +409,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
                 hilo = list_remove(cola_ready, 0);
             }
             if (!hilo) {
-                log_warning(kernel_log, "No hay hilos en la cola ready");
+                log_debug(kernel_log, "No hay hilos en la cola ready");
             } else {
                 log_info(kernel_log, "## [FIFO](%d:%d) Se seleccionó para ejecutar y pasa al estado EXECUTE", hilo->pid_padre, hilo->tid_asociado);
             }
@@ -404,7 +422,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
                 hilo = thread_find_by_priority_schedule(lista_prioridades);
             }
             if (!hilo) {
-                log_warning(kernel_log, "No hay hilos en la cola ready");
+                log_debug(kernel_log, "No hay hilos en la cola ready");
             } else {
                 log_info(kernel_log, "## [PRIORIDADES](%d:%d) Se seleccionó para ejecutar y pasa al estado EXECUTE", hilo->pid_padre, hilo->tid_asociado);
             }
@@ -417,7 +435,7 @@ t_hilo_planificacion* obtener_hilo_segun_algoritmo(char* planificacion){
                 hilo = thread_find_by_multilevel_queues_schedule(lista_colas_multinivel);
             }
             if (!hilo) {
-                log_warning(kernel_log, "No hay hilos en la cola ready");
+                log_debug(kernel_log, "No hay hilos en la cola ready");
             }
         pthread_mutex_unlock(&mutex_cola_ready);
     }
@@ -1002,6 +1020,7 @@ void* ejecutar_io(void* ptr){
 
         hilo = remover_de_block(args->pid, args->tid);
         poner_en_ready(hilo);
+        sem_post(&hay_hilos_en_block);
 
         log_info(kernel_log,"## (<%d>:<%d>) finalizó IO y pasa a READY", args->pid, args->tid);
     pthread_mutex_unlock(&mutex_io);

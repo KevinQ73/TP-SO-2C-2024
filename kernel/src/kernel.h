@@ -39,6 +39,7 @@
     sem_t contador_procesos_en_new;
     sem_t aviso_exit_proceso;
     sem_t kernel_activo;
+    sem_t hay_hilos_en_block;
 
     t_queue* cola_new;
 
@@ -299,5 +300,7 @@
     void inicializar_proceso(t_pcb* pcb, char* respuesta_creacion_proceso);
     
     t_pcb* remover_de_new();
+
+    bool verificar_cola_block();
 
 #endif /* KERNEL_H_ */

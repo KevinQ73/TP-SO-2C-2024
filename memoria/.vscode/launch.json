@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-      "args": ["./files/particiones_dinamicas.config"],
+      "args": ["./files/particiones_fijas.config"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
