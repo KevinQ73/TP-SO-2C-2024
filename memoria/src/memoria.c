@@ -205,31 +205,45 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         char* timestamp = temporal_get_string_time("%H:%M:%S:%MS");
         char* nombre_archivo = string_new();
 
-        t_contexto *contexto = buscar_contexto(pid, tid);
-        void * contenido_proceso = leer_de_memoria(contexto->limite, contexto->base);
-        string_append_with_format(&nombre_archivo, "<%s><%s><%s>.dmp",string_itoa(pid), string_itoa(tid), timestamp);
+        t_proceso* proceso = get_process(pid);
+        void* contenido_proceso = leer_de_memoria(proceso->size, proceso->inicio);
 
-        t_paquete *archivo_fs = crear_paquete(DUMP_MEMORY);
+        char* pid_string = string_itoa(pid);
+        char* tid_string = string_itoa(tid);
 
-        t_buffer* buffer = buffer_create(strlen(nombre_archivo)+2*sizeof(uint32_t)+strlen(contenido_proceso));
+        string_append_with_format(&nombre_archivo, "<%s><%s><%s>.dmp", pid_string, tid_string, timestamp);
 
-        buffer_add_string(buffer, strlen(nombre_archivo), nombre_archivo, memoria_log);
-        buffer_add_string(buffer, contexto->limite, contenido_proceso, memoria_log);
+        int length_nombre_archivo = strlen(nombre_archivo) +1;
+
+        t_paquete* archivo_fs = crear_paquete(DUMP_MEMORY);
+
+        t_buffer* buffer = buffer_create(
+            length_nombre_archivo + sizeof(uint32_t) + proceso->size
+        );
+
+        buffer_add_string(buffer, length_nombre_archivo, nombre_archivo, memoria_log);
+        buffer_add_uint32(buffer, &proceso->size, memoria_log);
+        buffer_add(buffer, contenido_proceso, proceso->size);
 
         archivo_fs->buffer = buffer;
-
-        enviar_paquete(archivo_fs,conexion_filesystem);
+        
+        int fd_filesystem = crear_conexion_con_filesystem(memoria_log, memoria_registro.ip_filesystem, memoria_registro.puerto_filesystem);
+        enviar_paquete(archivo_fs, fd_filesystem);
+        eliminar_paquete(archivo_fs);
 
         log_info(memoria_log, "## [MEMORIA:KERNEL] Memory Dump solicitado - (PID:TID) - (<%d>:<%d>)",pid,tid);
 
-        char* response_fs = recibir_mensaje(conexion_filesystem, memoria_log);
-        if(response_fs = "OK_FS"){
-			enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
+        char* response_fs = recibir_mensaje(fd_filesystem, memoria_log);
+        if(strcmp(response_fs, "OK_FS") == 0){
+			enviar_mensaje("OK", fd_memoria, memoria_log);
 		}else {
-			enviar_mensaje("ERROR", fd_conexion_kernel, memoria_log);
+			enviar_mensaje("ERROR", fd_memoria, memoria_log);
 		}
+        close(fd_filesystem);
+        free(response_fs);
         free(nombre_archivo);
-        free(contexto);
+        free(pid_string);
+        free(tid_string);
         close(fd_memoria);
         break;
 
@@ -950,6 +964,17 @@ t_proceso* obtener_proceso_activo(uint32_t pid){
         t_proceso* proceso = dictionary_remove(lista_procesos_activos, key);
     pthread_mutex_unlock(&mutex_procesos_activos);
 
+    free(key);
+    return proceso;
+}
+
+t_proceso* get_process(uint32_t pid){
+    pthread_mutex_lock(&mutex_procesos_activos);
+        char* key = string_itoa(pid);
+        t_proceso* proceso = dictionary_get(lista_procesos_activos, key);
+    pthread_mutex_unlock(&mutex_procesos_activos);
+
+    free(key);
     return proceso;
 }
 
@@ -1142,6 +1167,13 @@ t_hueco* remover_hueco_que_contiene_byte(uint32_t byte){
 void* memory_dump(){
     enviar_mensaje("OK", fd_conexion_kernel, memoria_log);
     return NULL;
+}
+
+int crear_conexion_con_filesystem(t_log* memoria_log, char* ip, char* puerto){
+    int conexion_memoria = crear_conexion(memoria_log, ip, puerto);
+    log_debug(memoria_log, "ME CONECTÉ A FILESYSTEM");
+
+    return conexion_memoria;
 }
 
 /*------------------------------------ WORKING ZONE ------------------------------------*/

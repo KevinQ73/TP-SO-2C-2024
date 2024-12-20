@@ -1,86 +1,85 @@
-==188662== Memcheck, a memory error detector
-==188662== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==188662== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==188662== Command: bin/kernel RECURSOS_MUTEX_PROC 32 ./files/race_condition.config
-==188662== Parent PID: 160847
-==188662== 
-==188662== 
-==188662== Process terminating with default action of signal 6 (SIGABRT)
-==188662==    at 0x490B9FC: __pthread_kill_implementation (pthread_kill.c:44)
-==188662==    by 0x490B9FC: __pthread_kill_internal (pthread_kill.c:78)
-==188662==    by 0x490B9FC: pthread_kill@@GLIBC_2.34 (pthread_kill.c:89)
-==188662==    by 0x48B7475: raise (raise.c:26)
-==188662==    by 0x489D7F2: abort (abort.c:79)
-==188662==    by 0x10B952: poner_en_exit (kernel.c:216)
-==188662==    by 0x10BAA1: finalizar_hilos_de_proceso (kernel.c:245)
-==188662==    by 0x10E722: syscall_process_exit (kernel.c:1094)
-==188662==    by 0x10E413: operacion_a_atender (kernel.c:1012)
-==188662==    by 0x10BB8D: planificador_corto_plazo (kernel.c:271)
-==188662==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==188662==    by 0x499AA03: clone (clone.S:100)
-==188662== 
-==188662== HEAP SUMMARY:
-==188662==     in use at exit: 12,746 bytes in 130 blocks
-==188662==   total heap usage: 33,781 allocs, 33,651 frees, 1,254,524 bytes allocated
-==188662== 
-==188662== 272 bytes in 1 blocks are possibly lost in loss record 73 of 81
-==188662==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==188662==    by 0x40147D9: calloc (rtld-malloc.h:44)
-==188662==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
-==188662==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
-==188662==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
-==188662==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
-==188662==    by 0x10B492: iniciar_planificacion (kernel.c:112)
-==188662==    by 0x10B039: main (kernel.c:33)
-==188662== 
-==188662== 272 bytes in 1 blocks are possibly lost in loss record 74 of 81
-==188662==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==188662==    by 0x40147D9: calloc (rtld-malloc.h:44)
-==188662==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
-==188662==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
-==188662==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
-==188662==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
-==188662==    by 0x10B4C4: iniciar_planificacion (kernel.c:115)
-==188662==    by 0x10B039: main (kernel.c:33)
-==188662== 
-==188662== 272 bytes in 1 blocks are possibly lost in loss record 75 of 81
-==188662==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==188662==    by 0x40147D9: calloc (rtld-malloc.h:44)
-==188662==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
-==188662==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
-==188662==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
-==188662==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
-==188662==    by 0x10BB5D: planificador_corto_plazo (kernel.c:265)
-==188662==    by 0x4909AC2: start_thread (pthread_create.c:442)
-==188662==    by 0x499AA03: clone (clone.S:100)
-==188662== 
-==188662== 2,304 bytes in 1 blocks are possibly lost in loss record 80 of 81
-==188662==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
-==188662==    by 0x4005D97: malloc (rtld-malloc.h:56)
-==188662==    by 0x4005D97: _dlfo_mappings_segment_allocate (dl-find_object.c:217)
-==188662==    by 0x4005D97: _dl_find_object_update_1 (dl-find_object.c:671)
-==188662==    by 0x4005D97: _dl_find_object_update (dl-find_object.c:804)
-==188662==    by 0x400ECCF: dl_open_worker_begin (dl-open.c:735)
-==188662==    by 0x49E9A97: _dl_catch_exception (dl-error-skeleton.c:208)
-==188662==    by 0x400DF99: dl_open_worker (dl-open.c:782)
-==188662==    by 0x49E9A97: _dl_catch_exception (dl-error-skeleton.c:208)
-==188662==    by 0x400E34D: _dl_open (dl-open.c:883)
-==188662==    by 0x49E9E00: do_dlopen (dl-libc.c:95)
-==188662==    by 0x49E9A97: _dl_catch_exception (dl-error-skeleton.c:208)
-==188662==    by 0x49E9B62: _dl_catch_error (dl-error-skeleton.c:227)
-==188662==    by 0x49E9F36: dlerror_run (dl-libc.c:45)
-==188662==    by 0x49E9F36: __libc_dlopen_mode (dl-libc.c:162)
-==188662==    by 0x499A610: __libc_unwind_link_get (unwind-link.c:50)
-==188662==    by 0x499A610: __libc_unwind_link_get (unwind-link.c:40)
-==188662== 
-==188662== LEAK SUMMARY:
-==188662==    definitely lost: 0 bytes in 0 blocks
-==188662==    indirectly lost: 0 bytes in 0 blocks
-==188662==      possibly lost: 3,120 bytes in 4 blocks
-==188662==    still reachable: 9,626 bytes in 126 blocks
-==188662==         suppressed: 0 bytes in 0 blocks
-==188662== Reachable blocks (those to which a pointer was found) are not shown.
-==188662== To see them, rerun with: --leak-check=full --show-leak-kinds=all
-==188662== 
-==188662== For lists of detected and suppressed errors, rerun with: -s
-==188662== ERROR SUMMARY: 4 errors from 4 contexts (suppressed: 0 from 0)
+==54509== Memcheck, a memory error detector
+==54509== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==54509== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==54509== Command: ./bin/kernel PRUEBA_FS 8 ./files/fibo.config
+==54509== Parent PID: 54400
+==54509== 
+==54509== 
+==54509== Process terminating with default action of signal 6 (SIGABRT)
+==54509==    at 0x490B9FC: __pthread_kill_implementation (pthread_kill.c:44)
+==54509==    by 0x490B9FC: __pthread_kill_internal (pthread_kill.c:78)
+==54509==    by 0x490B9FC: pthread_kill@@GLIBC_2.34 (pthread_kill.c:89)
+==54509==    by 0x48B7475: raise (raise.c:26)
+==54509==    by 0x489D7F2: abort (abort.c:79)
+==54509==    by 0x110A21: recibir_mensaje (serializacion.c:346)
+==54509==    by 0x10E6A3: avisar_creacion_hilo_memoria (kernel.c:1043)
+==54509==    by 0x10B7B1: reintentar_inicializar_pcb_en_espera (kernel.c:171)
+==54509==    by 0x10B6DA: inicializar_pcb_en_espera (kernel.c:156)
+==54509==    by 0x10B4FD: planificador_largo_plazo (kernel.c:124)
+==54509==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==54509==    by 0x499AA03: clone (clone.S:100)
+==54509== 
+==54509== HEAP SUMMARY:
+==54509==     in use at exit: 11,067 bytes in 246 blocks
+==54509==   total heap usage: 67,463 allocs, 67,217 frees, 2,383,824 bytes allocated
+==54509== 
+==54509== 4 bytes in 1 blocks are definitely lost in loss record 3 of 66
+==54509==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==54509==    by 0x11042B: buffer_read_string (serializacion.c:100)
+==54509==    by 0x1109BD: recibir_mensaje (serializacion.c:351)
+==54509==    by 0x10F95F: syscall_dump_memory (kernel.c:1443)
+==54509==    by 0x10EB26: operacion_a_atender (kernel.c:1170)
+==54509==    by 0x10C071: planificador_corto_plazo (kernel.c:351)
+==54509==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==54509==    by 0x499AA03: clone (clone.S:100)
+==54509== 
+==54509== 24 bytes in 2 blocks are definitely lost in loss record 38 of 66
+==54509==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==54509==    by 0x10F3DF: syscall_io (kernel.c:1336)
+==54509==    by 0x10EB3E: operacion_a_atender (kernel.c:1174)
+==54509==    by 0x10C071: planificador_corto_plazo (kernel.c:351)
+==54509==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==54509==    by 0x499AA03: clone (clone.S:100)
+==54509== 
+==54509== 272 bytes in 1 blocks are possibly lost in loss record 59 of 66
+==54509==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==54509==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==54509==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==54509==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==54509==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==54509==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==54509==    by 0x10B4A7: iniciar_planificacion (kernel.c:112)
+==54509==    by 0x10B04E: main (kernel.c:33)
+==54509== 
+==54509== 272 bytes in 1 blocks are possibly lost in loss record 60 of 66
+==54509==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==54509==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==54509==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==54509==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==54509==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==54509==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==54509==    by 0x10B4D9: iniciar_planificacion (kernel.c:115)
+==54509==    by 0x10B04E: main (kernel.c:33)
+==54509== 
+==54509== 544 bytes in 2 blocks are possibly lost in loss record 63 of 66
+==54509==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==54509==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==54509==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==54509==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==54509==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==54509==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==54509==    by 0x10C041: planificador_corto_plazo (kernel.c:345)
+==54509==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==54509==    by 0x499AA03: clone (clone.S:100)
+==54509== 
+==54509== LEAK SUMMARY:
+==54509==    definitely lost: 28 bytes in 3 blocks
+==54509==    indirectly lost: 0 bytes in 0 blocks
+==54509==      possibly lost: 1,088 bytes in 4 blocks
+==54509==    still reachable: 9,951 bytes in 239 blocks
+==54509==         suppressed: 0 bytes in 0 blocks
+==54509== Reachable blocks (those to which a pointer was found) are not shown.
+==54509== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==54509== 
+==54509== For lists of detected and suppressed errors, rerun with: -s
+==54509== ERROR SUMMARY: 5 errors from 5 contexts (suppressed: 0 from 0)

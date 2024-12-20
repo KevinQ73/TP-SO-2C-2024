@@ -18,10 +18,7 @@
     void* buffer_bitmap_2;
     void* buffer_bloques;
     void* puntero_bitmap;
-
-
-
-
+    
     void atender_memoria();
 
     void* atender_solicitudes(void* fd_conexion);

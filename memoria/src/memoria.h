@@ -169,4 +169,8 @@ void imprimir_estado_huecos();
 
 void imprimir_estado_procesos_activos();
 
+t_proceso* get_process(uint32_t pid);
+
+int crear_conexion_con_filesystem(t_log* memoria_log, char* ip, char* puerto);
+
 #endif /* MEMORIA_SRC_MEMORIA_H_ */

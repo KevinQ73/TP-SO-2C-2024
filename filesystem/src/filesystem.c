@@ -102,24 +102,27 @@ void* atender_solicitudes(void* fd_conexion){
 		case DUMP_MEMORY:
 			log_info(filesystem_log, "MEMORY DUMP LEIDO");
 
-			uint32_t tamanio_buffer;
 			uint32_t tamanio;
+			uint32_t size_contenido;
+			char* nombre = buffer_read_string(buffer, &tamanio);
+			size_contenido = buffer_read_uint32(buffer);
 
-			char* nombre = buffer_read_string(buffer, &tamanio_buffer);
-			void* contenido = buffer_read_string(buffer,&tamanio);
+			void* contenido = malloc(size_contenido);
 
-			if( dump_memory(nombre, tamanio, contenido) == EXIT_SUCCESS){
+			buffer_read(buffer, contenido, size_contenido);
+
+			if(dump_memory(nombre, tamanio, contenido) == EXIT_SUCCESS){
 				enviar_mensaje("OK_FS", fd_memoria, filesystem_log);
 			}else {
 				enviar_mensaje("ERROR", fd_memoria, filesystem_log);
 			}
-		break;
+			break;
+			close(fd_memoria);
 		default:
 			log_debug(filesystem_log, "## [FILESYSTEM:MEMORIA] OPERACIÓN DE MEMORIA ERRONEA");
         break;
 	}
 	close(fd_memoria);
-	close(fd_conexion);
 }
 
 //Funciones del dump_memory
