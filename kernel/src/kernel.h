@@ -295,5 +295,9 @@
     void log_hilos_bloqueados_por_mutex(t_pcb* pcb, char* name);
 
     bool es_hilo_ejecutando(uint32_t pid, uint32_t tid);
+
+    void inicializar_proceso(t_pcb* pcb, char* respuesta_creacion_proceso);
     
+    t_pcb* remover_de_new();
+
 #endif /* KERNEL_H_ */

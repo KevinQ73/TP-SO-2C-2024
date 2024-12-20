@@ -128,39 +128,44 @@ void* planificador_largo_plazo(){
 void* inicializar_pcb_en_espera(){        
     sem_wait(&contador_procesos_en_new);
     if(queue_size(cola_new) > 0){
-        pthread_mutex_lock(&mutex_cola_new);
-        t_pcb* pcb = queue_pop(cola_new);
-        pthread_mutex_unlock(&mutex_cola_new);
-
+        t_pcb* pcb = remover_de_new();
         char* respuesta_memoria = avisar_creacion_proceso_memoria(&(pcb->pid), &pcb->size_process, kernel_log);
-
-        if (strcmp(respuesta_memoria, "OK") == 0)
-        {
-            t_tcb* tcb_main = list_remove(pcb->lista_tcb, 0);
-            char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(&pcb->pid, &tcb_main->tid, pcb->path_instrucciones_hilo_main, &(tcb_main->prioridad), kernel_log);
-            if (strcmp(respuesta_memoria_hilo, "OK") == 0)
-            {
-                t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_main);
-                log_debug(kernel_log, "Se creó el t_hilo_planificacion (%d:%d) de prioridad %d", hilo->pid_padre, hilo->tid_asociado, hilo->prioridad);
-                log_tids_de_lista(pcb->lista_tcb);
-
-                create_thread_state(pcb->pid, tcb_main->tid, tcb_main->prioridad);
-                agregar_proceso_activo(pcb);
-                poner_en_ready(hilo);
-            } else {
-                log_debug(kernel_log, "NO SE PUDO INICIALIZAR HILO EN MEMORIA");
-            }
-            free(respuesta_memoria);
-            free(respuesta_memoria_hilo);
-        } else {
-            reintentar_inicializar_pcb_en_espera(pcb);
-            free(respuesta_memoria);
-        }
+        inicializar_proceso(pcb, respuesta_memoria);
     } else {
-        log_debug(kernel_log, "NO HAY PCB EN COLA NEW");
+        log_debug(kernel_log, "NO HAY PROCESOS PARA INICIALIZAR");
     }
 }
 
+void inicializar_proceso(t_pcb* pcb, char* respuesta_creacion_proceso){
+    if (strcmp(respuesta_creacion_proceso, "OK") == 0)
+    {
+        t_tcb* tcb_main = list_remove(pcb->lista_tcb, 0);
+        char* respuesta_memoria_hilo = avisar_creacion_hilo_memoria(&pcb->pid, &tcb_main->tid, pcb->path_instrucciones_hilo_main, &(tcb_main->prioridad), kernel_log);
+        if (strcmp(respuesta_memoria_hilo, "OK") == 0)
+        {
+            t_hilo_planificacion* hilo = create_hilo_planificacion(pcb, tcb_main);
+            log_debug(kernel_log, "Se creó el t_hilo_planificacion (%d:%d) de prioridad %d", hilo->pid_padre, hilo->tid_asociado, hilo->prioridad);
+            log_tids_de_lista(pcb->lista_tcb);
+
+            create_thread_state(pcb->pid, tcb_main->tid, tcb_main->prioridad);
+            agregar_proceso_activo(pcb);
+            poner_en_ready(hilo);
+        } else {
+            log_debug(kernel_log, "NO SE PUDO INICIALIZAR HILO EN MEMORIA");
+        }
+        free(respuesta_creacion_proceso);
+        free(respuesta_memoria_hilo);
+    } else {
+        free(respuesta_creacion_proceso);
+        poner_en_new(pcb);
+        sem_wait(&aviso_exit_proceso);
+        log_debug(kernel_log, "SE LIBERÓ UN PROCESO. REINTENTO INICIALIZAR PROCESO");
+        sem_post(&contador_procesos_en_new);
+        inicializar_pcb_en_espera();
+    }
+}
+
+/*
 void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
     t_tcb* tcb_asociado = list_remove(pcb->lista_tcb, 0);
     int prioridad = tcb_asociado->prioridad;
@@ -184,6 +189,14 @@ void reintentar_inicializar_pcb_en_espera(t_pcb* pcb){
             reintentar_inicializar_pcb_en_espera(pcb);
         }
     free(respuesta_memoria);
+}*/
+
+t_pcb* remover_de_new(){
+    pthread_mutex_lock(&mutex_cola_new);
+    t_pcb* pcb = queue_pop(cola_new);
+    pthread_mutex_unlock(&mutex_cola_new);
+
+    return pcb;
 }
 
 void poner_en_new(t_pcb* pcb){
@@ -231,7 +244,6 @@ void poner_en_exit(uint32_t pid, uint32_t tid){
     t_hilo_planificacion_destroy(hilo_a_eliminar);
 
     free(response_memoria);
-    sem_post(&aviso_exit_proceso);
 }
 
 void eliminar_tcb_de_pcb(t_hilo_planificacion* hilo){
@@ -1240,7 +1252,7 @@ void* syscall_process_exit(t_pid_tid pid_tid_recibido){
         abort();
     }
     log_info(kernel_log,"## Finaliza el proceso <%d>", pid_tid_recibido.pid);
-
+    sem_post(&aviso_exit_proceso);
     free(respuesta_memoria);
 }
 

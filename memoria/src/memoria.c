@@ -4,7 +4,7 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    memoria_log = iniciar_logger("./files/memoria_2.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
+    memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
 
     //memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
 
@@ -1127,7 +1127,7 @@ void liberar_hueco_dinamico(t_contexto_proceso* proceso){
         log_debug(memoria_log, "Estoy entre 2 bloques libres");
         consolidar_huecos(proceso_activo->inicio, 0);
         consolidar_huecos(proceso_activo->inicio + 1, proceso_activo->size);
-    } 
+    }
     else {
         log_debug(memoria_log, "No Tengo un hueco libre a los lados");
         t_hueco* hueco = crear_hueco(proceso_activo->inicio, proceso_activo->size);
