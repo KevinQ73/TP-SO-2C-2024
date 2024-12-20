@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    //kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
+    kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
 
-    kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
+    //kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
 
     kernel_config = iniciar_config(argv[3]);
 
@@ -492,11 +492,14 @@ t_hilo_planificacion* remover_de_ready(uint32_t pid, uint32_t tid, uint32_t prio
 
 t_hilo_planificacion* remover_de_block(uint32_t pid, uint32_t tid){
     t_hilo_planificacion* hilo_a_eliminar;
-    
+   
     pthread_mutex_lock(&mutex_cola_block);
         hilo_a_eliminar = thread_remove_by_tid(lista_t_hilos_bloqueados, pid, tid);
     pthread_mutex_unlock(&mutex_cola_block);
-
+    
+    
+//CAMBIO
+    //if(hilo_a_eliminar )
     return hilo_a_eliminar;
 }
 
@@ -598,13 +601,37 @@ t_hilo_planificacion* thread_find_by_tid(t_list* lista, t_pid_tid pid_tid){
 	return list_find(lista, _list_contains);
 }
 
-t_hilo_planificacion* thread_remove_by_tid(t_list* lista, uint32_t pid, uint32_t tid){
+
+//CAMBIO
+/*t_hilo_planificacion* thread_remove_by_tid(t_list* lista, uint32_t pid, uint32_t tid){
     bool _list_contains(void* ptr) {
 	    t_hilo_planificacion* hilo = (t_hilo_planificacion*) ptr;
 	    return ((tid == hilo->tid_asociado) &&(pid == hilo->pid_padre));
 	}
 	return list_remove_by_condition(lista, _list_contains);
+}*/
+
+t_hilo_planificacion* thread_remove_by_tid(t_list* lista, uint32_t pid, uint32_t tid) {
+   
+    // Predicado para encontrar el elemento
+    bool _list_contains(void* ptr) {
+        t_hilo_planificacion* hilo = (t_hilo_planificacion*) ptr;
+        
+        return ((tid == hilo->tid_asociado) && (pid == hilo->pid_padre));
+    }
+
+    // Remover el elemento que cumpla la condición
+    t_hilo_planificacion* hilo_a_eliminar = list_remove_by_condition(lista, _list_contains);
+
+    // Si no se encuentra el hilo, hacer log y retornar NULL
+    if (!hilo_a_eliminar) {
+        log_debug(kernel_log, "No se encontró un elemento que coincida con PID=%u y TID=%u", pid, tid);
+        return NULL;  // Retornar NULL si no se encontró el elemento
+    }
+
+    return hilo_a_eliminar;  
 }
+
 
 void liberar_hilos_bloqueados_por_tid(t_hilo_planificacion* hilo){
     bool hilos_desbloqueados = false;
@@ -1420,8 +1447,12 @@ void* syscall_dump_memory(t_pid_tid pid_tid){
 
     if(strcmp(respuesta_memoria, "OK") == 0){
         t_hilo_planificacion* hilo_a_desbloquear = remover_de_block(pid_tid.pid, pid_tid.tid);
-        poner_en_ready(hilo_a_desbloquear);
-        enviar_aviso_syscall("DUMP_MEMORY", &codigo);
+        //CAMBIO: ANTES NO ESTABA EL IF
+        if(hilo_a_desbloquear != NULL){
+            poner_en_ready(hilo_a_desbloquear);
+           // enviar_aviso_syscall("DUMP_MEMORY", &codigo);
+        }
+         enviar_aviso_syscall("DUMP_MEMORY", &codigo);
     }else{
         enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
