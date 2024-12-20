@@ -1083,10 +1083,28 @@ void liberar_hueco_bitmap_fijas(uint32_t base){
 void liberar_hueco_dinamico(t_contexto_proceso* proceso){
     t_proceso* proceso_activo = obtener_proceso_activo(proceso->pid);
 
-    if (byte_en_hueco((proceso_activo->inicio - 1)) && byte_en_hueco((proceso_activo->inicio + proceso_activo->size + 1)))
+    // if (byte_en_hueco(proceso_activo->inicio - 1) == true && byte_en_hueco(proceso_activo->inicio + proceso_activo->size + 1) == true)
+    // {
+    //     log_debug(memoria_log, "TENGO ESPACIO PARA CONSOLIDAR");
+    //     consolidar_huecos(proceso_activo->inicio, proceso_activo->size);
+    // } else {
+    //     t_hueco* hueco = crear_hueco(proceso_activo->inicio, proceso_activo->size);
+    //     agregar_hueco(hueco);
+    // }
+    if (byte_en_hueco((proceso_activo->inicio - 1)) && !byte_en_hueco((proceso_activo->inicio + proceso_activo->size + 1)))
     {
-        consolidar_huecos(proceso_activo->inicio, proceso_activo->size);
-    } else {
+        log_debug(memoria_log, "Tengo un hueco libre a izquierda");
+        consolidar_huecos(proceso_activo->inicio, 0);
+    }else if(!byte_en_hueco((proceso_activo->inicio - 1)) && byte_en_hueco((proceso_activo->inicio + proceso_activo->size + 1))){
+        log_debug(memoria_log, "Tengo un hueco libre a derecha");
+        consolidar_huecos(proceso_activo->inicio + 1, proceso_activo->size);
+    }else if(byte_en_hueco((proceso_activo->inicio - 1)) && byte_en_hueco((proceso_activo->inicio + proceso_activo->size + 1))){
+        log_debug(memoria_log, "Estoy entre 2 bloques libres");
+        consolidar_huecos(proceso_activo->inicio, 0);
+        consolidar_huecos(proceso_activo->inicio + 1, proceso_activo->size);
+    } 
+    else {
+        log_debug(memoria_log, "No Tengo un hueco libre a los lados");
         t_hueco* hueco = crear_hueco(proceso_activo->inicio, proceso_activo->size);
         agregar_hueco(hueco);
     }
@@ -1105,15 +1123,18 @@ void consolidar_huecos(uint32_t inicio, uint32_t size){
 bool byte_en_hueco(uint32_t byte){
     bool _list_contains(void* ptr){
         t_hueco* hueco = (t_hueco*) ptr;
-	    return (hueco->inicio < byte < (hueco->inicio + hueco->size));
+
+	    return (hueco->inicio < byte && byte < (hueco->inicio + hueco->size));
 	}
+    
+    
 	return list_any_satisfy(lista_huecos_disponibles, _list_contains);
 }
 
 t_hueco* remover_hueco_que_contiene_byte(uint32_t byte){
     bool _list_contains(void* ptr){
         t_hueco* hueco = (t_hueco*) ptr;
-	    return (hueco->inicio < byte < (hueco->inicio + hueco->size));
+	    return (hueco->inicio < byte && byte < (hueco->inicio + hueco->size));
 	}
 	return list_remove_by_condition(lista_huecos_disponibles, _list_contains);
 }
