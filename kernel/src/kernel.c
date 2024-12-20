@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
+    //kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
 
-    //kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
+    kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
 
     kernel_config = iniciar_config(argv[3]);
 
@@ -271,10 +271,60 @@ void log_tids_de_lista(t_list* lista_tcb) {
         }
     }
 
-    log_debug(kernel_log, "%s", tids);
+    log_debug(kernel_log, "%s\n", tids);
     free(tids); // Liberar la memoria utilizada por la cadena dinámica.
 }
 
+void log_mutex_de_procesos(t_pcb* pcb) {
+    if (list_is_empty(pcb->mutex_asociados)) {
+        log_debug(kernel_log, "La lista_mutex_asociados está vacía.");
+        return;
+    }
+
+    char* mutexs = string_new(); // Inicializamos una cadena dinámica para almacenar los TIDs.
+    string_append(&mutexs, "MUTEXs en lista_mutex_asociados: ");
+
+    for (int i = 0; i < list_size(pcb->mutex_asociados); i++) {
+        t_mutex* mutex = list_get(pcb->mutex_asociados, i);
+        if (mutex != NULL) {
+            char* mutex_tid_tomado = string_from_format("%d", mutex->tid_tomado);
+            string_append(&mutexs, mutex->nombre);
+            string_append(&mutexs, " ");
+            string_append(&mutexs, mutex_tid_tomado);
+            string_append(&mutexs, " "); // Separador entre TIDs.
+            free(mutex_tid_tomado);
+        }
+    }
+
+    log_debug(kernel_log, "%s\n", mutexs);
+    free(mutexs); // Liberar la memoria utilizada por la cadena dinámica.
+}
+
+void log_hilos_bloqueados_por_mutex(t_pcb* pcb, char* name) {
+    if (list_is_empty(pcb->mutex_asociados)) {
+        log_debug(kernel_log, "La lista_tid_bloqueados está vacía.");
+        return;
+    }
+
+    char* mutexs = string_new(); // Inicializamos una cadena dinámica para almacenar los TIDs.
+    string_append(&mutexs, "TIDs bloqueados por el MUTEX '");
+    string_append(&mutexs, name);
+    string_append(&mutexs, "': ");
+
+    t_mutex* mutex = find_mutex_by_name(pcb->mutex_asociados, name);
+    if (mutex != NULL) {
+        for (int i = 0; i < list_size(mutex->cola_bloqueados); i++) {
+            uint32_t tid_bloqueado = list_get(mutex->cola_bloqueados, i);
+            char* mutex_tid_tomado = string_from_format("%d", tid_bloqueado);
+            string_append(&mutexs, mutex_tid_tomado);
+            string_append(&mutexs, " - ");// Separador entre TIDs.
+            free(mutex_tid_tomado);
+        }
+    }
+
+    log_debug(kernel_log, "%s\n", mutexs);
+    free(mutexs); // Liberar la memoria utilizada por la cadena dinámica.
+}
 
 /*------------------------- PLANIFICADOR CORTO PLAZO ------------------------*/
 
@@ -724,7 +774,7 @@ t_thread_state* get_thread_blocked_by_tid(uint32_t pid, uint32_t tid_bloqueante)
 t_mutex* find_mutex_by_name(t_list* lista_de_mutex, char* name){
     bool _name_equals(void* ptr) {
         t_mutex* mutexAEncontrar = (t_mutex*) ptr;
-        return name == mutexAEncontrar->nombre;
+        return (strcmp(name, mutexAEncontrar->nombre) == 0);
     }
     return list_find(lista_de_mutex, _name_equals);
 }
@@ -732,7 +782,7 @@ t_mutex* find_mutex_by_name(t_list* lista_de_mutex, char* name){
 bool mutex_any_satisfy_by_name(t_list* lista_de_mutex, char* name){
     bool _name_equals(void* ptr) {
         t_mutex* mutexAEncontrar = (t_mutex*) ptr;
-        return name == mutexAEncontrar->nombre;
+        return (strcmp(name, mutexAEncontrar->nombre) == 0);
     }
     return list_any_satisfy(lista_de_mutex, _name_equals);
 }
@@ -740,7 +790,7 @@ bool mutex_any_satisfy_by_name(t_list* lista_de_mutex, char* name){
 bool mutex_taken_by_tid(t_list* lista_de_mutex, uint32_t tid, char* name){
     bool _mutex_equals(void* ptr) {
         t_mutex* mutexAEncontrar = (t_mutex*) ptr;
-        return (name == mutexAEncontrar->nombre) && (tid == mutexAEncontrar->tid_tomado);
+        return (strcmp(name, mutexAEncontrar->nombre) == 0)&&(tid == mutexAEncontrar->tid_tomado);
     }
     return list_any_satisfy(lista_de_mutex, _mutex_equals);
 }
@@ -763,19 +813,21 @@ bool is_mutex_taken_by_tid(uint32_t pid, uint32_t tid, char* nombre){
     return bool_mutex;
 }
 
-int is_mutex_taken(uint32_t pid, char* nombre){
+bool is_mutex_taken(uint32_t pid, char* nombre){
     pthread_mutex_lock(&mutex_lista_procesos_ready);
         t_pcb* pcb = active_process_find_by_pid(pid);
-        uint32_t valor_mutex = mutex_value(pcb->mutex_asociados, nombre);
+        int valor_mutex = mutex_value_tid(pcb->mutex_asociados, nombre);
+        log_debug(kernel_log, "IS MUTEX TAKEN VALUE: %d", valor_mutex);
     pthread_mutex_unlock(&mutex_lista_procesos_ready);
     
-    return valor_mutex;
+    return (valor_mutex >= 0);
 }
 
 void block_thread_mutex(uint32_t pid, uint32_t tid, char* nombre){
     pthread_mutex_lock(&mutex_lista_procesos_ready);
         t_pcb* pcb = active_process_find_by_pid(pid);
         block_tid_by_mutex(pcb->mutex_asociados, nombre, tid);
+        log_hilos_bloqueados_por_mutex(pcb, nombre);
     pthread_mutex_unlock(&mutex_lista_procesos_ready);
 }
 
@@ -783,6 +835,7 @@ void unblock_thread_mutex(uint32_t pid, char* nombre){
     pthread_mutex_lock(&mutex_lista_procesos_ready);
         t_pcb* pcb = active_process_find_by_pid(pid);
         uint32_t tid = unblock_tid_by_mutex(pcb->mutex_asociados, nombre);
+        log_mutex_de_procesos(pcb);
     pthread_mutex_unlock(&mutex_lista_procesos_ready);
 }
 
@@ -790,55 +843,66 @@ void lock_mutex_to_thread(uint32_t pid, uint32_t tid, char* nombre){
     pthread_mutex_lock(&mutex_lista_procesos_ready);
         t_pcb* pcb = active_process_find_by_pid(pid);
         add_tid_to_mutex(pcb->mutex_asociados, nombre, tid);
+        log_mutex_de_procesos(pcb);
     pthread_mutex_unlock(&mutex_lista_procesos_ready);
 }
 
-void unlock_mutex_to_thread(uint32_t pid, char* nombre){
+int unlock_mutex_to_thread(uint32_t pid, char* nombre){
     pthread_mutex_lock(&mutex_lista_procesos_ready);
         t_pcb* pcb = active_process_find_by_pid(pid);
-        left_tid_to_mutex(pcb->mutex_asociados, nombre);
+        log_mutex_de_procesos(pcb);
+        int tid = unblock_tid_by_mutex(pcb->mutex_asociados, nombre);
+        if (tid != -2)
+        {
+            log_mutex_de_procesos(pcb);
+        }
 
-        uint32_t tid = unblock_tid_by_mutex(pcb->mutex_asociados, nombre);
-        add_tid_to_mutex(pcb->mutex_asociados, nombre, tid);
     pthread_mutex_unlock(&mutex_lista_procesos_ready);
+
+    return tid;
 }
 
 void add_mutex_to_process(t_mutex* mutex, uint32_t pid){
     pthread_mutex_lock(&mutex_lista_procesos_ready);
         t_pcb* pcb = active_process_find_by_pid(pid);
         list_add(pcb->mutex_asociados, mutex);
+
+        log_mutex_de_procesos(pcb);
     pthread_mutex_unlock(&mutex_lista_procesos_ready);
 }
 
 void block_tid_by_mutex(t_list* lista_de_mutex, char* nombre, uint32_t tid){
     t_mutex* mutex = find_mutex_by_name(lista_de_mutex, nombre);
-    queue_push(mutex->cola_bloqueados, &tid);
+    log_debug(kernel_log, "MUTEX HALLADO block_tid_by_mutex %s", mutex->nombre);
+    list_add(mutex->cola_bloqueados, tid);
 }
 
-uint32_t unblock_tid_by_mutex(t_list* lista_de_mutex, char* nombre){
+int unblock_tid_by_mutex(t_list* lista_de_mutex, char* nombre){
     t_mutex* mutex = find_mutex_by_name(lista_de_mutex, nombre);
-    uint32_t tid = *(uint32_t*)queue_pop(mutex->cola_bloqueados);
 
-    log_debug(kernel_log, "## TID POP de la cola de bloqueados del mutex: %d", tid);
-
-    return tid;
+    if (list_is_empty(mutex->cola_bloqueados))
+    {
+        mutex->tid_tomado = -1;
+        log_debug(kernel_log, "MUTEX HALLADO unblock_tid_by_mutex %s - MUTEX Libre de ser asociado a un TID", mutex->nombre);
+        return -2;
+    } else {
+        uint32_t tid = (uint32_t)list_remove(mutex->cola_bloqueados, 0);
+        mutex->tid_tomado = tid;
+        log_debug(kernel_log, "MUTEX HALLADO unblock_tid_by_mutex %s - Nuevo TID asociado al MUTEX:%d ", mutex->nombre, tid);
+        return tid;
+    }
 }
 
 void add_tid_to_mutex(t_list* lista_de_mutex, char* nombre, uint32_t tid){
     t_mutex* mutex = find_mutex_by_name(lista_de_mutex, nombre);
+    log_debug(kernel_log, "MUTEX HALLADO add_tid_to_mutex %s", mutex->nombre);
     mutex->tid_tomado = tid;
-    mutex->valor = 0;
 }
 
-void left_tid_to_mutex(t_list* lista_de_mutex, char* nombre){
-    t_mutex* mutex = find_mutex_by_name(lista_de_mutex, nombre);
-    mutex->tid_tomado = -1;
-    mutex->valor = 1;
-}
-
-uint32_t mutex_value(t_list* lista_de_mutex, char* name){
+int mutex_value_tid(t_list* lista_de_mutex, char* name){
     t_mutex* mutex = find_mutex_by_name(lista_de_mutex, name);
-    return mutex->valor;
+    log_debug(kernel_log, "MUTEX HALLADO mutex_value_tid %s", mutex->nombre);
+    return mutex->tid_tomado;
 }
 
 /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
@@ -884,6 +948,8 @@ t_hilo_planificacion* desalojar_hilo(){
                 pthread_cancel(hilo_quantum);
             }
     pthread_mutex_unlock(&mutex_hilo_exec);
+
+    log_info(kernel_log, "## Hilo desalojado: (%d:%d)", hilo->pid_padre, hilo->tid_asociado);
 
     return hilo;
 }
@@ -1043,8 +1109,6 @@ void* operacion_a_atender(int operacion){
         }else{
             log_debug(kernel_log, "NO EJECUTA PROCESS_EXIT POR QUE NO ES TID 0");
         }
-        
-       
         break;
 
     case THREAD_CREATE:
@@ -1084,17 +1148,33 @@ void* operacion_a_atender(int operacion){
         break;
 
     case DESALOJO_PID_TID_CPU:
-        hilo_en_ejecucion = desalojar_hilo();
-        log_info(kernel_log, "## [CMN](<%d>:<%d>) Desalojado por fin de Quantum", hilo_en_ejecucion->pid_padre, hilo_en_ejecucion->tid_asociado);
-        poner_en_ready(hilo_en_ejecucion);
-        break;
+
+        if (es_hilo_ejecutando(pid_tid_recibido.pid, pid_tid_recibido.tid))
+        {
+            hilo_en_ejecucion = desalojar_hilo();
+            log_info(kernel_log, "## [CMN](<%d>:<%d>) Desalojado por fin de Quantum", hilo_en_ejecucion->pid_padre, hilo_en_ejecucion->tid_asociado);
+            poner_en_ready(hilo_en_ejecucion);
+            break;
+        } else {
+            log_warning(kernel_log, "## Se solicitó desalojar por QUANTUM el hilo (%d:%d) pero no es el que está ejecutando", pid_tid_recibido.pid, pid_tid_recibido.tid);
+            break;
+        }
 
     default:
         log_warning(kernel_log, "## Error en la OP enviada desde CPU");
         hilo_en_ejecucion = NULL;
+        sem_post(&kernel_activo);
         break;
     }
     buffer_destroy(buffer);
+}
+
+bool es_hilo_ejecutando(uint32_t pid, uint32_t tid){
+    pthread_mutex_lock(&mutex_hilo_exec);
+    t_hilo_planificacion* hilo = list_get(lista_hilo_en_ejecucion, 0);
+    pthread_mutex_unlock(&mutex_hilo_exec);
+
+    return ((hilo->pid_padre == pid) && (hilo->tid_asociado == tid));
 }
 
 void* syscall_process_create(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1259,19 +1339,21 @@ void* syscall_mutex_lock(t_buffer* buffer, t_pid_tid pid_tid){
     {
         if (is_mutex_taken(pid_tid.pid, nombre_mutex))
         {
-            block_thread_mutex(pid_tid.pid, pid_tid.tid, nombre_mutex);
             t_hilo_planificacion* hilo = desalojar_hilo();
             poner_en_block(hilo);
-            enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
+            block_thread_mutex(pid_tid.pid, pid_tid.tid, nombre_mutex);
+            enviar_aviso_syscall("REPLANIFICACION_KERNEL_MUTEX_TOMADO", &codigo);
             log_info(kernel_log, "## (<%d>:<%d>) - Bloqueado por: <MUTEX>", pid_tid.pid, pid_tid.tid);
         } else {
             enviar_aviso_syscall("MUTEX_TOMADO", &codigo);
             lock_mutex_to_thread(pid_tid.pid, pid_tid.tid, nombre_mutex);
         }
     } else {
-        enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
+        enviar_aviso_syscall("REPLANIFICACION_KERNEL_NO_EXISTE_MUTEX", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
+
+    free(nombre_mutex);
 }
 
 void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
@@ -1285,9 +1367,17 @@ void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
     {
         if (is_mutex_taken_by_tid(pid_tid.pid, pid_tid.tid, nombre_mutex))
         {
-            unlock_mutex_to_thread(pid_tid.pid, nombre_mutex);
-            t_hilo_planificacion* hilo = remover_de_block(pid_tid.pid, pid_tid.tid);
-            poner_en_ready(hilo);
+            int tid_a_desbloquear = unlock_mutex_to_thread(pid_tid.pid, nombre_mutex);
+
+            if (tid_a_desbloquear == -2)
+            {
+                log_debug(kernel_log, "MUTEX LIBERADO");
+            } else {
+                log_debug(kernel_log, "TID A DESBLOQUEAR: %d", tid_a_desbloquear);
+                t_hilo_planificacion* hilo = remover_de_block(pid_tid.pid, tid_a_desbloquear);
+                poner_en_ready(hilo);
+            }
+            
             enviar_aviso_syscall("HILO_DESBLOQUEADO", &codigo);
         } else {
             log_debug(kernel_log, "## El MUTEX no está asignado al hilo (%d,%d), continuo ejecución", pid_tid.pid, pid_tid.tid);
@@ -1297,6 +1387,8 @@ void* syscall_mutex_unlock(t_buffer* buffer, t_pid_tid pid_tid){
         enviar_aviso_syscall("REPLANIFICACION_KERNEL", &codigo);
         poner_en_exit(pid_tid.pid, pid_tid.tid);
     }
+
+    free(nombre_mutex);
 }
 
 void* syscall_dump_memory(t_pid_tid pid_tid){
@@ -1350,7 +1442,7 @@ void pcb_destroy(t_pcb* pcb){
 }
 
 void process_mutex_destroy(t_mutex* mutex){
-    queue_destroy(mutex->cola_bloqueados);
+    list_destroy(mutex->cola_bloqueados);
     free(mutex->nombre);
     free(mutex);
 }

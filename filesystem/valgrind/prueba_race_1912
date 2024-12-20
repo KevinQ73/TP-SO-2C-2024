@@ -1,0 +1,6 @@
+==123174== Memcheck, a memory error detector
+==123174== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==123174== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==123174== Command: ./bin/filesystem ./files/race_condition.config
+==123174== Parent PID: 80817
+==123174== 

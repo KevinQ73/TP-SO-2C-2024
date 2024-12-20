@@ -77,9 +77,8 @@ t_mutex* create_mutex(char* nombreMutex){
     t_mutex* mutex = malloc(sizeof(t_mutex));
 
     mutex->nombre = nombreMutex;
-    mutex->valor = 1;
     mutex->tid_tomado = -1;
-    mutex->cola_bloqueados= queue_create();
+    mutex->cola_bloqueados= list_create();
 
     return mutex;
 }

@@ -117,11 +117,10 @@
 
     typedef struct{
         char* nombre;
-        uint32_t valor;
         int tid_tomado;
-        t_queue* cola_bloqueados;
+        t_list* cola_bloqueados;
     }t_mutex;
-
+    
     typedef struct{
         uint32_t pid;
         uint32_t base;

@@ -1,0 +1,86 @@
+==123175== Memcheck, a memory error detector
+==123175== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==123175== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==123175== Command: ./bin/memoria ./files/race_condition.config
+==123175== Parent PID: 81282
+==123175== 
+==123175== Thread 4:
+==123175== Conditional jump or move depends on uninitialised value(s)
+==123175==    at 0x10D075: buscar_primer_bloque (memoria.c:753)
+==123175==    by 0x10CF75: asignacion_fija (memoria.c:730)
+==123175==    by 0x10CF22: hay_particion_disponible (memoria.c:720)
+==123175==    by 0x10B92F: crear_proceso (memoria.c:247)
+==123175==    by 0x10B4CD: atender_solicitudes_kernel (memoria.c:154)
+==123175==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==123175==    by 0x499AA03: clone (clone.S:100)
+==123175==  Uninitialised value was created by a stack allocation
+==123175==    at 0x49060F3: __futex_abstimed_wait_common64 (futex-internal.c:57)
+==123175==    by 0x49060F3: __futex_abstimed_wait_common (futex-internal.c:87)
+==123175==    by 0x49060F3: __futex_abstimed_wait_cancelable64 (futex-internal.c:139)
+==123175== 
+==123175== 
+==123175== HEAP SUMMARY:
+==123175==     in use at exit: 5,389 bytes in 1,356 blocks
+==123175==   total heap usage: 71,518 allocs, 70,162 frees, 2,439,429 bytes allocated
+==123175== 
+==123175== Thread 1:
+==123175== 10 bytes in 10 blocks are definitely lost in loss record 9 of 37
+==123175==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123175==    by 0x491D58E: strdup (strdup.c:42)
+==123175==    by 0x486E5FD: string_duplicate (string.c:43)
+==123175==    by 0x486E719: string_new (string.c:60)
+==123175==    by 0x10B44F: atender_solicitudes_kernel (memoria.c:142)
+==123175==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==123175==    by 0x499AA03: clone (clone.S:100)
+==123175== 
+==123175== 80 (48 direct, 32 indirect) bytes in 2 blocks are definitely lost in loss record 25 of 37
+==123175==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123175==    by 0x10C075: crear_contexto_proceso (memoria.c:431)
+==123175==    by 0x10B958: crear_proceso (memoria.c:251)
+==123175==    by 0x10B4CD: atender_solicitudes_kernel (memoria.c:154)
+==123175==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==123175==    by 0x499AA03: clone (clone.S:100)
+==123175== 
+==123175== 272 bytes in 1 blocks are possibly lost in loss record 32 of 37
+==123175==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123175==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==123175==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==123175==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==123175==    by 0x490A7B4: allocate_stack (allocatestack.c:430)
+==123175==    by 0x490A7B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==123175==    by 0x10B2F2: atender_solicitudes (memoria.c:106)
+==123175==    by 0x10AEBF: main (memoria.c:32)
+==123175== 
+==123175== 631 bytes in 631 blocks are definitely lost in loss record 35 of 37
+==123175==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123175==    by 0x491D58E: strdup (strdup.c:42)
+==123175==    by 0x486E5FD: string_duplicate (string.c:43)
+==123175==    by 0x486E719: string_new (string.c:60)
+==123175==    by 0x10CAEA: buscar_instruccion (memoria.c:620)
+==123175==    by 0x10BD80: atender_cpu (memoria.c:354)
+==123175==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==123175==    by 0x499AA03: clone (clone.S:100)
+==123175== 
+==123175== 1,262 bytes in 631 blocks are definitely lost in loss record 37 of 37
+==123175==    at 0x484DCD3: realloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123175==    by 0x486E64B: string_append (string.c:47)
+==123175==    by 0x486F461: _string_append_with_format_list (string.c:312)
+==123175==    by 0x486E83F: string_from_vformat (string.c:74)
+==123175==    by 0x486E7D0: string_from_format (string.c:67)
+==123175==    by 0x486E881: string_itoa (string.c:79)
+==123175==    by 0x10CAA9: buscar_instruccion (memoria.c:617)
+==123175==    by 0x10BD80: atender_cpu (memoria.c:354)
+==123175==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==123175==    by 0x499AA03: clone (clone.S:100)
+==123175== 
+==123175== LEAK SUMMARY:
+==123175==    definitely lost: 1,951 bytes in 1,274 blocks
+==123175==    indirectly lost: 32 bytes in 2 blocks
+==123175==      possibly lost: 272 bytes in 1 blocks
+==123175==    still reachable: 3,134 bytes in 79 blocks
+==123175==         suppressed: 0 bytes in 0 blocks
+==123175== Reachable blocks (those to which a pointer was found) are not shown.
+==123175== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==123175== 
+==123175== For lists of detected and suppressed errors, rerun with: -s
+==123175== ERROR SUMMARY: 7 errors from 6 contexts (suppressed: 0 from 0)

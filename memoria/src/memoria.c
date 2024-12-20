@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
+    //memoria_log = iniciar_logger("./files/memoria_2.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
 
-    //memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
+    memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
 
     memoria_config = iniciar_config(argv[1]);
 
@@ -395,11 +395,13 @@ void* atender_cpu(){
         case DESCONEXION:
             log_error(memoria_log, "## [MEMORIA:CPU] Desconexion de Memoria-Cpu");
             liberar_hilo_cpu = false;
+            sem_post(&memoria_activo);
             break;
 
         default:
             log_warning(memoria_log, "## [MEMORIA:CPU] Operacion desconocida de Memoria-Cpu");
             liberar_hilo_cpu = false;
+            sem_post(&memoria_activo);
             break;
         }
         buffer_destroy(buffer);

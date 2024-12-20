@@ -1,0 +1,56 @@
+==123177== Memcheck, a memory error detector
+==123177== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==123177== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==123177== Command: ./bin/cpu ./files/race_condition.config
+==123177== Parent PID: 81400
+==123177== 
+==123177== Invalid read of size 4
+==123177==    at 0x486E575: _isEnableLevelInLogger (log.c:157)
+==123177==    by 0x486E425: _log_write_in_level (log.c:121)
+==123177==    by 0x486E0B8: log_debug (log.c:89)
+==123177==    by 0x10BEE8: finalizar_cpu (cpu.c:88)
+==123177==    by 0x10BD5B: main (cpu.c:50)
+==123177==  Address 0x4aa104c is 12 bytes inside a block of size 32 free'd
+==123177==    at 0x484B27F: free (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123177==    by 0x486DF20: log_destroy (log.c:84)
+==123177==    by 0x10E147: eliminar_logger (files.c:17)
+==123177==    by 0x10BEA1: finalizar_cpu (cpu.c:82)
+==123177==    by 0x10BD5B: main (cpu.c:50)
+==123177==  Block was alloc'd at
+==123177==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123177==    by 0x486DE2C: log_create (log.c:54)
+==123177==    by 0x10E0F5: iniciar_logger (files.c:5)
+==123177==    by 0x10BB20: main (cpu.c:9)
+==123177== 
+==123177== 
+==123177== HEAP SUMMARY:
+==123177==     in use at exit: 1,760 bytes in 261 blocks
+==123177==   total heap usage: 65,200 allocs, 64,939 frees, 2,056,390 bytes allocated
+==123177== 
+==123177== 328 bytes in 82 blocks are definitely lost in loss record 1 of 2
+==123177==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123177==    by 0x10E697: buffer_read_string (serializacion.c:100)
+==123177==    by 0x10EC29: recibir_mensaje (serializacion.c:351)
+==123177==    by 0x10CF60: execute_write_mem (cpu.c:414)
+==123177==    by 0x10C71E: execute (cpu.c:274)
+==123177==    by 0x10C568: ejecutar_hilo (cpu.c:250)
+==123177==    by 0x10C01A: atender_puerto_dispatch (cpu.c:114)
+==123177==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==123177==    by 0x499AA03: clone (clone.S:100)
+==123177== 
+==123177== 1,432 bytes in 179 blocks are definitely lost in loss record 2 of 2
+==123177==    at 0x4848899: malloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==123177==    by 0x10AB61: recibir_paquete_kernel (utils-cpu.c:76)
+==123177==    by 0x10BF50: atender_puerto_dispatch (cpu.c:98)
+==123177==    by 0x4909AC2: start_thread (pthread_create.c:442)
+==123177==    by 0x499AA03: clone (clone.S:100)
+==123177== 
+==123177== LEAK SUMMARY:
+==123177==    definitely lost: 1,760 bytes in 261 blocks
+==123177==    indirectly lost: 0 bytes in 0 blocks
+==123177==      possibly lost: 0 bytes in 0 blocks
+==123177==    still reachable: 0 bytes in 0 blocks
+==123177==         suppressed: 0 bytes in 0 blocks
+==123177== 
+==123177== For lists of detected and suppressed errors, rerun with: -s
+==123177== ERROR SUMMARY: 3 errors from 3 contexts (suppressed: 0 from 0)

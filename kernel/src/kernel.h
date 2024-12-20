@@ -184,7 +184,7 @@
 
     bool is_mutex_taken_by_tid(uint32_t pid, uint32_t tid, char* nombre);
 
-    int is_mutex_taken(uint32_t pid, char* nombre);
+    bool is_mutex_taken(uint32_t pid, char* nombre);
 
     void block_thread_mutex(uint32_t pid, uint32_t tid, char* nombre);
 
@@ -192,19 +192,19 @@
 
     void lock_mutex_to_thread(uint32_t pid, uint32_t tid, char* nombre);
 
-    void unlock_mutex_to_thread(uint32_t pid, char* nombre);
+    int unlock_mutex_to_thread(uint32_t pid, char* nombre);
 
     void add_mutex_to_process(t_mutex* mutex, uint32_t pid);
 
     void block_tid_by_mutex(t_list* lista_de_mutex, char* nombre, uint32_t tid);
 
-    uint32_t unblock_tid_by_mutex(t_list* lista_de_mutex, char* nombre);
+    int unblock_tid_by_mutex(t_list* lista_de_mutex, char* nombre);
 
     void add_tid_to_mutex(t_list* lista_de_mutex, char* nombre, uint32_t tid);
 
     void left_tid_to_mutex(t_list* lista_de_mutex, char* nombre);
 
-    uint32_t mutex_value(t_list* lista_de_mutex, char* name);
+    int mutex_value_tid(t_list* lista_de_mutex, char* name);
 
     /*---------------------------- FUNCIONES EXECUTE ----------------------------*/
 
@@ -287,5 +287,13 @@
     void signal_handler(int sig);
 
     void iniciar_quantum();
+
+    void log_tids_de_lista(t_list* lista_tcb);
+
+    void log_mutex_de_procesos(t_pcb* pcb);
+
+    void log_hilos_bloqueados_por_mutex(t_pcb* pcb, char* name);
+
+    bool es_hilo_ejecutando(uint32_t pid, uint32_t tid);
     
 #endif /* KERNEL_H_ */
