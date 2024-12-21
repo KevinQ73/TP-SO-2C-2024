@@ -155,7 +155,7 @@
 
     void liberar_hueco_dinamico(t_contexto_proceso* proceso);
 
-    void consolidar_huecos(uint32_t inicio, uint32_t size);
+    t_hueco* consolidar_huecos(uint32_t inicio, uint32_t size);
 
     bool byte_en_hueco(uint32_t byte);
 
@@ -163,6 +163,9 @@
 
     void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura);
 
+    int asignar_particion_dinamica(t_hueco* hueco, uint32_t pid, uint32_t size);
+
+    void particionar_hueco(t_hueco* hueco_padre, t_proceso* proceso_activo);
 // WORKING ZONE
 
 void imprimir_estado_huecos();
