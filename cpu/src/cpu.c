@@ -103,7 +103,6 @@ void atender_puerto_dispatch(){
             cpu_replanificar = false;
             false_quantum();
             desalojo_kernel = false;
-            free(pid_tid_recibido);
         } else {
             log_error(cpu_log, "## PID TID RECIBIDO ES NULL");
         }

@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-      "args": ["./files/particiones_fijas.config"],
+      "args": ["./files/prueba_planificacion.config"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],

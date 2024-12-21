@@ -268,7 +268,7 @@ bool crear_proceso(uint32_t pid, uint32_t size){
         pthread_mutex_lock(&contexto_ejecucion_procesos);
             dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
         pthread_mutex_unlock(&contexto_ejecucion_procesos);
-        free(contexto_proceso);
+        //free(contexto_proceso);
         free(key);
         memoria_asignada = true;
     } else {
@@ -289,8 +289,8 @@ void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path){
     dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
 
-    free(contexto_proceso);
-    free(contexto_hilo);
+    //free(contexto_proceso);
+    //free(contexto_hilo);
     free(key);
 }
 
@@ -308,8 +308,8 @@ void* finalizar_hilo(uint32_t pid, uint32_t tid){
 
     thread_context_destroy(hilo_a_finalizar);
 
-    free(contexto_padre);
-    free(hilo_a_finalizar);
+    //free(contexto_padre);
+    //free(hilo_a_finalizar);
     log_info(memoria_log, "## [MEMORIA:KERNEL] ## Hilo <Destruido> - (PID:TID) - (<%d>:<%d>). Cerrando FD del socket.\n", pid, tid);
 
     return NULL;
@@ -375,7 +375,7 @@ void* atender_cpu(){
         	char* instruccion = buscar_instruccion(pid_tid_recibido.pid, pid_tid_recibido.tid, programCounter);
       	    log_info(memoria_log, "## Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: %s", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
             enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
-            free(instruccion);
+            //free(instruccion);
         	break;
 
         case WRITE_MEM:
