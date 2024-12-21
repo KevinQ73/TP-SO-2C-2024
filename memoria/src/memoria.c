@@ -638,7 +638,6 @@ char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
     } else {
         instruccion = "NO_INSTRUCCION";
     }
-
     //free(key);
     return instruccion;
 }
@@ -1116,33 +1115,57 @@ void liberar_hueco_dinamico(t_contexto_proceso* proceso){
     //     t_hueco* hueco = crear_hueco(proceso_activo->inicio, proceso_activo->size);
     //     agregar_hueco(hueco);
     // }
+
+    t_hueco* hueco_izquierda;
+    t_hueco* hueco_derecha;
+    t_hueco* hueco_consolidado;
+
+
     if (byte_en_hueco((proceso_activo->inicio - 1)) && !byte_en_hueco((proceso_activo->inicio + proceso_activo->size + 1)))
     {
         log_debug(memoria_log, "Tengo un hueco libre a izquierda");
-        consolidar_huecos(proceso_activo->inicio, 0);
+        hueco_izquierda = remover_hueco_que_contiene_byte(proceso_activo->inicio -1);
+        hueco_consolidado = consolidar_huecos(hueco_izquierda->inicio, (hueco_izquierda->size + proceso_activo->size));
+        agregar_hueco(hueco_consolidado);
+        free(hueco_izquierda);
+
     }else if(!byte_en_hueco((proceso_activo->inicio - 1)) && byte_en_hueco((proceso_activo->inicio + proceso_activo->size + 1))){
         log_debug(memoria_log, "Tengo un hueco libre a derecha");
-        consolidar_huecos(proceso_activo->inicio + 1, proceso_activo->size);
+        hueco_derecha = remover_hueco_que_contiene_byte(proceso_activo->inicio + proceso_activo->size + 1);
+        hueco_consolidado = consolidar_huecos(proceso_activo->inicio, (proceso_activo->size + hueco_derecha->size));
+        agregar_hueco(hueco_consolidado);
+        free(hueco_derecha);
+
     }else if(byte_en_hueco((proceso_activo->inicio - 1)) && byte_en_hueco((proceso_activo->inicio + proceso_activo->size + 1))){
         log_debug(memoria_log, "Estoy entre 2 bloques libres");
-        consolidar_huecos(proceso_activo->inicio, 0);
-        consolidar_huecos(proceso_activo->inicio + 1, proceso_activo->size);
+
+        hueco_izquierda = remover_hueco_que_contiene_byte(proceso_activo->inicio -1);
+        hueco_derecha = remover_hueco_que_contiene_byte(proceso_activo->inicio + proceso_activo->size + 1);
+
+        hueco_consolidado = consolidar_huecos(hueco_izquierda->inicio, (hueco_izquierda->size + proceso_activo->size + hueco_derecha->size));
+        agregar_hueco(hueco_consolidado);
+        free(hueco_izquierda);
+        free(hueco_derecha);
     }
     else {
         log_debug(memoria_log, "No Tengo un hueco libre a los lados");
         t_hueco* hueco = crear_hueco(proceso_activo->inicio, proceso_activo->size);
         agregar_hueco(hueco);
     }
-
     process_context_destroy(proceso);
 }
 
-void consolidar_huecos(uint32_t inicio, uint32_t size){
+t_hueco* consolidar_huecos(uint32_t inicio, uint32_t size){
+    t_hueco* hueco_consolidado = crear_hueco(inicio, size);
+
+    return hueco_consolidado;
+    /*
     t_hueco* hueco_izquierda = remover_hueco_que_contiene_byte(inicio -1);
     t_hueco* hueco_derecha = remover_hueco_que_contiene_byte(inicio + size + 1);
 
     t_hueco* hueco_consolidado = crear_hueco(hueco_izquierda->inicio, (hueco_derecha->inicio + hueco_derecha->size));
     agregar_hueco(hueco_consolidado);
+    */
 }
 
 bool byte_en_hueco(uint32_t byte){
