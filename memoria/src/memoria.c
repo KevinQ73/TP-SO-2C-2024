@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
+    //memoria_log = iniciar_logger("./files/memoria.log", "MEMORIA", 1, LOG_LEVEL_DEBUG);
 
-    //memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
+    memoria_log = iniciar_logger("./files/memoria_obligatorio.log", "MEMORIA", 1, LOG_LEVEL_INFO);
 
     memoria_config = iniciar_config(argv[1]);
 
@@ -360,7 +360,7 @@ void* atender_cpu(){
             actualizar_contexto_ejecucion(contexto_recibido, pid_tid_recibido.pid, pid_tid_recibido.tid);
             sem_post(&actualizar_contexto);
             log_info(memoria_log, "## [MEMORIA:CPU] Contexto <Actualizado> - (PID:TID) - (<%d>:<%d>)", pid_tid_recibido.pid, pid_tid_recibido.tid);
-            escribir_en_memoria(contexto_recibido, tamanio_contexto, contexto_recibido->base);
+            //escribir_en_memoria(contexto_recibido, tamanio_contexto, contexto_recibido->base);
             enviar_mensaje("OK_CONTEXTO", fd_conexion_cpu, memoria_log);
             free(contexto_recibido);
             break;
@@ -413,7 +413,7 @@ void* atender_cpu(){
 
             void* datos_leidos = leer_de_memoria(4, direccion_fisica);
             int valor_leido = *(int*)datos_leidos;
-            log_warning(memoria_log, "VALOR LEÍDO memoria %d", valor_leido);
+            log_debug(memoria_log, "VALOR LEÍDO memoria %d", valor_leido);
 
             enviar_datos_memoria(datos_leidos, 4);
 
@@ -421,13 +421,13 @@ void* atender_cpu(){
             break;
 
         case DESCONEXION:
-            log_error(memoria_log, "## [MEMORIA:CPU] Desconexion de Memoria-Cpu");
+            log_debug(memoria_log, "## [MEMORIA:CPU] Desconexion de Memoria-Cpu");
             liberar_hilo_cpu = false;
             sem_post(&memoria_activo);
             break;
 
         default:
-            log_warning(memoria_log, "## [MEMORIA:CPU] Operacion desconocida de Memoria-Cpu");
+            log_debug(memoria_log, "## [MEMORIA:CPU] Operacion desconocida de Memoria-Cpu");
             liberar_hilo_cpu = false;
             sem_post(&memoria_activo);
             break;

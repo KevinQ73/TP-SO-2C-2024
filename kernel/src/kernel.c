@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
+    //kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
 
-    //kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
+    kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
 
     kernel_config = iniciar_config(argv[3]);
 
@@ -364,14 +364,14 @@ void* planificador_corto_plazo(){
                     operacion_a_atender(operacion);
                 }
             } else {
-                log_info(kernel_log, "[CMN] No hay más hilos para planificar");
+                log_debug(kernel_log, "[CMN] No hay más hilos para planificar");
                 bool verificacion = verificar_cola_block();
 
                 if (verificacion)
                 {
                     sem_wait(&hay_hilos_en_block);
                 } else {
-                    log_info(kernel_log, "[CMN] Tampoco hay más hilos bloqueados. CIerro Kernel");
+                    log_info(kernel_log, "[CMN] Cierro Kernel");
                     finalizar_corto_plazo = true;
                 }                
             }   
@@ -382,7 +382,7 @@ void* planificador_corto_plazo(){
                 hilo_desalojado = false;
                 ejecutar_hilo(hilo_en_ejecucion);
             } else {
-                log_info(kernel_log, "No hay más hilos para planificar, cierro modulo KERNEL");
+                log_info(kernel_log, "[CMN] Cierro Kernel");
                 finalizar_corto_plazo = true;
             }
         }
@@ -1219,7 +1219,7 @@ void* operacion_a_atender(int operacion){
         }
 
     default:
-        log_warning(kernel_log, "## Error en la OP enviada desde CPU");
+        log_debug(kernel_log, "## Error en la OP enviada desde CPU");
         hilo_en_ejecucion = NULL;
         sem_post(&kernel_activo);
         break;

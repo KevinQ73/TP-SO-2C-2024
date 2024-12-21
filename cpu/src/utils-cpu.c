@@ -73,7 +73,7 @@ uint32_t recibir_valor_memoria(t_contexto* registros_cpu, char* registro, int so
 
     int valor_leido = *(int*)dato_recibido;
 
-    log_warning(cpu_log, "VALOR LEÍDO %d", valor_leido);
+    log_debug(cpu_log, "VALOR LEÍDO %d", valor_leido);
 
     modificar_registro(registros_cpu, registro, valor_leido, cpu_log);
     buffer_destroy(buffer);
@@ -377,7 +377,7 @@ void enviar_registros_memoria(t_contexto* registro_cpu, t_pid_tid* pid_tid_recib
 
     if (strcmp(respuesta, "OK_CONTEXTO") == 0)
     {
-        log_debug(log, "MEMORIA RECIBIÓ CONTEXTO DE MANERA SATISFACTORIA");
+        log_info(log, "## TID: <%d> - Actualizo Contexto Ejecución", pid_tid_recibido->tid);
     } else {
         log_error(log, "ROMPIMOS ALGO EN enviar_registros_memoria");
     }

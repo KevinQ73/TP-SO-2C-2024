@@ -2,9 +2,9 @@
 
 int main(int argc, char* argv[]) {
 
-    filesystem_log = iniciar_logger("./files/filesystem.log", "FILESYSTEM", 1, LOG_LEVEL_DEBUG);
+    //filesystem_log = iniciar_logger("./files/filesystem.log", "FILESYSTEM", 1, LOG_LEVEL_DEBUG);
 	
-	//filesystem_log = iniciar_logger("./files/filesystem_obligatorio.log", "FILESYSTEM", 1, LOG_LEVEL_INFO);
+	filesystem_log = iniciar_logger("./files/filesystem_obligatorio.log", "FILESYSTEM", 1, LOG_LEVEL_INFO);
     
 	filesystem_config = iniciar_config(argv[1]);
 
@@ -137,7 +137,7 @@ void* atender_solicitudes(void* fd_conexion){
 			close(fd_memoria);
 			break;
 		default:
-			log_error(filesystem_log, "## [FILESYSTEM:MEMORIA] OPERACIÓN DE MEMORIA DESCONOCIDA");
+			log_debug(filesystem_log, "## [FILESYSTEM:MEMORIA] OPERACIÓN DE MEMORIA DESCONOCIDA");
 			sem_post(&aviso_memoria);
         break;
 	}

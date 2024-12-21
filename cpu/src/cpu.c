@@ -4,9 +4,9 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    cpu_log = iniciar_logger("./files/cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
+    //cpu_log = iniciar_logger("./files/cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
     
-    //cpu_log = iniciar_logger("./files/cpu_obligatorio.log", "CPU", 1, LOG_LEVEL_INFO);
+    cpu_log = iniciar_logger("./files/cpu_obligatorio.log", "CPU", 1, LOG_LEVEL_INFO);
 
     cpu_config = iniciar_config("./files/cpu.config");
 
@@ -115,11 +115,11 @@ void atender_puerto_dispatch(){
             break;
 
         case DESCONEXION:
-            log_error(cpu_log, "Desconexion de Kernel - Dispatch");
+            log_debug(cpu_log, "Desconexion de Kernel - Dispatch");
             flag_disconect_dispatch = false;
             break;
         default:
-            log_warning(cpu_log, "Operacion desconocida de Kernel - Dispatch");
+            log_debug(cpu_log, "Operacion desconocida de Kernel - Dispatch");
             flag_disconect_dispatch = false;
             break;
         }
@@ -145,7 +145,7 @@ void atender_puerto_interrupt(){
 
             if (strcmp(mensaje, "FIN_QUANTUM") == 0)
             {
-                log_warning(cpu_log, "## Llega interrupción al puerto Interrupt");
+                log_info(cpu_log, "## Llega interrupción al puerto Interrupt");
                 recibo_kernel_ok = true;
                 true_quantum();
             }

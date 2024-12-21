@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-      "args": ["./files/fibo.config"],
+      "args": ["./files/particiones_dinamicas.config"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
