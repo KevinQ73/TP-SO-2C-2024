@@ -253,7 +253,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         log_debug(memoria_log, "## [MEMORIA:KERNEL] OPERACIÓN DE KERNEL ERRONEA");
         break;
     }
-    free(path);
+    //free(path);
     buffer_destroy(buffer);
 }
 
@@ -638,7 +638,7 @@ char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
     char* key = string_itoa(pid);
     t_contexto_proceso* contexto_proceso = dictionary_get(contextos_de_ejecucion, key);
     t_contexto_hilo* contexto_hilo = thread_get_by_tid(contexto_proceso->lista_hilos, tid);
-    char* instruccion = string_new();
+    char* instruccion;
 
     if(list_size(contexto_hilo->lista_instrucciones) > program_counter){
         instruccion = list_get(contexto_hilo->lista_instrucciones, program_counter);

@@ -1,0 +1,6 @@
+==329730== Memcheck, a memory error detector
+==329730== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==329730== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==329730== Command: ./bin/filesystem ./files/prueba_planificacion.config
+==329730== Parent PID: 325216
+==329730== 
