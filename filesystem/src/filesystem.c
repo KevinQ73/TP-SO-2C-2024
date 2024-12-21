@@ -19,17 +19,19 @@ int main(int argc, char* argv[]) {
 
     atender_memoria();
 
+	sem_wait(&aviso_memoria);
 	//Finalizar todo
+	log_debug(filesystem_log, "TERMINANDO FILESYSTEM");
 	close(fd_escucha_memoria);
 	munmap(puntero_bitmap, strlen(puntero_bitmap));
 	munmap(buffer_bloques, strlen(buffer_bloques));
+	bitarray_destroy(buffer_bitmap);
 	log_destroy(filesystem_log);
 	config_destroy(filesystem_config);
 	free(filesystem_registro.path_mount_dir);
 	free(filesystem_registro.log_level);
 	free(filesystem_registro.puerto_escucha);
-
-    log_debug(filesystem_log, "TERMINANDO MEMORIA");
+	sem_destroy(&aviso_memoria);
 }
 
 void inicializar_fs(){
@@ -64,6 +66,9 @@ void inicializar_fs(){
 
 	free(name_bitmap);
 	free(name_bloques);
+
+	//semaforo para finalizar filesystem
+	sem_init(&aviso_memoria, 0, 0);
 }
 
 void atender_memoria(){
@@ -80,6 +85,7 @@ void atender_memoria(){
             if (errno == EINTR || errno == ECONNABORTED) {
                 continue;  // Reintentar la operación en caso de interrupción o conexión abortada
             } else {
+				liberar_hilo_memoria = false;
                 abort();
             }
         } else {
@@ -116,10 +122,15 @@ void* atender_solicitudes(void* fd_conexion){
 			}else {
 				enviar_mensaje("ERROR", fd_memoria, filesystem_log);
 			}
-			break;
+
+			free(nombre);
+			free(contenido);
+
 			close(fd_memoria);
+			break;
 		default:
-			log_debug(filesystem_log, "## [FILESYSTEM:MEMORIA] OPERACIÓN DE MEMORIA ERRONEA");
+			log_error(filesystem_log, "## [FILESYSTEM:MEMORIA] OPERACIÓN DE MEMORIA DESCONOCIDA");
+			sem_post(&aviso_memoria);
         break;
 	}
 	buffer_destroy(buffer);
@@ -141,6 +152,7 @@ int dump_memory(char* nombre_archivo, int tamanio, void* contenido){
 		crear_metadata(nombre_archivo, puntero_bloques[0], tamanio);
 		log_info(filesystem_log, "## Archivo Creado: %s - Tamaño: <%i>\n", nombre_archivo, tamanio);
 		log_info(filesystem_log, "## Fin de solicitud - Archivo: %s\n", nombre_archivo);
+
 		free(puntero_bloques);
 		return EXIT_SUCCESS;
 	}
@@ -208,7 +220,6 @@ int escribir_datos_bloque(char* nombre_archivo, u_int32_t* puntero_bloque, int b
 	}
 
 	msync(buffer_bloques, strlen(buffer_bloques),MS_SYNC);
-	free(contenido);
 }
 
 //Funciones de bitmap.dat
@@ -295,8 +306,6 @@ int asignar_bloques_bitmap(u_int32_t* puntero_bloques, int longitud){
 //Archivos de metadata
 
 int crear_metadata(char* ruta, int bloque_indexado, int tamanio_archivo){
-	printf("RUTA(%s)\n", ruta);
-
 	char* ruta_archivo = string_duplicate(filesystem_registro.path_mount_dir);
 	string_append(&ruta_archivo, "/files/");
 	string_append(&ruta_archivo, ruta);

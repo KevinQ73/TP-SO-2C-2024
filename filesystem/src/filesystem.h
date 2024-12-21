@@ -18,6 +18,8 @@
     void* buffer_bitmap_2;
     void* buffer_bloques;
     void* puntero_bitmap;
+
+    sem_t aviso_memoria;
     
     void atender_memoria();
 
