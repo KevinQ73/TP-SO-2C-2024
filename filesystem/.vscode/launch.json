@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/bin/${workspaceFolderBasename}",
-      "args": ["./files/prueba_planificacion.config"],
+      "args": ["./files/fibo.config"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],

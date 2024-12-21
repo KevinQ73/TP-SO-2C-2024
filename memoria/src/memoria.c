@@ -1097,17 +1097,22 @@ void liberar_espacio_en_memoria(uint32_t pid){
     } else {
         liberar_hueco_dinamico(contexto_proceso);
     }
-    destruir_contexto_proceso(contexto_proceso); // Libera la memoria asociada al contexto
+    //destruir_contexto_proceso(contexto_proceso); // Libera la memoria asociada al contexto
 }
 
 void destruir_contexto_proceso(t_contexto_proceso* contexto) {
     if (contexto == NULL) {
         return;
     }
-    if (contexto->lista_hilos != NULL) {
-        list_destroy_and_destroy_elements(contexto->lista_hilos, (void*)free); // Libera los elementos de la lista
+    if (!list_is_empty(contexto->lista_hilos)) {
+        list_destroy_and_destroy_elements(contexto->lista_hilos, destroy_t_contexto_hilos); // Libera los elementos de la lista
     }
     free(contexto);
+}
+
+void destroy_t_contexto_hilos(t_contexto_hilo* hilo){
+    list_destroy_and_destroy_elements(hilo->lista_instrucciones, (void*)free);
+    free(hilo);
 }
 
 int get_size_partition(uint32_t base){
