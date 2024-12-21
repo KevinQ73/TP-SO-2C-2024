@@ -193,7 +193,6 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         pid = buffer_read_uint32(buffer);
         tid = buffer_read_uint32(buffer);
 
-        sem_wait(&actualizar_contexto);
         finalizar_hilo(pid, tid);
         enviar_mensaje("OK", fd_memoria, memoria_log);
         
@@ -301,12 +300,12 @@ void* finalizar_proceso(uint32_t pid){
 }
 
 void* finalizar_hilo(uint32_t pid, uint32_t tid){
-    pthread_mutex_lock(&contexto_ejecucion_procesos);
-    t_contexto_proceso* contexto_padre = buscar_contexto_proceso(pid);
-    t_contexto_hilo* hilo_a_finalizar = thread_remove_by_tid(contexto_padre->lista_hilos, tid);
-    pthread_mutex_unlock(&contexto_ejecucion_procesos);
+    //pthread_mutex_lock(&contexto_ejecucion_procesos);
+    //t_contexto_proceso* contexto_padre = buscar_contexto_proceso(pid);
+    //t_contexto_hilo* hilo_a_finalizar = thread_remove_by_tid(contexto_padre->lista_hilos, tid);
+    //pthread_mutex_unlock(&contexto_ejecucion_procesos);
 
-    thread_context_destroy(hilo_a_finalizar);
+    //thread_context_destroy(hilo_a_finalizar);
 
     //free(contexto_padre);
     //free(hilo_a_finalizar);
