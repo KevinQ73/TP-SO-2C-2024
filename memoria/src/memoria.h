@@ -151,6 +151,8 @@
 
     void liberar_espacio_en_memoria(uint32_t pid);
 
+    void destruir_contexto_proceso(t_contexto_proceso* contexto);
+
     void liberar_hueco_bitmap_fijas(uint32_t base);
 
     void liberar_hueco_dinamico(t_contexto_proceso* proceso);

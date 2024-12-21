@@ -122,6 +122,7 @@ void* atender_solicitudes(void* fd_conexion){
 			log_debug(filesystem_log, "## [FILESYSTEM:MEMORIA] OPERACIÓN DE MEMORIA ERRONEA");
         break;
 	}
+	buffer_destroy(buffer);
 	close(fd_memoria);
 }
 

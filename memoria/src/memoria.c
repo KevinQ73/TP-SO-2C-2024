@@ -139,7 +139,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
     t_buffer* buffer;
     uint32_t pid;
     int size = 0;
-    char* path = string_new();
+    //char* path = string_new();
 
     int operacion_kernel = recibir_operacion(fd_memoria);
 
@@ -163,6 +163,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         break;
 
     case CREAR_HILO:
+        char* path;
         path = buffer_read_string(buffer, &size);
         pid = buffer_read_uint32(buffer);
         uint32_t tid = buffer_read_uint32(buffer);
@@ -173,6 +174,7 @@ void* atender_solicitudes_kernel(void* fd_conexion){
         enviar_mensaje("OK", fd_memoria, memoria_log);
         log_info(memoria_log, "## [MEMORIA:KERNEL] Hilo <Creado> - (PID:TID) - (<%d>:<%d>) PRIORIDAD: %d, Y PATH: %s. Cerrando FD del socket.\n", pid, tid, prioridad, path);
 
+        free(path);
         close(fd_memoria);
         break;
 
@@ -266,6 +268,7 @@ bool crear_proceso(uint32_t pid, uint32_t size){
         pthread_mutex_lock(&contexto_ejecucion_procesos);
             dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
         pthread_mutex_unlock(&contexto_ejecucion_procesos);
+        free(contexto_proceso);
         free(key);
         memoria_asignada = true;
     } else {
@@ -286,6 +289,8 @@ void crear_hilo(uint32_t pid, uint32_t tid, uint32_t prioridad, char* path){
     dictionary_put(contextos_de_ejecucion, key, contexto_proceso);
     pthread_mutex_unlock(&contexto_ejecucion_procesos);
 
+    free(contexto_proceso);
+    free(contexto_hilo);
     free(key);
 }
 
@@ -303,6 +308,8 @@ void* finalizar_hilo(uint32_t pid, uint32_t tid){
 
     thread_context_destroy(hilo_a_finalizar);
 
+    free(contexto_padre);
+    free(hilo_a_finalizar);
     log_info(memoria_log, "## [MEMORIA:KERNEL] ## Hilo <Destruido> - (PID:TID) - (<%d>:<%d>). Cerrando FD del socket.\n", pid, tid);
 
     return NULL;
@@ -368,7 +375,7 @@ void* atender_cpu(){
         	char* instruccion = buscar_instruccion(pid_tid_recibido.pid, pid_tid_recibido.tid, programCounter);
       	    log_info(memoria_log, "## Obtener instrucción - (PID:TID) - (<%d>:<%d>) - Instrucción: %s", pid_tid_recibido.pid, pid_tid_recibido.tid, instruccion);
             enviar_mensaje(instruccion, fd_conexion_cpu, memoria_log);
-            //free(instruccion);
+            free(instruccion);
         	break;
 
         case WRITE_MEM:
@@ -638,7 +645,7 @@ char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
     } else {
         instruccion = "NO_INSTRUCCION";
     }
-    //free(key);
+    free(key);
     return instruccion;
 }
 
@@ -1090,6 +1097,17 @@ void liberar_espacio_en_memoria(uint32_t pid){
     } else {
         liberar_hueco_dinamico(contexto_proceso);
     }
+    destruir_contexto_proceso(contexto_proceso); // Libera la memoria asociada al contexto
+}
+
+void destruir_contexto_proceso(t_contexto_proceso* contexto) {
+    if (contexto == NULL) {
+        return;
+    }
+    if (contexto->lista_hilos != NULL) {
+        list_destroy_and_destroy_elements(contexto->lista_hilos, (void*)free); // Libera los elementos de la lista
+    }
+    free(contexto);
 }
 
 int get_size_partition(uint32_t base){
