@@ -274,10 +274,13 @@ u_int32_t* buscar_bloques_bitmap(int longitud){
 			puntero_bloques[contador_espacios] = i;
 			contador_espacios++;
 			if(contador_espacios == longitud){
+				log_debug(filesystem_log, "HAY ESPACIO SUFICIENTE");
 				return puntero_bloques;
 			}
 		}
 	}
+	log_debug(filesystem_log, "NO HAY ESPACIO SUFICIENTE");
+	NULL;
 }
 int asignar_bloques_bitmap(u_int32_t* puntero_bloques, int longitud){
 
