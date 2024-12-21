@@ -20,7 +20,13 @@ int main(int argc, char* argv[]) {
     atender_memoria();
 
 	sem_wait(&aviso_memoria);
-	//Finalizar todo
+	
+	terminar_programa();
+
+}
+
+void terminar_programa(){
+		//Finalizar todo
 	log_debug(filesystem_log, "TERMINANDO FILESYSTEM");
 	close(fd_escucha_memoria);
 	munmap(puntero_bitmap, strlen(puntero_bitmap));
@@ -117,7 +123,9 @@ void* atender_solicitudes(void* fd_conexion){
 
 			buffer_read(buffer, contenido, size_contenido);
 
-			if(dump_memory(nombre, tamanio, contenido) == EXIT_SUCCESS){
+			log_debug(filesystem_log, "LEI DE MEMORIA tamanio(%i)", size_contenido);
+
+			if(dump_memory(nombre, size_contenido, contenido) == EXIT_SUCCESS){
 				enviar_mensaje("OK_FS", fd_memoria, filesystem_log);
 			}else {
 				enviar_mensaje("ERROR", fd_memoria, filesystem_log);
@@ -185,6 +193,7 @@ int inicio_bloque(int n_bloque){
 	int bytes;
 
 	bytes = n_bloque * filesystem_registro.block_size;
+	log_debug(filesystem_log, "Inicio bloque (%i)", bytes);
 
 	return bytes;
 }
@@ -194,6 +203,7 @@ int cantidad_bloques(int tamanio){
 	if(cantidad == 0){
 		return 1;
 	}
+	log_debug(filesystem_log, "para (%i) se necesita (%i) bloques", tamanio, cantidad);
 	return cantidad;
 }
 
@@ -212,8 +222,9 @@ int escribir_datos_bloque(char* nombre_archivo, u_int32_t* puntero_bloque, int b
 
 	//Escribir bloque de datos
 	for(int i=1;i<bloques_totales;i++){
+		log_debug(filesystem_log, "CANTIDAD DE BLOQUES (%i)", bloques_totales);
 		memcpy(buffer_bloques + inicio_bloque(puntero_bloque[i]), contenido + size, filesystem_registro.block_size);
-
+		log_debug(filesystem_log, "(%s)", (char*) (buffer_bloques + inicio_bloque(puntero_bloque[i]) + 1));
 		log_info(filesystem_log, "## Acceso Bloque - Archivo: %s - Tipo Bloque: <DATOS> - Bloque File System <%i>\n", nombre_archivo, puntero_bloque[i]);
 		usleep(filesystem_registro.retardo_acceso_bloque * 1000);
 		size += filesystem_registro.block_size;
@@ -290,8 +301,9 @@ u_int32_t* buscar_bloques_bitmap(int longitud){
 			}
 		}
 	}
+	free(puntero_bloques);
 	log_debug(filesystem_log, "NO HAY ESPACIO SUFICIENTE");
-	NULL;
+	return NULL;
 }
 int asignar_bloques_bitmap(u_int32_t* puntero_bloques, int longitud){
 
@@ -301,6 +313,7 @@ int asignar_bloques_bitmap(u_int32_t* puntero_bloques, int longitud){
 	}
 
 	msync(puntero_bitmap, buffer_bitmap->size, MS_SYNC);
+	return EXIT_SUCCESS;
 }
 
 //Archivos de metadata

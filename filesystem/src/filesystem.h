@@ -51,5 +51,7 @@
 
     int dump_memory(char* nombre_archivo, int tamanio, void* contenido);
 
+    void terminar_programa();
+
 
 #endif /* FILESYSTEM_H_ */
