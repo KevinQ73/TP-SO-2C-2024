@@ -180,4 +180,6 @@ int crear_conexion_con_filesystem(t_log* memoria_log, char* ip, char* puerto);
 
 void destroy_t_contexto_hilos(t_contexto_hilo* hilo);
 
+int obtener_byte_inicial(int base, uint32_t pid);
+
 #endif /* MEMORIA_SRC_MEMORIA_H_ */

@@ -66,9 +66,16 @@ uint32_t recibir_valor_memoria(t_contexto* registros_cpu, char* registro, int so
         abort();
     }
     buffer = buffer_recieve(socket_memoria);
-    uint32_t valor_memoria = buffer_read_uint32(buffer);
 
-    modificar_registro(registros_cpu, registro, valor_memoria, cpu_log);
+    uint32_t size_void = buffer_read_uint32(buffer);
+    void* dato_recibido = malloc(size_void);
+    buffer_read(buffer, dato_recibido, size_void);
+
+    int valor_leido = *(int*)dato_recibido;
+
+    log_warning(cpu_log, "VALOR LEÍDO %d", valor_leido);
+
+    modificar_registro(registros_cpu, registro, valor_leido, cpu_log);
     buffer_destroy(buffer);
 }
 

@@ -326,9 +326,9 @@ void* atender_cpu(){
 
         uint32_t base;
         uint32_t desplazamiento;
-        uint32_t valor_a_escribir;
+        int valor_a_escribir;
 
-        uint32_t direccion_fisica;
+        int direccion_fisica;
         uint32_t tamanio_contexto = 11*sizeof(uint32_t);
         t_contexto* contexto;
 
@@ -385,14 +385,15 @@ void* atender_cpu(){
             base = buffer_read_uint32(buffer);
             desplazamiento = buffer_read_uint32(buffer);
             valor_a_escribir = buffer_read_uint32(buffer);
-
-            byte_inicial = obtener_byte_inicial(base);
+            log_debug(memoria_log, "VALOR A ESCRIBIR EN MEMORIA: %d", valor_a_escribir);
+            byte_inicial = obtener_byte_inicial(base, pid_tid_recibido.pid);
 
             direccion_fisica = byte_inicial + desplazamiento;
 
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_info(memoria_log, "## [MEMORIA:CPU] <Escritura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
             escribir_en_memoria(&valor_a_escribir, 4, direccion_fisica);
+            log_debug(memoria_log, "VALOR A ESCRIBIR EN MEMORIA PARTE 2: %d", &valor_a_escribir);
             enviar_mensaje("OK", fd_conexion_cpu, memoria_log);
             break;
             
@@ -403,14 +404,20 @@ void* atender_cpu(){
             base = buffer_read_uint32(buffer);
             desplazamiento = buffer_read_uint32(buffer);
 
-            byte_inicial = obtener_byte_inicial(base);
+            byte_inicial = obtener_byte_inicial(base, pid_tid_recibido.pid);
 
             direccion_fisica = byte_inicial + desplazamiento;
 
             usleep(memoria_registro.retardo_respuesta * 1000);
             log_info(memoria_log, "## [MEMORIA:CPU] <Lectura> - (PID:TID) - (<%d>:<%d>) - Dir. Física: <%d> - Tamaño: <4>", pid_tid_recibido.pid, pid_tid_recibido.tid, direccion_fisica);
 
-            enviar_datos_memoria(leer_de_memoria(4, direccion_fisica), 4);
+            void* datos_leidos = leer_de_memoria(4, direccion_fisica);
+            int valor_leido = *(int*)datos_leidos;
+            log_warning(memoria_log, "VALOR LEÍDO memoria %d", valor_leido);
+
+            enviar_datos_memoria(datos_leidos, 4);
+
+            free(datos_leidos);
             break;
 
         case DESCONEXION:
@@ -429,7 +436,7 @@ void* atender_cpu(){
     }
 }
 
-int obtener_byte_inicial(int base){
+int obtener_byte_inicial(int base, uint32_t pid){
     int valor_byte_inicial = 0;
     
     if (strcmp(memoria_registro.esquema, "FIJAS") == 0)
@@ -438,8 +445,12 @@ int obtener_byte_inicial(int base){
         {
             valor_byte_inicial = valor_byte_inicial + atoi(lista_particiones[i]);
         }
+        log_debug(memoria_log, "VALOR_BYTE_INICIAL_FIJAS: %d", valor_byte_inicial);
     } else {
+        t_proceso* proceso = get_process(pid);
+        valor_byte_inicial = proceso->inicio;
 
+        log_debug(memoria_log, "VALOR_BYTE_INICIAL_DINAMICAS: %d", valor_byte_inicial);
     }
 
     return valor_byte_inicial;
@@ -625,13 +636,13 @@ void enviar_contexto_solicitado(t_contexto* contexto){
 void* leer_de_memoria(uint32_t tamanio_lectura, uint32_t inicio_lectura){
     void* datos_memoria = malloc(tamanio_lectura);
 
-    memcpy(datos_memoria, memoria + inicio_lectura, tamanio_lectura*sizeof(char));
+    memcpy(datos_memoria, memoria + inicio_lectura, tamanio_lectura);
 
     return datos_memoria;
 }
 
 void escribir_en_memoria(void* buffer_escritura, uint32_t tamanio_buffer, uint32_t inicio_escritura){
-    memcpy(memoria + inicio_escritura, buffer_escritura, tamanio_buffer*sizeof(char));
+    memcpy(memoria + inicio_escritura, buffer_escritura, tamanio_buffer);
 }
 
 char** buscar_instruccion(uint32_t pid, uint32_t tid, uint32_t program_counter){
@@ -654,12 +665,15 @@ bool busqueda_pid_tid(t_pseudocodigo* pseudocodigo){
 }
 
 void enviar_datos_memoria(void* buffer_recibido, uint32_t tamanio){
-    t_paquete* paquete = crear_paquete(READ_MEM);
-    t_buffer* buffer = buffer_create(4);
+    uint32_t size_void = 4;
 
-    buffer->stream = buffer_recibido;
-    buffer->offset = 0;
-    buffer->size = 4;
+    t_paquete* paquete = crear_paquete(READ_MEM);
+    t_buffer* buffer = buffer_create(
+        sizeof(uint32_t) + size_void
+    );
+
+    buffer_add_uint32(buffer, &size_void, memoria_log);
+    buffer_add(buffer, buffer_recibido, size_void);
 
     paquete->buffer = buffer;
     enviar_paquete(paquete, fd_conexion_cpu);
