@@ -46,8 +46,6 @@ int main(int argc, char* argv[]) {
 
     log_warning(cpu_log, "TERMINANDO CPU");
     finalizar_cpu();
-
-    return EXIT_SUCCESS;
 }
 
     /*--------------------- Atender conexiones a la CPU ---------------------*/

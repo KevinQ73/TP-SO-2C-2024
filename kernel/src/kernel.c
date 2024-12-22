@@ -36,8 +36,6 @@ int main(int argc, char* argv[]) {
 
     log_warning(kernel_log, "TERMINANDO KERNEL");
     finalizar_modulo();
-
-    //LIBERAR COLAS Y ELEMENTOS QUE CONTIENE
 }
 
 /*----------------------- FUNCIONES DE INICIALIZACIÓN -----------------------*/

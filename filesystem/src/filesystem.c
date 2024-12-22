@@ -20,7 +20,6 @@ int main(int argc, char* argv[]) {
 	sem_wait(&aviso_memoria);
 	
 	terminar_programa();
-
 }
 
 void terminar_programa(){

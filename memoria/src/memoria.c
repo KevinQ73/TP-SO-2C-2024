@@ -36,9 +36,6 @@ int main(int argc, char* argv[]) {
     //FINALIZACION DEL MODULO
 
     log_debug(memoria_log, "TERMINANDO MEMORIA");
-    //terminar_modulo(conexion_cpu, memoria_log, memoria_config);
-    //terminar_modulo(conexion_kernel, memoria_log, memoria_config);
-    //terminar_modulo(conexion_filesystem, memoria_log, memoria_config);
 
 }
 
