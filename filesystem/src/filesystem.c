@@ -1,8 +1,6 @@
 #include <filesystem.h>
 
 int main(int argc, char* argv[]) {
-
-    //filesystem_log = iniciar_logger("./files/filesystem.log", "FILESYSTEM", 1, LOG_LEVEL_DEBUG);
 	
 	filesystem_log = iniciar_logger("./files/filesystem_obligatorio.log", "FILESYSTEM", 1, LOG_LEVEL_INFO);
     
@@ -46,6 +44,20 @@ void inicializar_fs(){
 	string_append(&name_bitmap, "/bitmap.dat");
 	string_append(&name_bloques, "/bloques.dat");
 
+	char* ruta_carpeta_files = string_duplicate(filesystem_registro.path_mount_dir);
+	string_append(&ruta_carpeta_files, "/files");
+
+	struct stat st = {0};
+
+    if (stat(ruta_carpeta_files, &st) == -1) {
+        // Crear la carpeta
+        if (mkdir(ruta_carpeta_files, 0700) == 0) {
+            log_info(filesystem_log, "## [FILESYSTEM] Carpeta '%s' creada exitosamente.\n", ruta_carpeta_files);
+        } else {
+            log_error(filesystem_log, "Error al crear la carpeta");
+        }
+    }
+
 	int size_bitmap = ceil((double)filesystem_registro.block_count/(double)8);
 	int bitmap_fd;
 	if(access(name_bitmap, F_OK) == -1){
@@ -72,7 +84,7 @@ void inicializar_fs(){
 
 	free(name_bitmap);
 	free(name_bloques);
-
+	free(ruta_carpeta_files);
 	//semaforo para finalizar filesystem
 	sem_init(&aviso_memoria, 0, 0);
 }

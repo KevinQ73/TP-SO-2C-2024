@@ -3,8 +3,6 @@
 int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
-
-    //cpu_log = iniciar_logger("./files/cpu.log", "CPU", 1, LOG_LEVEL_DEBUG);
     
     cpu_log = iniciar_logger("./files/cpu_obligatorio.log", "CPU", 1, LOG_LEVEL_INFO);
 

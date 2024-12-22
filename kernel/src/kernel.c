@@ -4,8 +4,6 @@ int main(int argc, char* argv[]) {
 
     //---------------------------- Iniciar archivos ----------------------------
 
-    //kernel_log = iniciar_logger("./files/kernel.log", "KERNEL", 1, LOG_LEVEL_DEBUG);
-
     kernel_log = iniciar_logger("./files/kernel_obligatorio.log", "KERNEL", 1, LOG_LEVEL_INFO);
 
     kernel_config = iniciar_config(argv[3]);
