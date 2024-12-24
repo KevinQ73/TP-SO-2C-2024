@@ -20,7 +20,7 @@
 - [Xubuntu - 64 bit](https://faq.utnso.com.ar/vm-gui) - Versión para desarrollo con entorno gráfico liviano (XFCE). Desarrollado por la cátedra de Sistemas Operativos
 - [Ubuntu Server (64-bit)](https://faq.utnso.com.ar/vm-server) - Versión de pruebas, sin entorno gráfico. En esta VM se evaluó el TP.
 - C - Lenguaje utilizado
-
+- Valgrind y Helgrind - Analizadores de uso de memoria dinámica y sincronización entre hilos.
 
 ## Dependencias
 
@@ -59,3 +59,8 @@ repositorio:
 code tp.code-workspace
 ```
 
+## Links útiles
+
+- [Documentación oficial de la cátedra](https://docs.utnso.com.ar/)
+- [Guía de primeros pasos](https://raniagus.github.io/so-project-template/)
+- [Documentación oficial Linux](https://man7.org/index.html)
